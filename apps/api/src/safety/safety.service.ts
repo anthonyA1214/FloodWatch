@@ -1,8 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
   CreateSafetyLocationInput,
+  SafetyLocationListQueryInput,
   SafetyLocationQueryDto,
 } from '@repo/schemas';
+import { ilike, inArray } from 'drizzle-orm';
 import { desc } from 'drizzle-orm';
 import { and, count, eq, like, or, sql } from 'drizzle-orm';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
@@ -52,21 +54,60 @@ export class SafetyService {
     return result;
   }
 
-  async getSafetyList() {
-    return await this.db
-      .select({
-        id: safety.id,
-        location: safety.location,
-        address: safety.address,
-        type: safety.type,
-        availability: safety.availability,
-      })
-      .from(safety)
-      .orderBy(desc(safety.createdAt));
+  async getSafetyList(
+    safetyLocationListQueryDto: SafetyLocationListQueryInput,
+  ) {
+    const { page, limit, types, q } = safetyLocationListQueryDto;
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 10;
+    const offset = (pageNumber - 1) * limitNumber;
+
+    const searchCondition = q
+      ? or(ilike(safety.location, `%${q}%`), ilike(safety.address, `%${q}%`))
+      : undefined;
+    const typeCondition =
+      types && types.length > 0 ? inArray(safety.type, types) : undefined;
+
+    const whereClause =
+      typeCondition && searchCondition
+        ? and(typeCondition, searchCondition)
+        : (typeCondition ?? searchCondition);
+
+    const [data, counts] = await Promise.all([
+      this.db
+        .select({
+          id: safety.id,
+          location: safety.location,
+          address: safety.address,
+          type: safety.type,
+          availability: safety.availability,
+        })
+        .from(safety)
+        .where(whereClause)
+        .orderBy(desc(safety.createdAt))
+        .limit(limitNumber)
+        .offset(offset),
+
+      this.db.select({ total: count() }).from(safety).where(whereClause),
+    ]);
+
+    const { total } = counts[0];
+
+    return {
+      data,
+      meta: {
+        page: pageNumber,
+        limit: limitNumber,
+        total,
+        totalPages: Math.ceil(total / limitNumber),
+        hasNextPage: pageNumber * limitNumber < total,
+        hasPrevPage: pageNumber > 1,
+      },
+    };
   }
 
-  async getAllSafety(safetyLocationQuery: SafetyLocationQueryDto) {
-    const { page, limit, type, q } = safetyLocationQuery;
+  async getAllSafety(safetyLocationQueryDto: SafetyLocationQueryDto) {
+    const { page, limit, type, q } = safetyLocationQueryDto;
 
     const pageNumber = Number(page) || 1;
     const limitNumber = Number(limit) || 10;

@@ -18,9 +18,11 @@ const SEVERITY_CONFIG = {
 export const FloodMarker = ({
   severity,
   status,
+  isFocused,
 }: {
   severity: 'critical' | 'high' | 'moderate' | 'low';
   status?: 'verified' | 'unverified' | 'resolved';
+  isFocused?: boolean;
 }) => {
   const { icon: Icon } = SEVERITY_CONFIG[severity] || SEVERITY_CONFIG.low;
   const color = SEVERITY_COLOR_MAP[severity] || SEVERITY_COLOR_MAP.low;
@@ -47,13 +49,14 @@ export const FloodMarker = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          border: '2.5px solid white',
+          // white halo ring when focused
+          border: isFocused ? `3px solid white` : '2.5px solid white',
+          outline: isFocused ? `3px solid ${color}` : 'none',
           boxShadow: `0 3px 12px ${color}45, 0 2px 4px rgba(0,0,0,0.2)`,
           zIndex: 2,
         }}
       >
         <Icon size={size * 0.55} stroke={1.8} />
-
         {statusColor && (
           <div
             style={{
@@ -72,7 +75,7 @@ export const FloodMarker = ({
         )}
       </div>
 
-      {/* tail (THIS is now the true bottom) */}
+      {/* tail */}
       <div
         style={{
           width: 0,
@@ -85,7 +88,7 @@ export const FloodMarker = ({
         }}
       />
 
-      {/* ground shadow (absolute so it doesn't affect anchor) */}
+      {/* ground shadow */}
       <div
         style={{
           position: 'absolute',

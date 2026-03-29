@@ -7,15 +7,15 @@ export default function MapLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <MapOverlayProvider>
-      <MapPopupProvider>
-        <MapFilterProvider>
+    <MapFilterProvider>
+      <MapOverlayProvider>
+        <MapPopupProvider>
           <div className='flex flex-col h-dvh overscroll-none overflow-hidden'>
             <TopNav />
             <main className='flex-1 overflow-hidden'>{children}</main>
           </div>
-        </MapFilterProvider>
-      </MapPopupProvider>
-    </MapOverlayProvider>
+        </MapPopupProvider>
+      </MapOverlayProvider>
+    </MapFilterProvider>
   );
 }

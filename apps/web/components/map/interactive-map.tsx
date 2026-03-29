@@ -33,24 +33,14 @@ import { useMapFilter } from '@/contexts/map-filter-context';
 import { useMapPopup } from '@/contexts/map-popup-context';
 import AffectedLocationPopup from './affected-location-popup';
 
-type SelectedLocation = {
-  longitude: number;
-  latitude: number;
-  label: string;
-};
-
-type Props = {
-  selectedLocation?: SelectedLocation | null;
-};
-
 export type InteractiveMapHandle = {
   zoomIn: () => void;
   zoomOut: () => void;
   geolocate: () => void;
 };
 
-const InteractiveMap = forwardRef<InteractiveMapHandle, Props>(
-  ({ selectedLocation }, ref) => {
+const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
+  (props, ref) => {
     const mapRef = useRef<MapRef | null>(null);
     const { caloocanGeoJSON, caloocanOutlineGeoJSON } = useBoundary();
     const [userLocation, setUserLocation] = useState<{
@@ -133,22 +123,6 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, Props>(
           }
         }),
     }));
-
-    // When user searches a location, fly to it
-    useEffect(() => {
-      const loc = selectedLocation;
-      const map = mapRef.current;
-      if (!loc || !map) return;
-
-      const currentZoom = map!.getZoom() ?? 0;
-
-      map!.flyTo({
-        center: [loc.longitude, loc.latitude],
-        zoom: Math.max(currentZoom, 16),
-        essential: true,
-        padding: { top: 0, bottom: 0, left: 0, right: 0 },
-      });
-    }, [selectedLocation]);
 
     return (
       <Map
@@ -250,16 +224,16 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, Props>(
         )}
 
         {/* Search-selected location pin */}
-        {selectedLocation && (
-          <Marker
-            longitude={selectedLocation.longitude}
-            latitude={selectedLocation.latitude}
-            anchor='bottom'
-            style={{ pointerEvents: 'none', opacity: 0.8 }} // allow clicks to pass through to the map
-          >
-            <SearchLocationMarker />
-          </Marker>
-        )}
+        {/*{selectedLocation && (
+        <Marker
+          longitude={selectedLocation.longitude}
+          latitude={selectedLocation.latitude}
+          anchor='bottom'
+          style={{ pointerEvents: 'none', opacity: 0.8 }} // allow clicks to pass through to the map
+        >
+          <SearchLocationMarker />
+        </Marker>
+      )}*/}
 
         {activePopup?.type === 'report' && (
           <Popup

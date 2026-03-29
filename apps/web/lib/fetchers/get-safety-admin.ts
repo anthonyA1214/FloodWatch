@@ -5,6 +5,7 @@ import {
   safetyLocationQuerySchema,
 } from '@repo/schemas';
 import { apiFetchServer } from '../api-fetch-server';
+import { SWR_KEYS } from '../constants/swr-keys';
 
 export async function getSafetyLocationsAdmin(
   params: SafetyLocationQueryInput,
@@ -26,7 +27,7 @@ export async function getSafetyLocationsAdmin(
 
   try {
     const res = await apiFetchServer(
-      `/safety/admin?${querySearch.toString()}`,
+      `${SWR_KEYS.safetyAdmin}?${querySearch.toString()}`,
       {
         method: 'GET',
       },

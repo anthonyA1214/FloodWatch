@@ -26,6 +26,7 @@ import {
   createFloodAlertSchema,
   ReportFloodAlertDto,
   reportFloodAlertSchema,
+  ReportListQueryDto,
   ReportQueryDto,
   VoteDto,
 } from '@repo/schemas';
@@ -41,6 +42,7 @@ import { CreateCommentWithImageDto } from 'src/comments/dtos/comments.swagger.dt
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
+import { OptionalJwtAuthGuard } from 'src/common/guards/optional-jwt-auth.guard';
 
 @Controller('reports')
 export class ReportsController {
@@ -66,8 +68,8 @@ export class ReportsController {
   @Public()
   @Get('list')
   @HttpCode(HttpStatus.OK)
-  async getReportList() {
-    return await this.reportsService.getReportList();
+  async getReportList(@Query() reportListQuery: ReportListQueryDto) {
+    return await this.reportsService.getReportList(reportListQuery);
   }
 
   @Public()
@@ -178,13 +180,19 @@ export class ReportsController {
   @Public()
   @Get(':id/comments')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(OptionalJwtAuthGuard, UserStatusGuard)
   @SkipThrottle({ global: true }) // bypass the 10/min global
   @Throttle({ getComments: { ttl: 60000, limit: 30 } }) // apply 30/min instead
   async getComments(
     @Param('id', ParseIntPipe) id: number,
     @Query() commentQueryDto: CommentQueryDto,
+    @Request() req: AuthRequest,
   ) {
-    return await this.commentsService.getComments(id, commentQueryDto);
+    return await this.commentsService.getComments(
+      id,
+      commentQueryDto,
+      req.user?.id,
+    );
   }
 
   @Post(':id/comments')

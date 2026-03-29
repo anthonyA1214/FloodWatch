@@ -15,8 +15,10 @@ const SAFETY_CONFIG = {
 
 export const SafetyMarker = ({
   type = 'hospital',
+  isFocused,
 }: {
   type: 'hospital' | 'shelter';
+  isFocused?: boolean;
 }) => {
   const { icon: Icon } = SAFETY_CONFIG[type] || SAFETY_CONFIG.hospital;
   const color = SAFETY_TYPE_COLOR_MAP[type] || SAFETY_TYPE_COLOR_MAP.hospital;
@@ -37,8 +39,11 @@ export const SafetyMarker = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          border: `2.5px solid ${color}`,
-          boxShadow: `0 3px 12px ${color}44, 0 2px 4px rgba(0,0,0,0.15)`,
+          border: isFocused ? `3px solid ${color}` : `2.5px solid ${color}`,
+          outline: isFocused ? `3px solid white` : 'none',
+          boxShadow: isFocused
+            ? `0 0 0 6px ${color}40, 0 3px 12px ${color}44, 0 2px 4px rgba(0,0,0,0.15)`
+            : `0 3px 12px ${color}44, 0 2px 4px rgba(0,0,0,0.15)`,
           cursor: 'pointer',
         }}
       >

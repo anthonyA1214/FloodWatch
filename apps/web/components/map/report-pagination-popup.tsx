@@ -1,4 +1,3 @@
-// components/map/popup-report-pagination.tsx
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 
 const btnClass = `

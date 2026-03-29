@@ -4,7 +4,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { IconInfoCircle, IconStack2 } from '@tabler/icons-react';
-import LegendItem from './legend-item';
+import LegendItem from '../map/legend-item';
 
 export default function MapLegendPopover() {
   return (

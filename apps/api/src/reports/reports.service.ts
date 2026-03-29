@@ -2,8 +2,11 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   CreateFloodAlertInput,
   ReportFloodAlertInput,
+  ReportListQueryInput,
   ReportQueryInput,
 } from '@repo/schemas';
+import { inArray } from 'drizzle-orm';
+import { ilike } from 'drizzle-orm';
 import { aliasedTable, asc } from 'drizzle-orm';
 import { and, count, desc, eq, like, or, sql } from 'drizzle-orm';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
@@ -92,17 +95,53 @@ export class ReportsService {
     return data;
   }
 
-  async getReportList() {
-    return await this.db
-      .select({
-        id: reports.id,
-        location: reports.location,
-        description: reports.description,
-        severity: reports.severity,
-        reportedAt: reports.createdAt,
-      })
-      .from(reports)
-      .orderBy(desc(reports.createdAt));
+  async getReportList(reportListQueryDto: ReportListQueryInput) {
+    const { page, limit, severities, q } = reportListQueryDto;
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 10;
+    const offset = (pageNumber - 1) * limitNumber;
+
+    const searchCondition = q ? ilike(reports.location, `%${q}%`) : undefined;
+    const severityCondition =
+      severities && severities.length > 0
+        ? inArray(reports.severity, severities)
+        : undefined;
+
+    const whereClause =
+      severityCondition && searchCondition
+        ? and(severityCondition, searchCondition)
+        : (severityCondition ?? searchCondition);
+
+    const [data, counts] = await Promise.all([
+      this.db
+        .select({
+          id: reports.id,
+          location: reports.location,
+          description: reports.description,
+          severity: reports.severity,
+          status: reports.status,
+          reportedAt: reports.createdAt,
+        })
+        .from(reports)
+        .where(whereClause)
+        .orderBy(desc(reports.createdAt))
+        .limit(limitNumber)
+        .offset(offset),
+      this.db.select({ total: count() }).from(reports).where(whereClause),
+    ]);
+
+    const { total } = counts[0];
+    return {
+      data,
+      meta: {
+        page: pageNumber,
+        limit: limitNumber,
+        total,
+        totalPages: Math.ceil(total / limitNumber),
+        hasNextPage: pageNumber * limitNumber < total,
+        hasPrevPage: pageNumber > 1,
+      },
+    };
   }
 
   async getAllReports(reportQueryDto: ReportQueryInput) {

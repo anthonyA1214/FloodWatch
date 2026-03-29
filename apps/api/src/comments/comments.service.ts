@@ -8,9 +8,10 @@ import {
 import {
   CommentQueryInput,
   CreateCommentInput,
+  ReportCommentInput,
   UpdateCommentDto,
 } from '@repo/schemas';
-import { and, desc, eq, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, lt, or, sql } from 'drizzle-orm';
 import { User } from 'src/auth/types/auth-request.type';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { DRIZZLE } from 'src/drizzle/drizzle-connection';
@@ -32,15 +33,22 @@ export class CommentsService {
     private cloudinaryService: CloudinaryService,
   ) {}
 
-  async getComments(reportId: number, commentQueryDto: CommentQueryInput) {
-    const { cursor, limit } = commentQueryDto;
+  async getComments(
+    reportId: number,
+    commentQueryDto: CommentQueryInput,
+    userId: number,
+  ) {
+    const { cursorDate, cursorId, limit } = commentQueryDto;
 
     const commentsList = await this.db
       .select({
         id: comments.id,
         content: comments.content,
         image: comments.image,
-        reportsCount: sql<number>`(SELECT COUNT(*) FROM ${commentReports} WHERE ${commentReports.commentId} = ${comments.id})`,
+        reportCount: sql<number>`(SELECT COUNT(*) FROM ${commentReports} WHERE ${commentReports.commentId} = ${comments.id})::int`,
+        hasReported: userId
+          ? sql<boolean>`EXISTS (SELECT 1 FROM ${commentReports} WHERE ${commentReports.commentId} = ${comments.id} AND ${commentReports.userId} = ${userId})`
+          : sql<boolean>`false`,
         createdAt: comments.createdAt,
         author: {
           id: users.id,
@@ -52,21 +60,31 @@ export class CommentsService {
       .leftJoin(users, eq(comments.userId, users.id))
       .leftJoin(profileInfo, eq(users.id, profileInfo.userId))
       .where(
-        cursor
+        cursorDate && cursorId
           ? and(
               eq(comments.reportId, reportId),
-              lt(comments.createdAt, new Date(cursor)),
+              or(
+                lt(comments.createdAt, new Date(cursorDate)),
+                and(
+                  eq(comments.createdAt, new Date(cursorDate)),
+                  lt(comments.id, cursorId),
+                ),
+              ),
             )
           : eq(comments.reportId, reportId),
       )
-      .orderBy(desc(comments.createdAt))
+      .orderBy(desc(comments.createdAt), desc(comments.id))
       .limit(limit + 1);
 
     const hasMore = commentsList.length > limit;
     const data = hasMore ? commentsList.slice(0, limit) : commentsList;
+    const lastItem = data[data.length - 1];
     const nextCursor =
-      hasMore && data.length > 0
-        ? (data[data.length - 1].createdAt?.toISOString() ?? null)
+      hasMore && lastItem
+        ? {
+            cursorDate: lastItem.createdAt?.toISOString() ?? null,
+            cursorId: lastItem.id ?? null,
+          }
         : null;
 
     return { data, meta: { hasMore, nextCursor } };
@@ -230,5 +248,48 @@ export class CommentsService {
         'You are not allowed to delete this comment',
       );
     }
+  }
+
+  async reportComment(
+    commentId: number,
+    userId: number,
+    reportCommentDto: ReportCommentInput,
+  ) {
+    const { reason, description } = reportCommentDto;
+
+    const [comment] = await this.db
+      .select()
+      .from(comments)
+      .where(eq(comments.id, commentId))
+      .limit(1);
+
+    if (!comment) throw new NotFoundException('Comment not found');
+
+    const [existingReport] = await this.db
+      .select()
+      .from(commentReports)
+      .where(
+        and(
+          eq(commentReports.commentId, commentId),
+          eq(commentReports.userId, userId),
+        ),
+      )
+      .limit(1);
+
+    if (existingReport) {
+      throw new BadRequestException('You have already reported this comment');
+    }
+
+    const [report] = await this.db
+      .insert(commentReports)
+      .values({
+        userId,
+        commentId,
+        reason,
+        description,
+      })
+      .returning();
+
+    return report;
   }
 }

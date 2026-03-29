@@ -192,8 +192,6 @@ export default function CreateSafetyLocationDialog() {
     if (!isOpen) resetForm();
   };
 
-  console.log(state.errors);
-
   return (
     <Dialog open={open} onOpenChange={() => handleOpenChange(!open)}>
       <DialogTrigger asChild>

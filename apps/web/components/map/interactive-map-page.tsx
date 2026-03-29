@@ -15,27 +15,16 @@ import AffectedLocationsListOverlay from './affected-locations-list-overlay';
 import SafetyLocationsListOverlay from './safety-locations-list-overlay';
 import WeatherOverlay from './weather-overlay';
 import SafetyLocationOverlay from './safety-location-overlay';
-import MapLegendPopover from './map-legend-popover';
+import MapLegendPopover from '../shared/map-legend-popover';
 import MapFilterPopover from './map-filter-popover';
-export type SelectedLocation = {
-  longitude: number;
-  latitude: number;
-  label: string;
-  source?: 'nominatim' | 'custom';
-};
 
 export default function InteractiveMapPage() {
-  const [selectedLocation, setSelectedLocation] =
-    useState<SelectedLocation | null>(null);
   const { activeOverlay } = useMapOverlay();
   const interactiveMapRef = useRef<InteractiveMapHandle>(null);
 
   return (
     <div className='relative w-full h-full'>
-      <InteractiveMap
-        ref={interactiveMapRef}
-        selectedLocation={selectedLocation}
-      />
+      <InteractiveMap ref={interactiveMapRef} />
 
       {/* Top bar: search + controls in one row */}
       <div className='absolute top-0 left-0 right-0 flex items-start gap-4 pointer-events-none h-full'>
@@ -43,7 +32,7 @@ export default function InteractiveMapPage() {
         <div className='pointer-events-none flex-1 min-w-0 flex items-start h-full'>
           <div className='md:relative md:max-w-md w-full h-full'>
             <div className='md:absolute flex-1 w-full sm:flex-none pt-4 ps-4 md:px-4 z-20'>
-              <SearchBar onSelectLocation={setSelectedLocation} />
+              <SearchBar />
             </div>
 
             {activeOverlay?.type === 'report' && (

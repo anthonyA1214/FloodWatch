@@ -12,7 +12,6 @@ import {
 } from '../ui/select';
 import { Separator } from '../ui/separator';
 import { IconShieldCheck } from '@tabler/icons-react';
-import SafetyLocationsCard from './safety-locations-card';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
 import { useSafetyList } from '@/hooks/use-safety-list';
@@ -21,27 +20,33 @@ import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
 import { useMapFilter } from '@/contexts/map-filter-context';
 import SafetyLocationsCardSkeleton from './skeletons/safety-locations-card-skeleton';
 import LocationsListEmpty from './empty/locations-list-empty';
+import { SafetyListItemInput, SafetyLocationQueryInput } from '@repo/schemas';
+import { useSearchParams } from 'next/navigation';
+import PagePagination from '../shared/page-pagination';
+import SafetyLocationsCard from '../shared/safety-locations-card';
 
 const snapPoints = ['0px', '355px', 1];
 
 export default function SafetyLocationsListDrawer() {
-  const { safetyList, isLoading } = useSafetyList();
+  const searchParams = useSearchParams();
+  const [page, setPage] = useState(1);
+  const [type, setType] = useState<'all-types' | 'shelter' | 'hospital'>(
+    (searchParams.get('status') as 'all-types' | 'shelter' | 'hospital') ||
+      'all-types',
+  );
+  const { q } = useMapFilter();
+
+  const params: SafetyLocationQueryInput = {
+    page: Number(page),
+    limit: Number(searchParams.get('limit') || '10'),
+    type: type === 'all-types' ? undefined : type,
+    q: q || undefined,
+  };
+
+  const { safetyList, meta, isLoading } = useSafetyList(params);
   const { close } = useMapOverlay();
   const { activePopup, openSafetyPopup } = useMapPopup();
   const { safetyMapPins } = useSafetyMapPins();
-
-  const [type, setType] = useState<'all-types' | 'shelter' | 'hospital'>(
-    'all-types',
-  );
-
-  const { filters } = useMapFilter();
-  const filteredSafetyList = safetyList?.filter((safety) => {
-    const pin = safetyMapPins?.find((p) => p.id === safety.id);
-    if (!pin) return false;
-    if (!filters.safetyTypes.has(pin.type)) return false;
-    if (type !== 'all-types' && pin.type !== type) return false;
-    return true;
-  });
 
   const handleCardClick = (safetyId: number) => {
     const pin = safetyMapPins?.find((p) => p.id === safetyId);
@@ -129,10 +134,10 @@ export default function SafetyLocationsListDrawer() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <SafetyLocationsCardSkeleton key={i} />
                 ))
-              ) : !filteredSafetyList || filteredSafetyList?.length === 0 ? (
+              ) : !safetyList || safetyList?.length === 0 ? (
                 <LocationsListEmpty />
               ) : (
-                filteredSafetyList?.map((safety) => (
+                safetyList?.map((safety: SafetyListItemInput) => (
                   <SafetyLocationsCard
                     key={safety.id}
                     isActive={
@@ -150,6 +155,18 @@ export default function SafetyLocationsListDrawer() {
             </div>
           </div>
         </div>
+
+        {meta && meta.totalPages > 1 && (
+          <div className='mt-auto flex justify-center py-2 border-t border-gray-200'>
+            <PagePagination
+              currentPage={meta?.page ?? 1}
+              totalPages={meta?.totalPages ?? 1}
+              hasNextPage={meta?.hasNextPage ?? false}
+              hasPrevPage={meta?.hasPrevPage ?? false}
+              onPageChange={setPage}
+            />
+          </div>
+        )}
       </Drawer.Content>
     </Drawer.Root>
   );

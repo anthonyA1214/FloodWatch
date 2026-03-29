@@ -65,7 +65,6 @@ export async function apiFetchClient(path: string, init: RequestInit = {}) {
   }
 
   if (!res.ok) {
-    console.error('API Fetch Error:', res.status, res.statusText);
     throw res;
   }
 

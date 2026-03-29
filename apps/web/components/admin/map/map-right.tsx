@@ -1,13 +1,19 @@
+'use client';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AffectedLocationsTab from '@/components/admin/map/affected-locations-tab';
 import SafetyLocationsTab from '@/components/admin/map/safety-locations-tab';
+import { useMapFilterAdmin } from '@/contexts/map-filter-admin-context';
 
 export default function MapRight() {
+  const { activeTab, setActiveTab } = useMapFilterAdmin();
+
   return (
     <div className='flex-1 min-h-0 rounded-2xl overflow-hidden'>
       <Tabs
-        defaultValue='affected'
+        defaultValue={activeTab}
         className='flex-1 flex flex-col h-full min-h-0'
+        onValueChange={(value) => setActiveTab(value)}
       >
         <TabsList className='w-full bg-[#EFF6FF] py-7 px-1.5 space-x-1.5'>
           <TabsTrigger

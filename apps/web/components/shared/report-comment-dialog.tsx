@@ -16,6 +16,8 @@ import { Field } from '../ui/field';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 import { Spinner } from '../ui/spinner';
+import { apiFetchClient } from '@/lib/api-fetch-client';
+import { toast } from 'sonner';
 
 const REASONS = [
   {
@@ -26,19 +28,19 @@ const REASONS = [
       'Can you tell us how this post is giving misinformation or false information?',
   },
   {
-    id: 'location',
+    id: 'wrong_pinned_location',
     label: 'Wrong Pinned Location',
     description: 'Location marker is incorrect',
     followUp: 'Where should the correct location be pinned?',
   },
   {
-    id: 'irrelevant',
+    id: 'not_disaster_related',
     label: 'Not Disaster-Related',
     description: 'Content is unrelated to the current event',
     followUp: 'How is this post unrelated to the disaster?',
   },
   {
-    id: 'harmful',
+    id: 'harmful_panic_content',
     label: 'Harmful or Panic-Inducing Content',
     description: 'May cause distress or spread fear',
     followUp: 'Please describe how this content is harmful or panic-inducing.',
@@ -48,9 +50,11 @@ const REASONS = [
 export default function ReportCommentDialog({
   open,
   onClose,
+  commentId,
 }: {
   open: boolean;
   onClose: () => void;
+  commentId: number | null;
 }) {
   const [step, setStep] = useState<
     'select-reason' | 'provide-details' | 'success'
@@ -79,12 +83,31 @@ export default function ReportCommentDialog({
 
     setIsPending(true);
     try {
-      // Simulate an API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    } catch {
+      await apiFetchClient(`/comments/${commentId}/report`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reason: selectedReason.id,
+          description: details || undefined,
+        }),
+      });
+      setStep('success');
+    } catch (error) {
+      if (error instanceof Response) {
+        if (error.status === 400) {
+          toast.error(
+            'You have already reported this comment. Thank you for your feedback.',
+          );
+          handleClose();
+          return;
+        }
+      }
+
+      toast.error('Failed to submit report. Please try again later.');
     } finally {
       setIsPending(false);
-      setStep('success');
     }
   };
 
@@ -101,9 +124,9 @@ export default function ReportCommentDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className='flex flex-col p-0 overflow-hidden gap-0 border-0 
+        className='flex flex-col p-0 overflow-hidden gap-0 border-0
       w-full max-w-full sm:max-w-md
-      [&>button]:text-white [&>button]:hover:text-white 
+      [&>button]:text-white [&>button]:hover:text-white
       [&>button]:opacity-70 [&>button]:hover:opacity-100'
       >
         <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl px-5 py-4 shrink-0 text-white'>

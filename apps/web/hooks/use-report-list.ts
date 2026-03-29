@@ -3,15 +3,18 @@
 import useSWR from 'swr';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { getReportList } from '@/lib/fetchers/get-report-list';
-import { ReportListItemInput } from '@repo/schemas';
+import { ReportListQueryInput } from '@repo/schemas';
 
-export function useReportList() {
-  const { data, error, isLoading, isValidating, mutate } = useSWR<
-    ReportListItemInput[]
-  >(SWR_KEYS.reportList, getReportList);
+export function useReportList(params: ReportListQueryInput) {
+  const { data, error, isLoading, isValidating, mutate } = useSWR(
+    [SWR_KEYS.reportList, params],
+    () => getReportList(params),
+    { keepPreviousData: true },
+  );
 
   return {
-    reportList: data,
+    reportList: data?.data,
+    meta: data?.meta,
     isLoading,
     isValidating,
     isError: error,

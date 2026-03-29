@@ -15,21 +15,11 @@ import RadiusCircle from '@/components/shared/radius-circle';
 import { FloodMarker } from '@/components/shared/markers/flood-marker';
 import { getUserLocation } from '@/lib/utils/get-user-location';
 import { UserLocationMarker } from '@/components/shared/markers/user-location-marker';
-import { SearchLocationMarker } from '@/components/shared/markers/search-location-marker';
 import { useReportMapPins } from '@/hooks/use-report-map-pins';
 import { useBoundary } from '@/hooks/use-boundary';
 import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
 import { SafetyMarker } from '@/components/shared/markers/safety-marker';
-
-type SelectedLocation = {
-  longitude: number;
-  latitude: number;
-  label: string;
-};
-
-type Props = {
-  selectedLocation?: SelectedLocation | null;
-};
+import { useMapHighlight } from '@/contexts/map-highlight-context';
 
 export type InteractiveMapHandle = {
   zoomIn: () => void;
@@ -37,8 +27,8 @@ export type InteractiveMapHandle = {
   geolocate: () => void;
 };
 
-const InteractiveMap = forwardRef<InteractiveMapHandle, Props>(
-  ({ selectedLocation }, ref) => {
+const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
+  (props, ref) => {
     const mapRef = useRef<MapRef | null>(null);
     const { caloocanGeoJSON, caloocanOutlineGeoJSON } = useBoundary();
     const [userLocation, setUserLocation] = useState<{
@@ -47,6 +37,19 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, Props>(
     } | null>(null);
     const { reportMapPins } = useReportMapPins();
     const { safetyMapPins } = useSafetyMapPins();
+
+    const { flyToRef, activePin, setActivePin } = useMapHighlight();
+
+    useEffect(() => {
+      flyToRef.current = (loc) => {
+        mapRef.current?.flyTo({
+          center: [loc.longitude, loc.latitude],
+          zoom: Math.max(mapRef.current.getZoom(), 16),
+          essential: true,
+        });
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useImperativeHandle(ref, () => ({
       zoomIn: () => mapRef.current?.zoomIn(),
@@ -67,22 +70,6 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, Props>(
         }),
     }));
 
-    // When user searches a location, fly to it
-    useEffect(() => {
-      const loc = selectedLocation;
-      const map = mapRef.current;
-      if (!loc || !map) return;
-
-      const currentZoom = typeof map.getZoom === 'function' ? map.getZoom() : 0;
-
-      map.flyTo({
-        center: [loc.longitude, loc.latitude],
-        zoom: Math.max(currentZoom, 16),
-        essential: true,
-        padding: { top: 0, bottom: 0, left: 0, right: 0 },
-      });
-    }, [selectedLocation]);
-
     return (
       <Map
         id='interactive-map'
@@ -96,6 +83,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, Props>(
         mapStyle='https://tiles.openfreemap.org/styles/bright'
         attributionControl={false}
         dragRotate={false}
+        onClick={() => setActivePin(null)} // Deselect pins when clicking on the map
       >
         {/* boundary fill */}
         {caloocanGeoJSON && (
@@ -137,8 +125,19 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, Props>(
               longitude={report.longitude}
               latitude={report.latitude}
               anchor='bottom'
+              onClick={(e) => {
+                e.originalEvent.stopPropagation();
+                setActivePin({ type: 'report', report });
+              }}
             >
-              <FloodMarker severity={report.severity} status={report.status} />
+              <FloodMarker
+                severity={report.severity}
+                status={report.status}
+                isFocused={
+                  activePin?.type === 'report' &&
+                  activePin.report.id === report.id
+                }
+              />
             </Marker>
             <RadiusCircle
               id={`${report.id}`}
@@ -157,8 +156,18 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, Props>(
             longitude={location.longitude}
             latitude={location.latitude}
             anchor='bottom'
+            onClick={(e) => {
+              e.originalEvent.stopPropagation();
+              setActivePin({ type: 'safety', safety: location });
+            }}
           >
-            <SafetyMarker type={location.type} />
+            <SafetyMarker
+              type={location.type}
+              isFocused={
+                activePin?.type === 'safety' &&
+                activePin.safety.id === location.id
+              }
+            />
           </Marker>
         ))}
 
@@ -171,18 +180,6 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, Props>(
             style={{ pointerEvents: 'none', opacity: 0.8 }} // allow clicks to pass through to the map
           >
             <UserLocationMarker />
-          </Marker>
-        )}
-
-        {/* Search-selected location pin (red) */}
-        {selectedLocation && (
-          <Marker
-            longitude={selectedLocation.longitude}
-            latitude={selectedLocation.latitude}
-            anchor='bottom'
-            style={{ pointerEvents: 'none', opacity: 0.8 }} // allow clicks to pass through to the map
-          >
-            <SearchLocationMarker />
           </Marker>
         )}
       </Map>

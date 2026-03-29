@@ -18,6 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   type CreateSafetyLocationInput,
   createSafetyLocationSchema,
+  SafetyLocationListQueryDto,
   SafetyLocationQueryDto,
 } from '@repo/schemas';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
@@ -48,8 +49,10 @@ export class SafetyController {
   @Public()
   @Get('list')
   @HttpCode(HttpStatus.OK)
-  async getSafetyList() {
-    return await this.safetyService.getSafetyList();
+  async getSafetyList(
+    @Query() safetyLocationListQueryDto: SafetyLocationListQueryDto,
+  ) {
+    return await this.safetyService.getSafetyList(safetyLocationListQueryDto);
   }
 
   @Public()

@@ -16,9 +16,11 @@ export default function DeleteCommentDialog({
   open,
   comment,
   onClose,
+  onConfirm,
 }: {
   open: boolean;
   comment?: CommentInput | null;
+  onConfirm: () => Promise<void>;
   onClose: () => void;
 }) {
   const [isPending, setIsPending] = useState(false);
@@ -36,10 +38,9 @@ export default function DeleteCommentDialog({
 
     setIsPending(true);
     try {
-      // Simulate an API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      onClose();
+      await onConfirm();
     } catch {
+      // errors are handled by the caller (CommentsList)
     } finally {
       setIsPending(false);
     }
@@ -48,9 +49,9 @@ export default function DeleteCommentDialog({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
-        className='flex flex-col p-0 overflow-hidden gap-0 border-0 
+        className='flex flex-col p-0 overflow-hidden gap-0 border-0
         w-full max-w-full sm:max-w-md
-      [&>button]:text-white [&>button]:hover:text-white 
+      [&>button]:text-white [&>button]:hover:text-white
         [&>button]:opacity-70 [&>button]:hover:opacity-100'
       >
         <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl px-5 py-4 shrink-0 text-white'>
@@ -79,7 +80,7 @@ export default function DeleteCommentDialog({
             <button
               type='button'
               onClick={onClose}
-              className='flex-1 flex items-center gap-2 justify-center bg-secondary hover:bg-secondary/80 text-secondary-foreground text-sm py-2.5 px-4 rounded-lg font-medium transition-colors disabled:opacity-50'
+              className='flex-1 flex items-center gap-1.5 sm:gap-2 justify-center bg-secondary hover:bg-secondary/80 text-secondary-foreground text-xs sm:text-sm py-2 px-3 sm:py-2.5 sm:px-4 rounded-lg font-medium transition-colors disabled:opacity-50'
             >
               <span>CANCEL</span>
             </button>
@@ -88,7 +89,7 @@ export default function DeleteCommentDialog({
               type='button'
               onClick={handleSubmit}
               disabled={isPending}
-              className='flex-1 flex items-center gap-2 justify-center bg-destructive hover:bg-destructive/90 text-white text-sm py-2.5 px-4 rounded-lg font-medium transition-colors disabled:opacity-50'
+              className='flex-1 flex items-center gap-1.5 sm:gap-2 justify-center bg-destructive hover:bg-destructive/90 text-white text-xs sm:text-sm py-2 px-3 sm:py-2.5 sm:px-4 rounded-lg font-medium transition-colors disabled:opacity-50'
             >
               {isPending ? (
                 <>
@@ -98,7 +99,8 @@ export default function DeleteCommentDialog({
               ) : (
                 <>
                   <IconTrash className='w-[1em]! h-[1em]!' />
-                  <span>DELETE COMMENT</span>
+                  <span className='sm:hidden'>DELETE</span>
+                  <span className='hidden sm:inline'>DELETE COMMENT</span>
                 </>
               )}
             </button>

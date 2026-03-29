@@ -3,6 +3,7 @@
 import { useReportMapPins } from '@/hooks/use-report-map-pins';
 import { ReportMapPinInput, SafetyMapPinInput } from '@repo/schemas';
 import { createContext, RefObject, useContext, useRef, useState } from 'react';
+import { useMapFilter } from './map-filter-context';
 
 type ActivePopup =
   | { type: 'report'; report: ReportMapPinInput }
@@ -29,10 +30,15 @@ const MapPopupContext = createContext<MapPopupContextType | null>(null);
 
 export function MapPopupProvider({ children }: { children: React.ReactNode }) {
   const { reportMapPins } = useReportMapPins();
+  const { filters } = useMapFilter();
   const [activePopup, setActivePopup] = useState<ActivePopup>(null);
   const flyToRef = useRef<
     ((loc: { longitude: number; latitude: number }) => void) | null
   >(null);
+
+  const filteredPins = reportMapPins?.filter((pin) =>
+    filters.severities.has(pin.severity),
+  );
 
   const flyTo = (loc: { longitude: number; latitude: number }) => {
     flyToRef.current?.(loc);
@@ -54,23 +60,23 @@ export function MapPopupProvider({ children }: { children: React.ReactNode }) {
   const activeReportId =
     activePopup?.type === 'report' ? activePopup.report.id : null;
   const currentIndex =
-    reportMapPins?.findIndex((r) => r.id === activeReportId) ?? -1;
+    filteredPins?.findIndex((r) => r.id === activeReportId) ?? -1;
   const hasNext =
-    currentIndex >= 0 && currentIndex < (reportMapPins?.length ?? 0) - 1;
+    currentIndex >= 0 && currentIndex < (filteredPins?.length ?? 0) - 1;
   const hasPrev = currentIndex > 0;
   const currentReportIndex = currentIndex + 1;
-  const total = reportMapPins?.length ?? 0;
+  const total = filteredPins?.length ?? 0;
 
   const nextReport = () => {
-    if (!hasNext || !reportMapPins) return;
-    const next = reportMapPins[currentIndex + 1];
+    if (!hasNext || !filteredPins) return;
+    const next = filteredPins[currentIndex + 1];
     setActivePopup({ type: 'report', report: next });
     flyTo(next);
   };
 
   const prevReport = () => {
-    if (!hasPrev || !reportMapPins) return;
-    const prev = reportMapPins[currentIndex - 1];
+    if (!hasPrev || !filteredPins) return;
+    const prev = filteredPins[currentIndex - 1];
     setActivePopup({ type: 'report', report: prev });
     flyTo(prev);
   };

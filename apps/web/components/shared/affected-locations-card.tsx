@@ -1,33 +1,38 @@
 import { formatDistanceToNow } from 'date-fns';
 import { IconClock, IconMapPin } from '@tabler/icons-react';
+import { SEVERITY_COLOR_MAP } from '@/lib/utils/get-color-map';
 
 export default function AffectedLocationsCard({
   severity = 'high',
+  isActive = false,
   location = 'Barangay 176',
-  message = 'Floodwaters reaching waist level, residents advised to evacuate immediately.',
-  reportedAt = '2026-01-28T10:30:00Z',
+  description = 'Floodwaters reaching waist level, residents advised to evacuate immediately.',
+  reportedAt = new Date(),
+  onClick,
 }: {
   severity: 'critical' | 'high' | 'moderate' | 'low';
+  isActive?: boolean;
   location: string;
-  message: string;
-  reportedAt: string;
+  description: string | null;
+  reportedAt: Date;
+  onClick?: () => void;
 }) {
-  const severityColorMap = {
-    critical: '#FB2C36',
-    high: '#FF6900',
-    moderate: '#F0B204',
-    low: '#2B7FFF',
-  };
-
-  const color = severityColorMap[severity];
+  const color = SEVERITY_COLOR_MAP[severity];
 
   return (
-    <div className='grid rounded-lg p-4 gap-3 border'>
-      <div className='flex justify-between gap-8 items-center'>
+    <div
+      className='grid rounded-lg p-4 gap-3 border cursor-pointer'
+      onClick={onClick}
+      style={{
+        borderColor: isActive ? color : '',
+        backgroundColor: isActive ? `${color}25` : '',
+      }}
+    >
+      <div className='flex justify-between gap-8 items-start'>
         {/* Location */}
-        <div className='font-poppins flex items-center gap-2 text-sm font-semibold'>
+        <div className='font-poppins flex items-start gap-2 text-sm font-semibold'>
           <IconMapPin
-            className='w-[1.5em]! h-[1.5em]!'
+            className='w-[1.5em]! h-[1.5em]! shrink-0!'
             style={{ color: color }}
           />
           {location}
@@ -42,8 +47,8 @@ export default function AffectedLocationsCard({
         </div>
       </div>
 
-      {/* message */}
-      <p className='text-sm'>{message}</p>
+      {/* description */}
+      <p className='text-sm'>{description}</p>
 
       {/* reported at */}
       <div className='flex items-center text-xs gap-2 text-gray-600'>

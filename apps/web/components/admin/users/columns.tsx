@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/avatar';
 import Avatar from 'boring-avatars';
 import { format, parseISO } from 'date-fns';
-import { IconArrowsUpDown, IconBan, IconEye } from '@tabler/icons-react';
+import { IconArrowsUpDown, IconBan } from '@tabler/icons-react';
 import {
   Tooltip,
   TooltipContent,
@@ -129,15 +129,6 @@ function ActionCell({ user }: { user: UsersDto }) {
 
   return (
     <div className='flex justify-center gap-2'>
-      <Tooltip>
-        <TooltipTrigger className='text-[#0066CC] bg-[#0066CC]/10 rounded-lg p-1.5 hover:bg-[#0066CC]/20 transition'>
-          <IconEye className='w-[1.5em]! h-[1.5em]!' />
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>View reports</p>
-        </TooltipContent>
-      </Tooltip>
-
       <Tooltip>
         <TooltipTrigger
           className={cn(`rounded-lg p-1.5 hover:`, color)}

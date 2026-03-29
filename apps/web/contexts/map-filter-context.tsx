@@ -16,6 +16,8 @@ type MapFilterContextType = {
   toggleSeverity: (severity: FloodSeverity) => void;
   toggleSafetyType: (safetyType: SafetyType) => void;
   resetFilters: () => void;
+  q: string;
+  setQ: (q: string) => void;
 };
 
 const MapFilterContext = createContext<MapFilterContextType | null>(null);
@@ -30,6 +32,7 @@ const DEFAULT_FILTERS: MapFilters = {
 
 export function MapFilterProvider({ children }: { children: React.ReactNode }) {
   const [filters, setFilters] = useState<MapFilters>(DEFAULT_FILTERS);
+  const [q, setQ] = useState('');
 
   const toggleSeverity = (severity: FloodSeverity) =>
     setFilters((prev) => {
@@ -58,7 +61,14 @@ export function MapFilterProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <MapFilterContext.Provider
-      value={{ filters, toggleSeverity, toggleSafetyType, resetFilters }}
+      value={{
+        filters,
+        toggleSeverity,
+        toggleSafetyType,
+        resetFilters,
+        q,
+        setQ,
+      }}
     >
       {children}
     </MapFilterContext.Provider>

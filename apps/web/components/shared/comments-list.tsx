@@ -76,6 +76,17 @@ export default function CommentsList({
     setEditingId(null);
   };
 
+  const handleDelete = async () => {
+    if (!deletingComment) return;
+
+    await apiFetchClient(`/comments/${deletingComment?.id}`, {
+      method: 'DELETE',
+    });
+
+    mutateComments();
+    setDeletingComment(null);
+  };
+
   return (
     <div className='flex flex-col gap-4'>
       {comments.map((comment) => {
@@ -109,7 +120,8 @@ export default function CommentsList({
             }}
             content={comment.content}
             timestamp={comment.createdAt}
-            reportCount={0}
+            reportCount={comment.reportCount}
+            hasReported={comment.hasReported}
             image={comment.image ?? undefined}
             isAdmin={isAdmin}
             isOwner={comment.author?.id === me?.id}
@@ -135,6 +147,7 @@ export default function CommentsList({
       )}
 
       <ReportCommentDialog
+        commentId={reportingId}
         open={reportingId !== null}
         onClose={() => setReportingId(null)}
       />
@@ -142,6 +155,7 @@ export default function CommentsList({
       <DeleteCommentDialog
         open={deletingComment !== null}
         comment={deletingComment}
+        onConfirm={handleDelete}
         onClose={() => setDeletingComment(null)}
       />
     </div>

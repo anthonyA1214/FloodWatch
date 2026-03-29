@@ -10,7 +10,7 @@ export default function SafetyLocationsCard({
   onClick,
 }: {
   type: 'hospital' | 'shelter';
-  isActive: boolean;
+  isActive?: boolean;
   location: string;
   address: string;
   availability?: string;
