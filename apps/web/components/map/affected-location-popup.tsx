@@ -4,6 +4,7 @@ import {
   IconClock,
   IconExclamationCircle,
   IconHelpCircle,
+  IconLoader2,
   IconMapPin,
   IconSend,
   IconShield,
@@ -22,10 +23,14 @@ import VoteButtons from './vote-buttons';
 import ReportPaginationPopup from './report-pagination-popup';
 import { useMyVote } from '@/hooks/use-my-vote';
 import { cn } from '@/lib/utils';
+import { useDirections } from '@/hooks/use-directions';
+import { useMapRouting } from '@/contexts/map-routing-context';
 
 export default function AffectedLocationPopup({
   onClose,
   reportId,
+  latitude,
+  longitude,
   onSelectReport,
   nextReport,
   prevReport,
@@ -36,6 +41,8 @@ export default function AffectedLocationPopup({
 }: {
   onClose: () => void;
   reportId: number;
+  latitude: number;
+  longitude: number;
   onSelectReport?: () => void;
   nextReport: () => void;
   prevReport: () => void;
@@ -46,6 +53,8 @@ export default function AffectedLocationPopup({
 }) {
   const { reportDetail, isLoading } = useReportDetail(reportId);
   const { isLoading: isMyVoteLoading } = useMyVote(reportId);
+  const { getDirections } = useDirections();
+  const { isLoadingRoute } = useMapRouting();
 
   const formattedTime = reportDetail
     ? format(reportDetail?.reportedAt, 'hh:mm a')
@@ -100,7 +109,6 @@ export default function AffectedLocationPopup({
       <div className='flex flex-col'>
         {/* badge and distance to now */}
         <div className='flex flex-row justify-between gap-4 p-3'>
-          {/* reported at */}
           <div className='flex items-center text-xs gap-1.5 tabular-nums opacity-50'>
             <IconClock className='w-[1.5em]! h-[1.5em]!' />
             {formatDistanceToNow(reportDetail?.reportedAt, {
@@ -108,7 +116,6 @@ export default function AffectedLocationPopup({
             })}
           </div>
 
-          {/* report status */}
           <div
             className='flex items-center rounded-full px-3 py-1 w-fit h-fit'
             style={{
@@ -133,7 +140,6 @@ export default function AffectedLocationPopup({
 
         {/* report details */}
         <div className='flex flex-col gap-2 p-3'>
-          {/* severity level */}
           <div className='flex justify-between gap-2'>
             <div className='flex items-center gap-1.5 opacity-50'>
               <IconExclamationCircle className='w-[1.5em]! h-[1.5em]!' />
@@ -155,7 +161,6 @@ export default function AffectedLocationPopup({
 
           <Separator />
 
-          {/* date & time */}
           <div className='flex justify-between items-start gap-2'>
             <div className='flex items-center gap-1.5 lg:gap-2 opacity-50 shrink-0'>
               <IconClock className='w-[1.5em]! h-[1.5em]!' />
@@ -170,7 +175,6 @@ export default function AffectedLocationPopup({
 
           <Separator />
 
-          {/* location */}
           <div className='flex justify-between gap-2'>
             <div className='flex items-center gap-1.5 opacity-50 h-fit shrink-0'>
               <IconMapPin className='w-[1.5em]! h-[1.5em]!' />
@@ -188,7 +192,6 @@ export default function AffectedLocationPopup({
         {/* credibility and confirm and deny */}
         {!reportDetail?.isAdmin && (
           <div className='flex flex-col text-xs'>
-            {/* credibility */}
             <div className='flex justify-between items-center p-3'>
               <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
                 <IconShieldCheck className='w-[1.5em]! h-[1.5em]!' />
@@ -200,7 +203,6 @@ export default function AffectedLocationPopup({
               </div>
             </div>
 
-            {/* vote buttons */}
             <VoteButtons reportId={reportId} />
           </div>
         )}
@@ -214,9 +216,19 @@ export default function AffectedLocationPopup({
             <span className='font-poppins font-medium'>COMMUNITY</span>
           </button>
 
-          <button className='flex items-center gap-1.5 w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 duration-200 px-4 py-2.5 rounded-lg justify-center'>
-            <IconSend className='w-[1.5em]! h-[1.5em]!' />
-            <span className='font-poppins font-medium'>DIRECTIONS</span>
+          <button
+            className='flex items-center gap-1.5 w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 duration-200 px-4 py-2.5 rounded-lg justify-center disabled:opacity-50 disabled:cursor-not-allowed'
+            disabled={isLoadingRoute}
+            onClick={() => getDirections({ latitude, longitude })}
+          >
+            {isLoadingRoute ? (
+              <IconLoader2 className='w-[1.5em]! h-[1.5em]! animate-spin' />
+            ) : (
+              <IconSend className='w-[1.5em]! h-[1.5em]!' />
+            )}
+            <span className='font-poppins font-medium'>
+              {isLoadingRoute ? 'LOADING...' : 'DIRECTIONS'}
+            </span>
           </button>
         </div>
 

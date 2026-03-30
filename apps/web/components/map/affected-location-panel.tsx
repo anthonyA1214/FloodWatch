@@ -7,6 +7,7 @@ import {
   IconExclamationCircle,
   IconHelpCircle,
   IconInfoCircle,
+  IconLoader2,
   IconSend,
   IconShield,
   IconShieldCheck,
@@ -35,6 +36,9 @@ import VoteButtons from './vote-buttons';
 import ReportPaginationOverlay from './report-pagination-overlay';
 import { useMyVote } from '@/hooks/use-my-vote';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
+import { useReportMapPins } from '@/hooks/use-report-map-pins';
+import { useDirections } from '@/hooks/use-directions';
+import { useMapRouting } from '@/contexts/map-routing-context';
 
 export default function AffectedLocationPanel({
   reportId,
@@ -44,6 +48,12 @@ export default function AffectedLocationPanel({
   const { close } = useMapOverlay();
   const { isLoading: isMyVoteLoading } = useMyVote(reportId);
   const { reportDetail, isLoading } = useReportDetail(reportId);
+
+  const { reportMapPins } = useReportMapPins();
+  const { getDirections } = useDirections();
+  const { isLoadingRoute } = useMapRouting();
+
+  const destination = reportMapPins?.find((p) => p.id === reportId);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -90,7 +100,7 @@ export default function AffectedLocationPanel({
           className='flex-1 min-h-0 overflow-y-auto'
         >
           {/* image */}
-          <div className='aspect-video w-full relative bg-muted shrink-0 '>
+          <div className='aspect-video w-full relative bg-muted shrink-0'>
             {reportDetail?.image ? (
               <Image
                 src={reportDetail.image}
@@ -120,16 +130,13 @@ export default function AffectedLocationPanel({
               </div>
             )}
 
-            {/* location name */}
             <h3 className='font-poppins text-base font-semibold'>
               {reportDetail?.location}
             </h3>
 
             <Separator />
 
-            {/* badge and distance to now */}
             <div className='flex flex-row justify-between gap-4'>
-              {/* reported at */}
               <div className='flex items-center text-xs lg:text-sm gap-1.5 lg:gap-2 tabular-nums opacity-50'>
                 <IconClock className='w-[1.5em]! h-[1.5em]!' />
                 {formatDistanceToNow(reportDetail?.reportedAt, {
@@ -137,7 +144,6 @@ export default function AffectedLocationPanel({
                 })}
               </div>
 
-              {/* report status */}
               <div
                 className='flex items-center rounded-full px-3 py-1 w-fit h-fit'
                 style={{
@@ -162,7 +168,6 @@ export default function AffectedLocationPanel({
             <div className='flex flex-col border rounded-lg text-xs lg:text-sm'>
               {!reportDetail?.isAdmin && (
                 <>
-                  {/* reported by */}
                   <div className='flex justify-between items-center p-3 lg:p-4'>
                     <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
                       <IconUser className='w-[1.5em]! h-[1.5em]!' />
@@ -228,7 +233,6 @@ export default function AffectedLocationPanel({
                 </>
               )}
 
-              {/* date & time */}
               <div className='flex justify-between items-start p-3 lg:p-4'>
                 <div className='flex items-center gap-1.5 lg:gap-2 opacity-50 shrink-0'>
                   <IconClock className='w-[1.5em]! h-[1.5em]!' />
@@ -243,7 +247,6 @@ export default function AffectedLocationPanel({
 
               <Separator />
 
-              {/* severity */}
               <div className='flex justify-between items-center p-3 lg:p-4'>
                 <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
                   <IconExclamationCircle className='w-[1.5em]! h-[1.5em]!' />
@@ -264,8 +267,6 @@ export default function AffectedLocationPanel({
                   </span>
                 </div>
               </div>
-
-              {/*  */}
             </div>
 
             {/* description */}
@@ -283,7 +284,6 @@ export default function AffectedLocationPanel({
             {/* credibility and confirm and deny */}
             {!reportDetail?.isAdmin && (
               <div className='flex flex-col border rounded-lg text-xs lg:text-sm'>
-                {/* credibility */}
                 <div className='flex justify-between items-center p-3 lg:p-4'>
                   <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
                     <IconShieldCheck className='w-[1.5em]! h-[1.5em]!' />
@@ -295,14 +295,23 @@ export default function AffectedLocationPanel({
                   <span className='font-poppins font-bold'>{credibility}%</span>
                 </div>
 
-                {/* vote buttons */}
                 <VoteButtons reportId={reportId} />
               </div>
             )}
 
-            <Button className='rounded-lg h-12'>
-              <IconSend className='w-[1.5em]! h-[1.5em]!' />
-              <span className='font-poppins font-medium'>GET DIRECTIONS</span>
+            <Button
+              className='rounded-lg h-12'
+              disabled={!destination || isLoadingRoute}
+              onClick={() => destination && getDirections(destination)}
+            >
+              {isLoadingRoute ? (
+                <IconLoader2 className='w-[1.5em]! h-[1.5em]! animate-spin' />
+              ) : (
+                <IconSend className='w-[1.5em]! h-[1.5em]!' />
+              )}
+              <span className='font-poppins font-medium'>
+                {isLoadingRoute ? 'GETTING DIRECTIONS...' : 'GET DIRECTIONS'}
+              </span>
             </Button>
 
             <Separator />
@@ -310,7 +319,6 @@ export default function AffectedLocationPanel({
             <ReportPaginationOverlay />
           </div>
 
-          {/*  */}
           <div className='flex gap-4 text-xs items-center px-2 lg:px-0'>
             <div className='h-px flex-1 bg-gray-200' />
             <span className='font-poppins font-bold opacity-50'>

@@ -5,6 +5,7 @@ import {
   IconCalendarPlus,
   IconCircleCheck,
   IconInfoCircle,
+  IconLoader2,
   IconPhone,
   IconRoad,
   IconSend,
@@ -22,6 +23,9 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
 import { useSafetyDetail } from '@/hooks/use-safety-detail';
 import { SafetyLocationDrawerSkeleton } from './skeletons/safety-location-drawer-skeleton';
+import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
+import { useDirections } from '@/hooks/use-directions';
+import { useMapRouting } from '@/contexts/map-routing-context';
 
 const snapPoints = ['0px', '355px', 1];
 
@@ -41,9 +45,15 @@ export default function SafetyLocationDrawer({
 
   const { safetyDetail, isLoading } = useSafetyDetail(safetyId);
 
+  const { safetyMapPins } = useSafetyMapPins();
+  const { getDirections } = useDirections();
+  const { isLoadingRoute } = useMapRouting();
+
+  const destination = safetyMapPins?.find((p) => p.id === safetyId);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // scroll to top when report changes
+  // scroll to top when safety location changes
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
@@ -97,7 +107,6 @@ export default function SafetyLocationDrawer({
               'overflow-hidden': snap !== 1,
             })}
           >
-            {/* report details */}
             <div
               className='flex flex-col p-2 sm:p-3 gap-2 lg:gap-3 border-l-4 shrink-0'
               style={{
@@ -111,7 +120,6 @@ export default function SafetyLocationDrawer({
                 </span>
               </div>
 
-              {/* row 1 */}
               <Drawer.Title className='font-poppins text-sm lg:text-base font-semibold'>
                 {safetyDetail?.location}
               </Drawer.Title>
@@ -120,7 +128,6 @@ export default function SafetyLocationDrawer({
 
               {/* details */}
               <div className='flex flex-col border rounded-lg text-xs lg:text-sm'>
-                {/* severity */}
                 <div className='flex justify-between items-center p-3 lg:p-4'>
                   <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
                     <IconShield className='w-[1.5em]! h-[1.5em]!' />
@@ -155,7 +162,6 @@ export default function SafetyLocationDrawer({
 
                 <Separator />
 
-                {/* added on */}
                 <div className='flex justify-between items-start p-3 lg:p-4'>
                   <div className='flex items-center gap-1.5 lg:gap-2 opacity-50 shrink-0'>
                     <IconCalendarPlus className='w-[1.5em]! h-[1.5em]!' />
@@ -201,16 +207,14 @@ export default function SafetyLocationDrawer({
                     </div>
                   </>
                 )}
-
-                {/**/}
               </div>
 
               {/* image */}
-              <div className='aspect-video w-full relative bg-muted shrink-0 '>
+              <div className='aspect-video w-full relative bg-muted shrink-0'>
                 {safetyDetail?.image ? (
                   <Image
                     src={safetyDetail.image}
-                    alt='Affected location'
+                    alt='Safety location'
                     fill
                     className='object-cover'
                   />
@@ -235,9 +239,19 @@ export default function SafetyLocationDrawer({
                 </div>
               )}
 
-              <Button className='rounded-lg h-12'>
-                <IconSend className='w-[1.5em]! h-[1.5em]!' />
-                <span className='font-poppins font-medium'>GET DIRECTIONS</span>
+              <Button
+                className='rounded-lg h-12'
+                disabled={!destination || isLoadingRoute}
+                onClick={() => destination && getDirections(destination)}
+              >
+                {isLoadingRoute ? (
+                  <IconLoader2 className='w-[1.5em]! h-[1.5em]! animate-spin' />
+                ) : (
+                  <IconSend className='w-[1.5em]! h-[1.5em]!' />
+                )}
+                <span className='font-poppins font-medium'>
+                  {isLoadingRoute ? 'GETTING DIRECTIONS...' : 'GET DIRECTIONS'}
+                </span>
               </Button>
             </div>
           </div>
