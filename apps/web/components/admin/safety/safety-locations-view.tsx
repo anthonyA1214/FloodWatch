@@ -14,8 +14,14 @@ import { useSafetyLocationsAdmin } from '@/hooks/use-safety-admin';
 import { SafetyLocationQueryInput } from '@repo/schemas';
 import { SafetyLocationsDataTableSkeleton } from './skeleton/safety-locations-data-table-skeleton';
 import SafetyLocationsPageSkeleton from './skeleton/safety-locations-page-skeleton';
+// ✅ Import the provider and dialogs
+import SafetyLocationsDialogProvider from '@/contexts/safety-locations-dialog-context';
+import EditSafetyLocationDialog from './edit-safety-location-dialog';
+import ViewSafetyLocationDialog from './view-safety-location-dialog';
+import DeleteSafetyLocationDialog from './delete-safety-location-dialog';
 
-export default function SafetyLocationsView() {
+// ✅ Create an inner component that uses the context
+function SafetyLocationsContent() {
   const searchParams = useSearchParams();
   const [type, setType] = useState<'total' | 'shelter' | 'hospital'>(
     (searchParams.get('status') as 'total' | 'shelter' | 'hospital') || 'total',
@@ -41,7 +47,6 @@ export default function SafetyLocationsView() {
     <div className='flex-1 flex flex-col bg-white p-8 rounded-2xl gap-8 min-h-0'>
       {/* Header */}
       <h1 className='font-poppins text-3xl font-bold'>Safety Locations</h1>
-
       <div className='flex justify-between gap-4'>
         <div className='flex-1'>
           <SearchBar
@@ -54,7 +59,6 @@ export default function SafetyLocationsView() {
           />
         </div>
       </div>
-
       <div className='flex-1 flex flex-col min-h-0 gap-4'>
         {isFirstLoad ? (
           <div className='grid grid-cols-3 gap-8'>
@@ -105,6 +109,19 @@ export default function SafetyLocationsView() {
           </div>
         )}
       </div>
+      {/* ✅ Add both dialog components */}
+      <ViewSafetyLocationDialog />
+      <EditSafetyLocationDialog />
+      <DeleteSafetyLocationDialog />
     </div>
+  );
+}
+
+// ✅ Wrap the main component with the provider
+export default function SafetyLocationsView() {
+  return (
+    <SafetyLocationsDialogProvider>
+      <SafetyLocationsContent />
+    </SafetyLocationsDialogProvider>
   );
 }

@@ -3,7 +3,7 @@
 import { SafetyDetailInput } from '@repo/schemas';
 import { createContext, useContext, useState } from 'react';
 
-type DialogType = 'view' | 'delete';
+type DialogType = 'view' | 'delete' | 'edit';
 
 interface SafetyLocationsDialogContextType {
   safetyLocations: SafetyDetailInput | null;

@@ -4,7 +4,6 @@ import InteractiveMapReportedLocation from '@/components/shared/interactive-map-
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -61,16 +60,11 @@ export default function ViewReportDialog() {
         {report && (
           <>
             {/* ── Blue Header ── */}
-            <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl px-5 py-4 shrink-0'>
+            <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl px-5 py-4 shrink-0 text-white'>
               {/* Text */}
-              <div className='flex flex-col space-y-0 text-white'>
-                <DialogTitle className='font-poppins text-base font-medium'>
-                  FLOOD REPORT
-                </DialogTitle>
-                <DialogDescription className='text-sm text-blue-100'>
-                  {formattedDate} at {formattedTime}
-                </DialogDescription>
-              </div>
+              <DialogTitle className='flex items-center gap-3 sm:gap-4 font-poppins text-sm sm:text-base font-medium'>
+                FLOOD REPORT
+              </DialogTitle>
             </DialogHeader>
 
             {/* ── Content Area ── */}
