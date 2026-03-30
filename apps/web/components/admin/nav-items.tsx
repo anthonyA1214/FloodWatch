@@ -43,6 +43,11 @@ export function NavItems() {
       url: '/admin/safety',
       icon: IconShieldPin,
     },
+    {
+      title: 'REPORTED COMMENTS',
+      url: '/admin/reported-comments',
+      icon: IconMessageReport,
+    },
     // {
     //   title: 'ARCHIVE & RECORDS',
     //   url: '/admin/archive',
@@ -53,11 +58,7 @@ export function NavItems() {
       url: '/admin/feed',
       icon: IconUsers,
     },
-    {
-      title: 'USER REPORTS',
-      url: '/admin/comments',
-      icon: IconMessageReport,
-    },
+
     {
       title: 'SETTINGS',
       url: '/admin/settings',

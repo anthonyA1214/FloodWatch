@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { CommentInput } from '@repo/schemas';
-import DeleteCommentPreview from './delete-comment-preview';
+import CommentPreview from './comment-preview';
 import { IconTrash } from '@tabler/icons-react';
 import { Spinner } from '../ui/spinner';
 import { useEffect, useState } from 'react';
@@ -73,7 +73,7 @@ export default function DeleteCommentDialog({
             </span>
           </div>
 
-          <DeleteCommentPreview comment={activeComment as CommentInput} />
+          <CommentPreview comment={activeComment as CommentInput} />
 
           {/* buttons */}
           <div className='flex-1 flex gap-4'>

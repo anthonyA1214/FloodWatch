@@ -7,12 +7,12 @@ import { IconClock } from '@tabler/icons-react';
 import Avatar from 'boring-avatars';
 import Image from 'next/image';
 import { format } from 'date-fns';
-import { CommentInput } from '@repo/schemas';
+import { CommentPreviewInput } from '@repo/schemas';
 
-export default function DeleteCommentPreview({
+export default function CommentPreview({
   comment,
 }: {
-  comment: CommentInput;
+  comment: CommentPreviewInput;
 }) {
   const formattedTime = comment?.createdAt
     ? format(comment?.createdAt, 'hh:mm a')
