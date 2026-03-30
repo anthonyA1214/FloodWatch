@@ -1,24 +1,28 @@
 'use client';
 
 import useSWR from 'swr';
+import { SafetyDetailInput } from '@repo/schemas';
 
 /**
- * Hospital data type as stored in hospitals-caloocan.json
+ * Hospital detail shape saved in /public/data/hospitals-caloocan.json.
+ * This intentionally mirrors the safety detail schema so existing safety UI
+ * (popup/panel/drawer) can be reused without custom hospital-specific UI.
  */
-export type Hospital = {
-  id: string;
-  name: string;
+export type HospitalSafetyDetail = {
+  id: number;
   latitude: number;
   longitude: number;
-  address: string | null;
-  source: string;
-  osmType: 'node' | 'way' | 'relation';
-  osmId: number;
-  tags: {
-    amenity: string | null;
-    healthcare: string | null;
-    operator: string | null;
-  };
+  type: 'hospital';
+  location: string;
+  address: string;
+  description: string | null;
+  availability: string | null;
+  contactNumber: string | null;
+  image: string | null;
+  createdAt: string;
+  source?: string;
+  osmType?: 'node' | 'way' | 'relation' | null;
+  osmId?: number;
 };
 
 /**
@@ -29,20 +33,29 @@ export type Hospital = {
  *   hospitals?.map(h => <Marker key={h.id} longitude={h.longitude} latitude={h.latitude} />)
  */
 export function useHospitals() {
-  // Fetch the static JSON file from public/data folder
-  const { data, error, isLoading, isValidating, mutate } = useSWR<Hospital[]>(
-    'hospitals-caloocan', // SWR key for caching
+  const { data, error, isLoading, isValidating, mutate } = useSWR<
+    SafetyDetailInput[]
+  >(
+    'hospitals-caloocan',
     async () => {
       const res = await fetch('/data/hospitals-caloocan.json');
       if (!res.ok) {
         console.error('HOSPITALS FETCH ERROR:', res.status);
         return [];
       }
-      const hospitals = await res.json();
-      console.log(`Loaded ${hospitals.length} hospitals from Caloocan`);
-      return hospitals;
+
+      const hospitals = (await res.json()) as HospitalSafetyDetail[];
+
+      // Coerce createdAt back to Date so it matches SafetyDetailInput expectations.
+      const mapped = hospitals.map((hospital) => ({
+        ...hospital,
+        createdAt: new Date(hospital.createdAt),
+      }));
+
+      console.log(`Loaded ${mapped.length} hospitals from Caloocan`);
+      return mapped;
     },
-    { revalidateOnFocus: false }, // Don't refetch when window regains focus
+    { revalidateOnFocus: false },
   );
 
   return {

@@ -25,9 +25,7 @@ import { UserLocationMarker } from '../shared/markers/user-location-marker';
 import { useReportMapPins } from '@/hooks/use-report-map-pins';
 import { useBoundary } from '@/hooks/use-boundary';
 import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
-import { useHospitals } from '@/hooks/use-hospitals'; // ← NEW: Import hospitals hook
 import { SafetyMarker } from '../shared/markers/safety-marker';
-import { HospitalMarker } from '../shared/markers/hospital-marker'; // ← NEW: Import hospital marker component
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
 import SafetyLocationPopup from './safety-location-popup';
@@ -51,7 +49,6 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
     } | null>(null);
     const { reportMapPins } = useReportMapPins();
     const { safetyMapPins } = useSafetyMapPins();
-    const { hospitals } = useHospitals(); // ← NEW: Fetch hospitals from static JSON
     const { activeOverlay, openReport, openSafety } = useMapOverlay();
     const isMobile = useIsMobile();
 
@@ -211,28 +208,6 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
             }}
           >
             <SafetyMarker type={safety.type} />
-          </Marker>
-        ))}
-
-        {/* ← NEW: Hospital pins markers */}
-        {/* 
-          Render hospitals fetched from /data/hospitals-caloocan.json
-          Each hospital displays a green medical cross icon on the map.
-          Users can click to see hospital details (implement popup if needed).
-        */}
-        {hospitals?.map((hospital) => (
-          <Marker
-            key={hospital.id}
-            longitude={hospital.longitude}
-            latitude={hospital.latitude}
-            anchor='bottom'
-            onClick={(e) => {
-              e.originalEvent.stopPropagation();
-              // TODO: Implement hospital popup/detail panel if needed
-              console.log('Hospital clicked:', hospital.name, hospital);
-            }}
-          >
-            <HospitalMarker />
           </Marker>
         ))}
 

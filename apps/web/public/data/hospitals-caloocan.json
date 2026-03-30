@@ -1,272 +1,290 @@
 [
   {
-    "id": "255070486",
-    "name": "Acebedo General Hospital",
+    "id": -255070486,
     "latitude": 14.7188033,
     "longitude": 121.0051496,
+    "type": "hospital",
+    "location": "Acebedo General Hospital",
     "address": "General Luis Street, Valenzuela 1440",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "node",
-    "osmId": 255070486,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": null,
-      "operator": null
-    }
+    "osmId": 255070486
   },
   {
-    "id": "255071258",
-    "name": "Baesa Advent Polyclinic",
+    "id": -255071258,
     "latitude": 14.6767411,
     "longitude": 121.0052375,
+    "type": "hospital",
+    "location": "Baesa Advent Polyclinic",
     "address": "Valenzuela 1440",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "node",
-    "osmId": 255071258,
-    "tags": {
-      "amenity": "doctors",
-      "healthcare": "hospital",
-      "operator": null
-    }
+    "osmId": 255071258
   },
   {
-    "id": "255071879",
-    "name": "Our Lady Of Grace Hospital",
+    "id": -255071879,
     "latitude": 14.64872,
     "longitude": 120.981758,
+    "type": "hospital",
+    "location": "Our Lady Of Grace Hospital",
     "address": "Kalookan 1400",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "node",
-    "osmId": 255071879,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": "hospital",
-      "operator": null
-    }
+    "osmId": 255071879
   },
   {
-    "id": "8424682317",
-    "name": "Our Lady of Grace Hospital",
+    "id": -8424682317,
     "latitude": 14.6488967,
     "longitude": 120.981379,
+    "type": "hospital",
+    "location": "Our Lady of Grace Hospital",
     "address": "8th Avenue",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "node",
-    "osmId": 8424682317,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": null,
-      "operator": null
-    }
+    "osmId": 8424682317
   },
   {
-    "id": "8737517378",
-    "name": "Our Lady of Lourdes Hospital",
+    "id": -8737517378,
     "latitude": 14.719221,
     "longitude": 121.0066929,
+    "type": "hospital",
+    "location": "Our Lady of Lourdes Hospital",
     "address": "General Luis Street",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "node",
-    "osmId": 8737517378,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": null,
-      "operator": null
-    }
+    "osmId": 8737517378
   },
   {
-    "id": "256339755",
-    "name": "Caloocan City Medical Center South",
+    "id": -256339755,
     "latitude": 14.6483413,
     "longitude": 120.9735979,
-    "address": null,
+    "type": "hospital",
+    "location": "Caloocan City Medical Center South",
+    "address": "Address not available",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "way",
-    "osmId": 256339755,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": "hospital",
-      "operator": null
-    }
+    "osmId": 256339755
   },
   {
-    "id": "265574761",
-    "name": "Manila Central University Hospital",
+    "id": -265574761,
     "latitude": 14.6577421,
     "longitude": 120.9870998,
-    "address": null,
+    "type": "hospital",
+    "location": "Manila Central University Hospital",
+    "address": "Address not available",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "way",
-    "osmId": 265574761,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": "hospital",
-      "operator": null
-    }
+    "osmId": 265574761
   },
   {
-    "id": "265574777",
-    "name": "Manila Central University Hospital",
+    "id": -265574777,
     "latitude": 14.657686,
     "longitude": 120.9867239,
+    "type": "hospital",
+    "location": "Manila Central University Hospital",
     "address": "Malabon 1470",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "way",
-    "osmId": 265574777,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": "hospital",
-      "operator": null
-    }
+    "osmId": 265574777
   },
   {
-    "id": "304117640",
-    "name": "North Caloocan Doctors Hospital",
+    "id": -304117640,
     "latitude": 14.7660751,
     "longitude": 121.0846894,
-    "address": null,
+    "type": "hospital",
+    "location": "North Caloocan Doctors Hospital",
+    "address": "Address not available",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "way",
-    "osmId": 304117640,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": null,
-      "operator": null
-    }
+    "osmId": 304117640
   },
   {
-    "id": "312353855",
-    "name": "Martinez Hospital",
+    "id": -312353855,
     "latitude": 14.6385559,
     "longitude": 120.9759068,
+    "type": "hospital",
+    "location": "Martinez Hospital",
     "address": "A. Mabini Street, Caloocan",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "way",
-    "osmId": 312353855,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": "hospital",
-      "operator": null
-    }
+    "osmId": 312353855
   },
   {
-    "id": "528989939",
-    "name": "Caloocan City North Medical Center",
+    "id": -528989939,
     "latitude": 14.7561517,
     "longitude": 121.0502049,
-    "address": null,
+    "type": "hospital",
+    "location": "Caloocan City North Medical Center",
+    "address": "Address not available",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "way",
-    "osmId": 528989939,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": "hospital",
-      "operator": null
-    }
+    "osmId": 528989939
   },
   {
-    "id": "530280724",
-    "name": "Nodado General Hospital",
+    "id": -530280724,
     "latitude": 14.7633043,
     "longitude": 121.0440578,
-    "address": null,
+    "type": "hospital",
+    "location": "Nodado General Hospital",
+    "address": "Address not available",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "way",
-    "osmId": 530280724,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": "hospital",
-      "operator": null
-    }
+    "osmId": 530280724
   },
   {
-    "id": "534775070",
-    "name": "National Mental Hospital",
+    "id": -534775070,
     "latitude": 14.7685928,
     "longitude": 121.043062,
+    "type": "hospital",
+    "location": "National Mental Hospital",
     "address": "Barugo, Caloocan",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "way",
-    "osmId": 534775070,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": "hospital",
-      "operator": null
-    }
+    "osmId": 534775070
   },
   {
-    "id": "534857378",
-    "name": "Doctor Jose N. Rodriguez Memorial Hospital & Sanitarium",
+    "id": -534857378,
     "latitude": 14.766709,
     "longitude": 121.0656547,
+    "type": "hospital",
+    "location": "Doctor Jose N. Rodriguez Memorial Hospital & Sanitarium",
     "address": "Saint Joseph Avenue, Caloocan",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "way",
-    "osmId": 534857378,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": "hospital",
-      "operator": "government"
-    }
+    "osmId": 534857378
   },
   {
-    "id": "796759425",
-    "name": "San Lorenzo Hospital",
+    "id": -796759425,
     "latitude": 14.7372495,
     "longitude": 121.0323024,
+    "type": "hospital",
+    "location": "San Lorenzo Hospital",
     "address": "Deparo Road, Caloocan",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "way",
-    "osmId": 796759425,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": "hospital",
-      "operator": null
-    }
+    "osmId": 796759425
   },
   {
-    "id": "942891048",
-    "name": "Barangay 174 Health Center and Lying In",
+    "id": -942891048,
     "latitude": 14.7626442,
     "longitude": 121.0477456,
-    "address": null,
+    "type": "hospital",
+    "location": "Barangay 174 Health Center and Lying In",
+    "address": "Address not available",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "way",
-    "osmId": 942891048,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": "hospital",
-      "operator": null
-    }
+    "osmId": 942891048
   },
   {
-    "id": "1117530134",
-    "name": "Bermudez Polymedic Hospital",
+    "id": -1117530134,
     "latitude": 14.7700948,
     "longitude": 121.0782804,
+    "type": "hospital",
+    "location": "Bermudez Polymedic Hospital",
     "address": "Malaria Road, Caloocan",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "way",
-    "osmId": 1117530134,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": "hospital",
-      "operator": null
-    }
+    "osmId": 1117530134
   },
   {
-    "id": "14909701",
-    "name": "Camarin Doctors Hospital",
+    "id": -14909701,
     "latitude": 14.7535145,
     "longitude": 121.0401202,
+    "type": "hospital",
+    "location": "Camarin Doctors Hospital",
     "address": "1 Camarin Road, Caloocan",
+    "description": null,
+    "availability": null,
+    "contactNumber": null,
+    "image": null,
+    "createdAt": "2026-03-30T00:00:00.000Z",
     "source": "openstreetmap-overpass",
     "osmType": "relation",
-    "osmId": 14909701,
-    "tags": {
-      "amenity": "hospital",
-      "healthcare": null,
-      "operator": null
-    }
+    "osmId": 14909701
   }
 ]
