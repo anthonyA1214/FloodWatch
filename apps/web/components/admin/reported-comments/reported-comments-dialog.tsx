@@ -27,15 +27,44 @@ import { useReportedCommentsDialog } from '@/contexts/reported-comments-dialog-c
 import CommentPreview from '@/components/shared/comment-preview';
 import { useReportedCommentDetail } from '@/hooks/use-reported-comment-detail';
 import ReporterReasonBreakdown from './reporter-reason-breakdown';
-import { REASON_LABELS } from '@/lib/utils/get-reason-labels';
+import {
+  ACTION_TAKEN_LABELS,
+  REASON_LABELS,
+} from '@/lib/utils/get-reason-labels';
 import ReportedCommentsDialogSkeleton from './skeleton/reported-comments-dialog-skeleton';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { toast } from 'sonner';
+import { Spinner } from '@/components/ui/spinner';
+import { apiFetchClient } from '@/lib/api-fetch-client';
+import { cn } from '@/lib/utils';
 
 export default function ReportedCommentsDialog() {
   const { commentId, isOpen, closeDialog } = useReportedCommentsDialog();
-  const [isPending, setIsPending] = useState(false);
   const { mutate } = useSWRConfig();
   const { reportedComment, isLoading } = useReportedCommentDetail(commentId);
+  const [pendingAction, setPendingAction] = useState<
+    'warn' | 'block' | 'dismiss' | null
+  >(null);
+
+  const handleAction = async (action: 'warn' | 'block' | 'dismiss') => {
+    setPendingAction(action);
+    try {
+      await apiFetchClient(`/comments/reports/${commentId}/action`, {
+        method: 'PATCH',
+        body: JSON.stringify({ action }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      closeDialog();
+    } catch {
+      toast.error('Something went wrong.');
+    } finally {
+      setPendingAction(null);
+    }
+  };
+
+  console.log('reportedComment:', reportedComment);
 
   const color = reportedComment
     ? REPORT_COMMENT_STATUS_COLOR_MAP[reportedComment.status]
@@ -186,31 +215,113 @@ export default function ReportedCommentsDialog() {
                   </div>
                 </div>
               </div>
-              {reportedComment?.status !== 'resolved' && (
+              {reportedComment?.status === 'pending' ? (
                 <DialogFooter className='grid grid-cols-3  bg-[#F9F9F9] rounded-t-2xl px-5 py-4 shrink-0'>
                   <Button
                     variant='outline'
+                    disabled={!!pendingAction}
+                    onClick={() => handleAction('warn')}
                     className='font-poppins flex items-center gap-2 border-[#F0B204] bg-white text-[#F0B204] hover:bg-[#F0B20410] hover:text-[#F0B204]'
                   >
-                    <IconAlertTriangle className='w-[1.5em]! h-[1.5em]!' />
-                    <span>WARN USER</span>
+                    {pendingAction === 'warn' ? (
+                      <Spinner />
+                    ) : (
+                      <IconAlertTriangle className='w-[1.5em]! h-[1.5em]!' />
+                    )}
+                    <span>
+                      {pendingAction === 'warn' ? 'WARNING...' : 'WARN USER'}
+                    </span>
                   </Button>
                   <Button
                     variant='outline'
+                    disabled={!!pendingAction}
+                    onClick={() => handleAction('block')}
                     className='font-poppins flex items-center gap-2 border-[#FB2C36] bg-white text-[#FB2C36] hover:bg-[#FB2C3610] hover:text-[#FB2C36]'
                   >
-                    <IconBan className='w-[1.5em]! h-[1.5em]!' />
-                    <span>BLOCK USER</span>
+                    {pendingAction === 'block' ? (
+                      <Spinner />
+                    ) : (
+                      <IconBan className='w-[1.5em]! h-[1.5em]!' />
+                    )}
+                    <span>
+                      {pendingAction === 'block' ? 'BLOCKING...' : 'BLOCK USER'}
+                    </span>
                   </Button>
                   <Button
                     variant='outline'
+                    disabled={!!pendingAction}
+                    onClick={() => handleAction('dismiss')}
                     className='font-poppins flex items-center gap-2 border-[#6B7280] bg-white text-[#6B7280] hover:bg-[#6B728010] hover:text-[#6B7280]'
                   >
-                    <IconX className='w-[1.5em]! h-[1.5em]!' />
-                    <span>DISMISS</span>
+                    {pendingAction === 'dismiss' ? (
+                      <Spinner />
+                    ) : (
+                      <IconX className='w-[1.5em]! h-[1.5em]!' />
+                    )}
+                    <span>
+                      {pendingAction === 'dismiss'
+                        ? 'DISMISSING...'
+                        : 'DISMISS'}
+                    </span>
                   </Button>
                 </DialogFooter>
-              )}
+              ) : reportedComment?.status === 'resolved' ||
+                reportedComment?.status === 'dismissed' ? (
+                <DialogFooter className='flex w-full bg-[#F9F9F9] rounded-t-2xl px-5 py-4 shrink-0'>
+                  <div className='flex w-full justify-between'>
+                    <div className='flex flex-col gap-2'>
+                      <span className='font-poppins font-semibold text-gray-600 text-sm'>
+                        REVIEWED BY
+                      </span>
+                      <div className='flex items-center gap-3 w-auto'>
+                        <UIAvatar className='size-8'>
+                          <AvatarImage
+                            src={
+                              reportedComment?.reviewer?.profilePicture ||
+                              undefined
+                            }
+                          />
+                          <AvatarFallback>
+                            <Avatar
+                              name={`${reportedComment?.reviewer?.name} ${reportedComment?.reviewer?.id}`}
+                              variant='beam'
+                            />
+                          </AvatarFallback>
+                        </UIAvatar>
+                        <div className='flex flex-col'>
+                          <span className='font-medium'>
+                            {reportedComment?.reviewer?.name}
+                          </span>
+                          <span className='text-sm text-gray-600'>
+                            {reportedComment?.reviewer?.email}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className='flex flex-col gap-2'>
+                      <span className='font-poppins font-semibold text-gray-600 text-sm'>
+                        ACTION TAKEN
+                      </span>
+                      <span
+                        className={cn(
+                          'font poppins text-sm font-medium',
+                          reportedComment?.actionTaken === 'dismiss'
+                            ? 'text-[#6B7280]'
+                            : reportedComment?.actionTaken === 'block'
+                              ? 'text-[#FB2C36]'
+                              : reportedComment?.actionTaken === 'warn'
+                                ? 'text-[#F0B204]'
+                                : '',
+                        )}
+                      >
+                        {ACTION_TAKEN_LABELS[
+                          reportedComment.actionTaken
+                        ].toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                </DialogFooter>
+              ) : null}
             </>
           )
         )}

@@ -1,3 +1,4 @@
+import { el } from '@faker-js/faker';
 import {
   BadRequestException,
   ForbiddenException,
@@ -9,6 +10,7 @@ import {
   CommentQueryInput,
   CreateCommentInput,
   ReportCommentInput,
+  ReportedCommentActionInput,
   ReportedCommentQueryInput,
   UpdateCommentDto,
 } from '@repo/schemas';
@@ -415,6 +417,7 @@ export class CommentsService {
         createdAt: comments.createdAt,
         status: commentReportReviews.status,
         reviewedAt: commentReportReviews.reviewedAt,
+        actionTaken: commentReportReviews.actionTaken,
         reportCount: sql<number>`(
           SELECT COUNT(*) FROM ${commentReports}
           WHERE ${commentReports.commentId} = ${comments.id}
@@ -462,6 +465,7 @@ export class CommentsService {
     return {
       id: detail.commentId,
       createdAt: detail.createdAt,
+      actionTaken: detail.actionTaken,
       comment: {
         id: detail.commentId,
         content: detail.content,
@@ -504,6 +508,69 @@ export class CommentsService {
         description: r.description ?? null,
         createdAt: r.createdAt,
       })),
+    };
+  }
+
+  async handleReportedCommentAction(
+    commentId: number,
+    actionDto: ReportedCommentActionInput,
+    reviewerId: number,
+  ) {
+    const { action } = actionDto;
+
+    const report = await this.db.query.commentReportReviews.findFirst({
+      where: and(
+        eq(commentReportReviews.commentId, commentId),
+        eq(commentReportReviews.status, 'pending'),
+      ),
+    });
+
+    if (!report) {
+      throw new NotFoundException('No pending report found for this comment');
+    }
+
+    const comment = await this.db.query.comments.findFirst({
+      where: eq(comments.id, commentId),
+    });
+
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    if (action === 'warn') {
+      await this.db
+        .update(commentReportReviews)
+        .set({
+          status: 'resolved',
+          actionTaken: action,
+          reviewedBy: reviewerId,
+          reviewedAt: new Date(),
+        })
+        .where(eq(commentReportReviews.commentId, commentId));
+    } else if (action === 'block') {
+      await this.db
+        .update(commentReportReviews)
+        .set({
+          status: 'resolved',
+          actionTaken: action,
+          reviewedBy: reviewerId,
+          reviewedAt: new Date(),
+        })
+        .where(eq(commentReportReviews.commentId, commentId));
+    } else if (action === 'dismiss') {
+      await this.db
+        .update(commentReportReviews)
+        .set({
+          status: 'dismissed',
+          actionTaken: action,
+          reviewedBy: reviewerId,
+          reviewedAt: new Date(),
+        })
+        .where(eq(commentReportReviews.commentId, commentId));
+    }
+
+    return {
+      message: `Comment report has been ${action === 'dismiss' ? 'dismissed' : 'resolved with action: ' + action}`,
     };
   }
 }

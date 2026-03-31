@@ -21,6 +21,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { type AuthRequest } from 'src/auth/types/auth-request.type';
 import {
   ReportCommentDto,
+  ReportedCommentActionDto,
   ReportedCommentQueryDto,
   UpdateCommentDto,
 } from '@repo/schemas';
@@ -86,5 +87,21 @@ export class CommentsController {
   @UseGuards(JwtAuthGuard, UserStatusGuard)
   async getReportedCommentDetails(@Param('id') id: number) {
     return await this.commentsService.getReportedCommentDetails(id);
+  }
+
+  @Roles('admin')
+  @Patch('reports/:id/action')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  async handleReportedCommentAction(
+    @Param('id') id: number,
+    @Body() actionDto: ReportedCommentActionDto,
+    @Request() req: AuthRequest,
+  ) {
+    return await this.commentsService.handleReportedCommentAction(
+      id,
+      actionDto,
+      req.user.id,
+    );
   }
 }

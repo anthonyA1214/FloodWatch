@@ -14,6 +14,8 @@ export const commentReportStatusSchema = z.enum([
   'dismissed',
 ]);
 
+export const actionEnum = z.enum(['warn', 'block', 'dismiss']);
+
 export const createCommentSchema = z.object({
   content: z.string().trim().optional(),
 });
@@ -115,6 +117,7 @@ export const reportedCommentDetailSchema = reportedCommentSchema.extend({
       createdAt: z.coerce.date().nullable(),
     }),
   ),
+  actionTaken: actionEnum,
 });
 
 export const reportedCommentQuerySchema = z.object({
@@ -122,6 +125,10 @@ export const reportedCommentQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(10),
   status: commentReportStatusSchema.optional(),
   q: z.string().optional(),
+});
+
+export const reportedCommentActionSchema = z.object({
+  action: actionEnum,
 });
 
 export class CreateCommentDto extends createZodDto(createCommentSchema) {}
@@ -138,6 +145,9 @@ export class ReportedCommentDetailDto extends createZodDto(
 export class ReportedCommentQueryDto extends createZodDto(
   reportedCommentQuerySchema,
 ) {}
+export class ReportedCommentActionDto extends createZodDto(
+  reportedCommentActionSchema,
+) {}
 
 export type CreateCommentInput = z.infer<typeof createCommentSchema>;
 export type UpdateCommentInput = z.infer<typeof updateCommentSchema>;
@@ -152,4 +162,7 @@ export type ReportedCommentDetailInput = z.infer<
 >;
 export type ReportedCommentQueryInput = z.infer<
   typeof reportedCommentQuerySchema
+>;
+export type ReportedCommentActionInput = z.infer<
+  typeof reportedCommentActionSchema
 >;
