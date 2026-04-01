@@ -44,7 +44,7 @@
     "cookie-parser": "^1.4.7",
     "csrf-csrf": "^4.0.3",
     "dotenv": "^17.2.3",
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "^0.45.2",
     "express-basic-auth": "^1.2.1",
     "file-type": "^16.5.4",
     "handlebars": "^4.7.8",

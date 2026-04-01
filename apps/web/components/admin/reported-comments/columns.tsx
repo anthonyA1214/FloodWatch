@@ -95,12 +95,12 @@ export const columns: ColumnDef<ReportedCommentInput>[] = [
     header: () => <span className='flex justify-center'>ACTIONS</span>,
     cell: ({ row }) => {
       const report = row.original;
-      return <ActionCell commentId={report?.id} />;
+      return <ActionCell report={report} />;
     },
   },
 ];
 
-function ActionCell({ commentId }: { commentId: number }) {
+function ActionCell({ report }: { report: ReportedCommentInput }) {
   const { openDialog } = useReportedCommentsDialog();
 
   return (
@@ -108,7 +108,7 @@ function ActionCell({ commentId }: { commentId: number }) {
       <Tooltip>
         <TooltipTrigger
           className='text-[#0066CC] bg-[#0066CC]/10 rounded-lg p-1.5 hover:bg-[#0066CC]/20 transition'
-          onClick={() => openDialog('view', commentId)}
+          onClick={() => openDialog('view', report?.id)}
         >
           <IconEye className='w-[1.5em]! h-[1.5em]!' />
         </TooltipTrigger>
@@ -122,7 +122,7 @@ function ActionCell({ commentId }: { commentId: number }) {
           className={cn(
             `text-[#FB323B] bg-[#FB323B]/10 rounded-lg p-1.5 hover:bg-[#FB323B]/20 transition`,
           )}
-          // onClick={() => openDialog('delete', report)}
+          onClick={() => openDialog('delete', report)}
         >
           <IconTrash className='w-[1.5em]! h-[1.5em]!' />
         </TooltipTrigger>

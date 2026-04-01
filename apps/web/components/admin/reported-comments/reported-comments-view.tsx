@@ -44,7 +44,7 @@ export default function ReportedCommentsView() {
   if (isLoading && isFirstLoad) return <ReportedCommentsPageSkeleton />;
 
   return (
-    <div className='flex-1 flex flex-col bg-white p-8 rounded-2xl gap-8 min-h-0'>
+    <div className='flex-1 flex flex-col bg-white p-8 rounded-2xl gap-8 min-h-0 overflow-y-auto'>
       {/* Header */}
       <h1 className='font-poppins text-3xl font-bold'>Reported Comments</h1>
 
@@ -63,7 +63,7 @@ export default function ReportedCommentsView() {
 
       <div className='flex-1 flex flex-col min-h-0 gap-4'>
         {isFirstLoad ? (
-          <div className='grid grid-cols-4 gap-8'>
+          <div className='grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8'>
             {Array.from({ length: 4 }).map((_, i) => (
               <StatCardSkeleton key={i} />
             ))}
