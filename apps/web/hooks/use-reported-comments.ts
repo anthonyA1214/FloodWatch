@@ -5,10 +5,10 @@ import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { ReportedCommentQueryInput } from '@repo/schemas';
 import { getReportedComments } from '@/lib/fetchers/get-reported-comments';
 
-export function useReportedComments(params: ReportedCommentQueryInput) {
+export function useReportedComments(params?: ReportedCommentQueryInput) {
   const { data, error, isLoading, isValidating, mutate } = useSWR(
     [SWR_KEYS.reportedComments, params],
-    () => getReportedComments(params),
+    () => getReportedComments(params!),
     { keepPreviousData: true },
   );
 

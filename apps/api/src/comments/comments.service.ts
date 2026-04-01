@@ -573,4 +573,21 @@ export class CommentsService {
       message: `Comment report has been ${action === 'dismiss' ? 'dismissed' : 'resolved with action: ' + action}`,
     };
   }
+
+  async deleteReportedComment(commentId: number) {
+    const commentReview = await this.db.query.commentReportReviews.findFirst({
+      where: eq(commentReportReviews.commentId, commentId),
+    });
+
+    if (!commentReview) {
+      throw new NotFoundException('No reported comment found for this ID');
+    }
+
+    await this.db
+      .delete(commentReportReviews)
+      .where(eq(commentReportReviews.commentId, commentId));
+    await this.db
+      .delete(commentReports)
+      .where(eq(commentReports.commentId, commentId));
+  }
 }

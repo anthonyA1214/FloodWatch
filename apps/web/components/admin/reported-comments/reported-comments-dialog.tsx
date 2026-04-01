@@ -37,14 +37,16 @@ import { toast } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
 import { apiFetchClient } from '@/lib/api-fetch-client';
 import { cn } from '@/lib/utils';
+import { SWR_KEYS } from '@/lib/constants/swr-keys';
 
 export default function ReportedCommentsDialog() {
   const { commentId, isOpen, closeDialog } = useReportedCommentsDialog();
-  const { mutate } = useSWRConfig();
-  const { reportedComment, isLoading } = useReportedCommentDetail(commentId);
+  const { reportedComment, isLoading, mutateReportedComment } =
+    useReportedCommentDetail(commentId);
   const [pendingAction, setPendingAction] = useState<
     'warn' | 'block' | 'dismiss' | null
   >(null);
+  const { mutate } = useSWRConfig();
 
   const handleAction = async (action: 'warn' | 'block' | 'dismiss') => {
     setPendingAction(action);
@@ -56,6 +58,10 @@ export default function ReportedCommentsDialog() {
           'Content-Type': 'application/json',
         },
       });
+      mutateReportedComment();
+      mutate(
+        (key) => Array.isArray(key) && key[0] === SWR_KEYS.reportedComments,
+      );
       closeDialog();
     } catch {
       toast.error('Something went wrong.');
@@ -64,15 +70,13 @@ export default function ReportedCommentsDialog() {
     }
   };
 
-  console.log('reportedComment:', reportedComment);
-
   const color = reportedComment
     ? REPORT_COMMENT_STATUS_COLOR_MAP[reportedComment.status]
     : undefined;
 
   return (
     <Dialog open={isOpen('view')} onOpenChange={closeDialog}>
-      <DialogContent className='flex flex-col min-w-[50vw] h-[80vh] p-0 overflow-hidden gap-0 border-0 [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-70 [&>button]:hover:opacity-100'>
+      <DialogContent className='flex flex-col w-full max-w-full sm:max-w-lg max-h-[85vh] p-0 overflow-hidden gap-0 border-0 [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-70 [&>button]:hover:opacity-100'>
         {isLoading ? (
           <>
             <VisuallyHidden>
@@ -105,23 +109,23 @@ export default function ReportedCommentsDialog() {
                         <UIAvatar className='size-8'>
                           <AvatarImage
                             src={
-                              reportedComment.commenter.profilePicture ||
+                              reportedComment?.commenter?.profilePicture ||
                               undefined
                             }
                           />
                           <AvatarFallback>
                             <Avatar
-                              name={`${reportedComment.commenter.name} ${reportedComment.commenter.id}`}
+                              name={`${reportedComment?.commenter?.name} ${reportedComment?.commenter?.id}`}
                               variant='beam'
                             />
                           </AvatarFallback>
                         </UIAvatar>
                         <div className='flex flex-col'>
                           <span className='font-medium'>
-                            {reportedComment.commenter.name}
+                            {reportedComment?.commenter?.name}
                           </span>
                           <span className='text-sm text-gray-600'>
-                            {reportedComment.commenter.email}
+                            {reportedComment?.commenter?.email}
                           </span>
                         </div>
                       </div>
@@ -168,8 +172,8 @@ export default function ReportedCommentsDialog() {
 
                           {/* top row: avatar + info + badge */}
                           <div className='flex w-full justify-between gap-3'>
-                            <div className='flex items-center gap-3 min-w-0'>
-                              <UIAvatar className='size-8 shrink-0'>
+                            <div className='flex items-center gap-2 w-auto'>
+                              <UIAvatar className='size-6'>
                                 <AvatarImage
                                   src={reporter?.profilePicture || undefined}
                                 />
@@ -180,12 +184,12 @@ export default function ReportedCommentsDialog() {
                                   />
                                 </AvatarFallback>
                               </UIAvatar>
-                              <div className='flex flex-col min-w-0'>
-                                <span className='font-medium truncate'>
+                              <div className='flex flex-col'>
+                                <span className='text-sm font-medium'>
                                   {reporter?.name}
                                 </span>
                                 {reporter?.createdAt && (
-                                  <span className='text-sm text-gray-600'>
+                                  <span className='text-xs text-gray-600'>
                                     {format(reporter.createdAt, 'PPP p')}
                                   </span>
                                 )}
@@ -273,8 +277,8 @@ export default function ReportedCommentsDialog() {
                       <span className='font-poppins font-semibold text-gray-600 text-sm'>
                         REVIEWED BY
                       </span>
-                      <div className='flex items-center gap-3 w-auto'>
-                        <UIAvatar className='size-8'>
+                      <div className='flex items-center gap-2 w-auto'>
+                        <UIAvatar className='size-6'>
                           <AvatarImage
                             src={
                               reportedComment?.reviewer?.profilePicture ||
@@ -289,12 +293,14 @@ export default function ReportedCommentsDialog() {
                           </AvatarFallback>
                         </UIAvatar>
                         <div className='flex flex-col'>
-                          <span className='font-medium'>
+                          <span className='text-sm font-medium'>
                             {reportedComment?.reviewer?.name}
                           </span>
-                          <span className='text-sm text-gray-600'>
-                            {reportedComment?.reviewer?.email}
-                          </span>
+                          {reportedComment?.reviewedAt && (
+                            <span className='text-xs text-gray-600'>
+                              {format(reportedComment?.reviewedAt, 'PPP p')}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -304,7 +310,7 @@ export default function ReportedCommentsDialog() {
                       </span>
                       <span
                         className={cn(
-                          'font poppins text-sm font-medium',
+                          'font-poppins text-sm font-medium',
                           reportedComment?.actionTaken === 'dismiss'
                             ? 'text-[#6B7280]'
                             : reportedComment?.actionTaken === 'block'

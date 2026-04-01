@@ -121,7 +121,7 @@ function ActionCell({ user }: { user: UsersDto }) {
   const { openDialog } = useUserStatusDialog();
 
   const buttonColorMap = {
-    active: 'text-[#FB323B] bg-[#FB323B]/10 hover:bg-[#FB323B]/20',
+    active: 'text-[#FB2C36] bg-[#FB2C36]/10 hover:bg-[#FB2C36]/20',
     blocked: 'text-[#00D69B] bg-[#00D69B]/10 hover:bg-[#00D69B]/20',
   };
 

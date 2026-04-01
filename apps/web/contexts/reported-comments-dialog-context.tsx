@@ -1,14 +1,19 @@
 'use client';
 
+import { ReportedCommentInput } from '@repo/schemas';
 import { createContext, useContext, useState } from 'react';
 
 type DialogType = 'view' | 'delete';
 
 interface ReportedCommentsDialogContextType {
   commentId: number | null;
+  reportedComment: ReportedCommentInput | null;
   isOpen: (type: DialogType) => boolean;
   openDialogType: DialogType | null;
-  openDialog: (type: DialogType, commentId: number) => void;
+  openDialog: {
+    (type: 'view', commentId: number): void;
+    (type: 'delete', reportedComment: ReportedCommentInput): void;
+  };
   closeDialog: () => void;
 }
 
@@ -21,10 +26,16 @@ export function ReportedCommentsDialogProvider({
   children: React.ReactNode;
 }) {
   const [commentId, setCommentId] = useState<number | null>(null);
+  const [reportedComment, setReportedComment] =
+    useState<ReportedCommentInput | null>(null);
   const [openDialogType, setOpenDialogType] = useState<DialogType | null>(null);
 
-  const openDialog = (type: DialogType, id: number) => {
-    setCommentId(id);
+  const openDialog = (type: DialogType, arg: number | ReportedCommentInput) => {
+    if (type === 'view') {
+      setCommentId(arg as number);
+    } else {
+      setReportedComment(arg as ReportedCommentInput);
+    }
     setOpenDialogType(type);
   };
 
@@ -41,6 +52,7 @@ export function ReportedCommentsDialogProvider({
     <ReportedCommentsDialogContext.Provider
       value={{
         commentId,
+        reportedComment,
         isOpen,
         openDialog,
         closeDialog,

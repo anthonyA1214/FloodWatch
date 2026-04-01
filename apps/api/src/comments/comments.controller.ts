@@ -104,4 +104,12 @@ export class CommentsController {
       req.user.id,
     );
   }
+
+  @Roles('admin')
+  @Delete('reports/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  async deleteReportedComment(@Param('id') id: number) {
+    return await this.commentsService.deleteReportedComment(id);
+  }
 }

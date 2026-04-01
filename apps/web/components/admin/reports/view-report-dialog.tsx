@@ -29,6 +29,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { verifyReport } from '@/lib/actions/report-actions';
 import { useSWRConfig } from 'swr';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
+import NoPhotoEmpty from '@/components/shared/no-photo-empty';
 
 export default function ViewReportDialog() {
   const { report, isOpen, closeDialog } = useReportDialog();
@@ -223,12 +224,9 @@ export default function ViewReportDialog() {
                         className='object-cover'
                       />
                     ) : (
-                      <Image
-                        src='/no-data-rafiki.svg'
-                        alt='No image available'
-                        fill
-                        className='object-cover opacity-40'
-                      />
+                      <div className='absolute inset-0'>
+                        <NoPhotoEmpty />
+                      </div>
                     )}
                   </div>
                 </div>

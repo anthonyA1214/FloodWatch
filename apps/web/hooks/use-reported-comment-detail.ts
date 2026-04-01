@@ -17,6 +17,6 @@ export function useReportedCommentDetail(commentId: number | null) {
     isLoading,
     isValidating,
     isError: error,
-    mutateSafetyDetail: mutate,
+    mutateReportedComment: mutate,
   };
 }

@@ -1,5 +1,4 @@
 'use client';
-
 import {
   ColumnDef,
   SortingState,
@@ -8,7 +7,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-
 import {
   Table,
   TableBody,
@@ -42,13 +40,14 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className='overflow-hidden rounded-lg flex flex-col flex-1 min-h-0 h-0'>
-      <Table className='w-full table-fixed'>
-        <TableHeader className='font-poppins bg-[#0066CC]'>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className='hover:bg-transparent'>
-              {headerGroup.headers.map((header) => {
-                return (
+    <div className='rounded-lg border overflow-hidden flex flex-col flex-1 min-h-0'>
+      {/* Sticky header */}
+      <div className='overflow-hidden shrink-0'>
+        <Table className='w-full table-fixed'>
+          <TableHeader className='font-poppins bg-[#0066CC]'>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className='hover:bg-transparent'>
+                {headerGroup.headers.map((header) => (
                   <TableHead key={header.id} className='text-white'>
                     {header.isPlaceholder
                       ? null
@@ -57,13 +56,15 @@ export function DataTable<TData, TValue>({
                           header.getContext(),
                         )}
                   </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-      </Table>
-      <div className='no-scrollbar flex-1 min-h-0 overflow-y-auto'>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+        </Table>
+      </div>
+
+      {/* Scrollable body */}
+      <div className='flex-1 min-h-0 overflow-y-auto'>
         <Table className='w-full table-fixed'>
           <TableBody>
             {table.getRowModel().rows?.length ? (

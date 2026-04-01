@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Field, FieldLabel } from '@/components/ui/field';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { IconCurrentLocation, IconMinus, IconPlus } from '@tabler/icons-react';
 import { useRef, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
@@ -252,7 +252,7 @@ export default function CreateFloodAlertDialog() {
             >
               <div className='flex flex-col gap-4 px-4'>
                 {/* location name */}
-                <Field className='flex items-center'>
+                <Field>
                   <FieldLabel
                     htmlFor='location-name'
                     className='font-poppins text-sm font-medium'
@@ -268,14 +268,12 @@ export default function CreateFloodAlertDialog() {
                     onChange={(e) => setLocationNameValue(e.target.value)}
                   />
                   {state.errors?.locationName && (
-                    <span className='text-sm text-red-600'>
-                      {state.errors.locationName[0]}
-                    </span>
+                    <FieldError>{state.errors.locationName[0]}</FieldError>
                   )}
                 </Field>
 
                 {/* Severity Level */}
-                <Field className='flex items-center'>
+                <Field>
                   <FieldLabel
                     htmlFor='severity'
                     className='font-poppins text-sm font-medium'
@@ -305,14 +303,12 @@ export default function CreateFloodAlertDialog() {
                     </SelectContent>
                   </Select>
                   {state.errors?.severity && (
-                    <span className='text-sm text-red-600'>
-                      {state.errors.severity[0]}
-                    </span>
+                    <FieldError>{state.errors.severity[0]}</FieldError>
                   )}
                 </Field>
 
                 {/* range */}
-                <Field className='flex items-center'>
+                <Field>
                   <FieldLabel
                     htmlFor='range'
                     className='font-poppins text-sm font-medium'
@@ -333,14 +329,12 @@ export default function CreateFloodAlertDialog() {
                     onChange={(e) => setRadius(Number(e.target.value))}
                   />
                   {state.errors?.range && (
-                    <span className='text-sm text-red-600'>
-                      {state.errors.range[0]}
-                    </span>
+                    <FieldError>{state.errors.range[0]}</FieldError>
                   )}
                 </Field>
 
                 {/* Description */}
-                <Field className='flex items-center'>
+                <Field>
                   <FieldLabel
                     htmlFor='description'
                     className='font-poppins text-sm font-medium'
@@ -359,15 +353,16 @@ export default function CreateFloodAlertDialog() {
                     onChange={(e) => setDescriptionValue(e.target.value)}
                   />
                   {state.errors?.description && (
-                    <span className='text-sm text-red-600'>
-                      {state.errors.description[0]}
-                    </span>
+                    <FieldError>{state.errors.description[0]}</FieldError>
                   )}
                 </Field>
 
                 {/* Upload image */}
-                <Field className='flex items-center'>
-                  <FieldLabel className='font-poppins text-sm font-medium'>
+                <Field>
+                  <FieldLabel
+                    htmlFor='image'
+                    className='font-poppins text-sm font-medium'
+                  >
                     UPLOAD IMAGE
                     <span className='font-inter text-gray-600 text-xs'>
                       (Optional)
@@ -381,9 +376,7 @@ export default function CreateFloodAlertDialog() {
                     onChange={handleImageChange}
                   />
                   {state.errors?.image && (
-                    <span className='text-sm text-red-600'>
-                      {state.errors.image[0]}
-                    </span>
+                    <FieldError>{state.errors.image[0]}</FieldError>
                   )}
                 </Field>
 

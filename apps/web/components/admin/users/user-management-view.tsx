@@ -3,7 +3,7 @@
 import SearchBar from '@/components/shared/search-bar';
 import { DataTable } from '@/components/shared/data-table';
 import { columns } from './columns';
-import { AddNewAdminModal } from '@/components/admin/users/add-new-admin-modal';
+import AddNewAdminDialog from '@/components/admin/users/add-new-admin-dialog';
 import UserStatCards from '@/components/admin/users/user-stat-cards';
 import PagePagination from '@/components/shared/page-pagination';
 import { useUsers } from '@/hooks/use-users';
@@ -55,7 +55,7 @@ export default function UserManagementView() {
           />
         </div>
         <div className='flex w-fit'>
-          <AddNewAdminModal />
+          <AddNewAdminDialog />
         </div>
       </div>
 
@@ -95,7 +95,7 @@ export default function UserManagementView() {
             <PaginationSkeleton />
           </div>
         ) : (
-          <div className='flex items-center justify-between'>
+          <div className='flex items-center justify-between h-8'>
             <span className='text-sm text-gray-600'>
               Showing {users?.length ?? 0} of {stats?.totalCount ?? 0} users
             </span>
