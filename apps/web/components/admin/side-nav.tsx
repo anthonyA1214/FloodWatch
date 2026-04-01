@@ -18,7 +18,6 @@ import {
 import Avatar from 'boring-avatars';
 import { NavItems } from './nav-items';
 import LogoutButton from './logout-button';
-import { ScrollArea } from '../ui/scroll-area';
 import { useMe } from '@/hooks/use-me';
 import { Skeleton } from '../ui/skeleton';
 
@@ -43,8 +42,8 @@ export default function SideNav() {
         <SidebarContent className='w-full flex-1 min-h-0'>
           {/* profile */}
           <SidebarGroup>
-            <SidebarGroupContent className='flex flex-col items-center justify-center py-4'>
-              <div className='py-2'>
+            <SidebarGroupContent className='flex flex-col items-center justify-center py-2'>
+              <div className='py-1'>
                 {isLoading ? (
                   <Skeleton className='size-24 rounded-full' />
                 ) : (
@@ -61,16 +60,18 @@ export default function SideNav() {
                 )}
               </div>
 
-              <div className='flex flex-col text-center'>
+              <div className='flex flex-col text-center gap-0.5'>
                 {isLoading ? (
                   <>
-                    <Skeleton className='h-7 w-32' />
-                    <Skeleton className='h-5 w-24 mx-auto' />
+                    <Skeleton className='h-6 w-28' />
+                    <Skeleton className='h-4 w-20 mx-auto' />
                   </>
                 ) : (
                   <>
-                    <span className='text-lg font-bold'>{me?.name}</span>
-                    <span className='text-muted-foreground'>
+                    <span className='text-base font-bold leading-tight'>
+                      {me?.name}
+                    </span>
+                    <span className='text-sm text-muted-foreground leading-tight'>
                       {me?.role.toUpperCase()}
                     </span>
                   </>
@@ -78,14 +79,11 @@ export default function SideNav() {
               </div>
             </SidebarGroupContent>
           </SidebarGroup>
-          {/* Nav items - scrollable */}
-          <ScrollArea className='flex-1 min-h-0 h-0'>
-            <SidebarGroup>
-              <SidebarGroupContent className='space-y-2'>
-                <NavItems />
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </ScrollArea>
+          <SidebarGroup>
+            <SidebarGroupContent className='space-y-2'>
+              <NavItems />
+            </SidebarGroupContent>
+          </SidebarGroup>
         </SidebarContent>
         <SidebarFooter className='border-t py-4 w-full'>
           <SidebarGroup>

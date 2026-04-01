@@ -2,8 +2,9 @@
 
 import { usePathname } from 'next/navigation';
 import {
-  IconArchive,
+  IconBell,
   IconClipboard,
+  IconChevronDown,
   IconMap,
   IconMessageReport,
   IconReportAnalytics,
@@ -12,11 +13,17 @@ import {
   IconUserCog,
   IconUsers,
 } from '@tabler/icons-react';
-import { SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import {
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 export function NavItems() {
+  const notificationCount = 3;
+
   const items = [
     {
       title: 'DASHBOARD',
@@ -70,10 +77,23 @@ export function NavItems() {
 
   return (
     <>
+      <SidebarMenuItem className='mb-6'>
+        <SidebarMenuButton className='text-base rounded-full border border-black/20 py-4 px-4'>
+          <IconBell className='w-[1.5em]! h-[1.5em]!' aria-hidden />
+          <span className='font-poppins'>NOTIFICATION</span>
+        </SidebarMenuButton>
+        <SidebarMenuBadge className='top-0 right-8 h-5 min-w-5 rounded-full bg-[#FF3B30] px-1.5 text-[10px] font-semibold leading-none text-white'>
+          {notificationCount}
+        </SidebarMenuBadge>
+      </SidebarMenuItem>
+
       {items.map((item) => {
         const isActive = pathname === item.url;
         return (
-          <SidebarMenuItem key={item.title}>
+          <SidebarMenuItem
+            key={item.title}
+            className={item.title === 'DASHBOARD' ? 'mb-1' : undefined}
+          >
             <SidebarMenuButton asChild className='text-base'>
               <Link
                 href={item.url}
