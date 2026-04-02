@@ -4,7 +4,6 @@ import { usePathname } from 'next/navigation';
 import {
   IconBell,
   IconClipboard,
-  IconChevronDown,
   IconMap,
   IconMessageReport,
   IconReportAnalytics,
@@ -20,6 +19,7 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import NotificationSheet from './notification-sheet';
 
 export function NavItems() {
   const notificationCount = 3;
@@ -78,11 +78,13 @@ export function NavItems() {
   return (
     <>
       <SidebarMenuItem className='mb-6'>
-        <SidebarMenuButton className='text-base rounded-full border border-black/20 py-4 px-4'>
-          <IconBell className='w-[1.5em]! h-[1.5em]!' aria-hidden />
-          <span className='font-poppins'>NOTIFICATION</span>
-        </SidebarMenuButton>
-        <SidebarMenuBadge className='top-0 right-8 h-5 min-w-5 rounded-full bg-[#FF3B30] px-1.5 text-[10px] font-semibold leading-none text-white'>
+        <NotificationSheet>
+          <SidebarMenuButton className='text-base rounded-full border border-black/20 flex items-center gap-4 py-4 pl-5'>
+            <IconBell className='w-[1.5em]! h-[1.5em]!' aria-hidden />
+            <span className='font-poppins'>NOTIFICATION</span>
+          </SidebarMenuButton>
+        </NotificationSheet>
+        <SidebarMenuBadge className='top-1/2 -translate-y-1/2 right-3 h-5 min-w-5 rounded-full bg-[#FF3B30] px-1.5 text-[10px] font-semibold leading-none text-white'>
           {notificationCount}
         </SidebarMenuBadge>
       </SidebarMenuItem>
