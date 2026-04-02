@@ -164,7 +164,7 @@ export default function AddNewAdminDialog() {
       </DialogTrigger>
       <DialogContent className='flex flex-col w-full max-w-full sm:max-w-lg max-h-[85vh] p-0 overflow-hidden gap-0 border-0 [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-70 [&>button]:hover:opacity-100'>
         {/* ── Blue Header ── */}
-        <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl px-5 py-4 shrink-0 text-white'>
+        <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl p-4 shrink-0 text-white'>
           {/* Text */}
           <DialogTitle className='flex items-center gap-3 sm:gap-4 font-poppins text-sm sm:text-base font-medium'>
             ADD NEW ADMIN
@@ -173,7 +173,7 @@ export default function AddNewAdminDialog() {
 
         {/* ── Content Area ── */}
         <div className='flex-1 min-h-0 overflow-y-auto'>
-          <div className='flex flex-col p-6 gap-4'>
+          <div className='flex flex-col p-4 gap-4'>
             {/* full name */}
             <div className='flex flex-col gap-1'>
               <FieldLabel
@@ -316,7 +316,7 @@ export default function AddNewAdminDialog() {
           </div>
         </div>
 
-        <DialogFooter className='grid grid-cols-2  bg-[#F9F9F9] rounded-t-2xl px-5 py-4 shrink-0'>
+        <DialogFooter className='grid grid-cols-2  bg-[#F9F9F9] rounded-t-2xl p-4 shrink-0'>
           <Button
             variant='ghost'
             onClick={() => setOpen(false)}

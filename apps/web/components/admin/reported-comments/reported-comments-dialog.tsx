@@ -38,6 +38,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { apiFetchClient } from '@/lib/api-fetch-client';
 import { cn } from '@/lib/utils';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
+import { Badge } from '@/components/ui/badge';
 
 export default function ReportedCommentsDialog() {
   const { commentId, isOpen, closeDialog } = useReportedCommentsDialog();
@@ -97,7 +98,7 @@ export default function ReportedCommentsDialog() {
 
               {/* ── Content Area ── */}
               <div className='flex-1 min-h-0 overflow-y-auto'>
-                <div className='flex flex-col p-6 gap-4'>
+                <div className='flex flex-col p-4 gap-4'>
                   <div className='flex w-full justify-between'>
                     {/*commenter*/}
                     <div className='flex flex-col gap-2'>
@@ -132,14 +133,12 @@ export default function ReportedCommentsDialog() {
                     </div>
 
                     {/*badge*/}
-                    <div
-                      className='inline-flex items-center rounded-full px-4 py-1.5 h-fit'
+                    <Badge
+                      className='font-poppins h-fit text-sm'
                       style={{ backgroundColor: `${color}25`, color }}
                     >
-                      <span className='text-sm font-medium capitalize'>
-                        {reportedComment.status.toUpperCase()}
-                      </span>
-                    </div>
+                      {reportedComment.status.toUpperCase()}
+                    </Badge>
                   </div>
 
                   {/*comment content*/}
@@ -152,9 +151,16 @@ export default function ReportedCommentsDialog() {
 
                   {/*report summary*/}
                   <div className='flex flex-col gap-2'>
-                    <span className='font-poppins font-semibold text-gray-600 text-base'>
-                      REPORT SUMMARY
-                    </span>
+                    <div className='flex items-center gap-2 h-4'>
+                      <span className='font-poppins font-semibold text-gray-600 text-base'>
+                        REPORT SUMMARY
+                      </span>
+                      <Separator orientation='vertical' />
+                      <span className='font-poppins font-semibold text-gray-600 text-base'>
+                        {reportedComment?.reportCount}{' '}
+                        <span className='font-medium'>TOTAL</span>
+                      </span>
+                    </div>
                     <ReporterReasonBreakdown
                       reporters={reportedComment?.reporters}
                     />
@@ -195,17 +201,15 @@ export default function ReportedCommentsDialog() {
                                 )}
                               </div>
                             </div>
-                            <div
-                              className='inline-flex items-center rounded-full px-3 py-1 h-fit shrink-0'
+                            <Badge
+                              className='font-poppins h-fit text-xs'
                               style={{
                                 backgroundColor: `${REASON_COLORS[reporter?.reason]}25`,
                                 color: REASON_COLORS[reporter?.reason],
                               }}
                             >
-                              <span className='text-xs font-medium capitalize'>
-                                {REASON_LABELS[reporter?.reason]}
-                              </span>
-                            </div>
+                              {REASON_LABELS[reporter?.reason].toUpperCase()}
+                            </Badge>
                           </div>
 
                           {reporter?.description && (
@@ -271,7 +275,7 @@ export default function ReportedCommentsDialog() {
                 </DialogFooter>
               ) : reportedComment?.status === 'resolved' ||
                 reportedComment?.status === 'dismissed' ? (
-                <DialogFooter className='flex w-full bg-[#F9F9F9] rounded-t-2xl px-5 py-4 shrink-0'>
+                <DialogFooter className='flex w-full bg-[#F9F9F9] rounded-t-2xl p-4 shrink-0'>
                   <div className='flex w-full justify-between'>
                     <div className='flex flex-col gap-2'>
                       <span className='font-poppins font-semibold text-gray-600 text-sm'>

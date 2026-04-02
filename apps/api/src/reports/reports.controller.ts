@@ -51,18 +51,18 @@ export class ReportsController {
     private commentsService: CommentsService,
   ) {}
 
-  @Public()
-  @Get()
-  @HttpCode(HttpStatus.OK)
-  async getReportMapPins() {
-    return await this.reportsService.getReportMapPins();
-  }
-
   @Roles('admin')
-  @Get('admin')
+  @Get('')
   @HttpCode(HttpStatus.OK)
   async getAllReports(@Query() reportQuery: ReportQueryDto) {
     return await this.reportsService.getAllReports(reportQuery);
+  }
+
+  @Public()
+  @Get('map-pins')
+  @HttpCode(HttpStatus.OK)
+  async getReportMapPins() {
+    return await this.reportsService.getReportMapPins();
   }
 
   @Public()

@@ -7,7 +7,6 @@ import { useSearchParams } from 'next/navigation';
 import {
   SafetyListItemInput,
   SafetyLocationListQueryInput,
-  SafetyLocationQueryInput,
 } from '@repo/schemas';
 import { useSafetyList } from '@/hooks/use-safety-list';
 import {

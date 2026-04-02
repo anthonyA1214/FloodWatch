@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { REPORT_COMMENT_STATUS_COLOR_MAP } from '@/lib/utils/get-color-map';
 import { useReportedCommentsDialog } from '@/contexts/reported-comments-dialog-context';
+import { Badge } from '@/components/ui/badge';
 
 export const columns: ColumnDef<ReportedCommentInput>[] = [
   {
@@ -78,14 +79,12 @@ export const columns: ColumnDef<ReportedCommentInput>[] = [
 
       return (
         <div className='flex justify-center w-full'>
-          <div
-            className='inline-flex items-center rounded-full px-4 py-1.5'
+          <Badge
+            className='text-sm'
             style={{ backgroundColor: `${color}25`, color }}
           >
-            <span className='text-sm font-medium capitalize'>
-              {data.status.toUpperCase()}
-            </span>
-          </div>
+            {data.status.toUpperCase()}
+          </Badge>
         </div>
       );
     },
@@ -120,7 +119,7 @@ function ActionCell({ report }: { report: ReportedCommentInput }) {
       <Tooltip>
         <TooltipTrigger
           className={cn(
-            `text-[#FB323B] bg-[#FB323B]/10 rounded-lg p-1.5 hover:bg-[#FB323B]/20 transition`,
+            `text-[#FB2C36] bg-[#FB2C36]/10 rounded-lg p-1.5 hover:bg-[#FB2C36]/20 transition`,
           )}
           onClick={() => openDialog('delete', report)}
         >

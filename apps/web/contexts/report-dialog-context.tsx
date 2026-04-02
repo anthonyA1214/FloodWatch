@@ -1,16 +1,20 @@
 'use client';
 
-import { ReportDetailInput } from '@repo/schemas';
+import { ReportDetailInput, ReportsInput } from '@repo/schemas';
 import { createContext, useContext, useState } from 'react';
 
 type DialogType = 'view' | 'delete';
 
 interface ReportDialogContextType {
-  report: ReportDetailInput | null;
-  openDialogType: DialogType | null;
-  openDialog: (type: DialogType, report: ReportDetailInput) => void;
-  closeDialog: () => void;
+  reportId: number | null;
+  report: ReportsInput | null;
   isOpen: (type: DialogType) => boolean;
+  openDialogType: DialogType | null;
+  openDialog: {
+    (type: 'view', commentId: number): void;
+    (type: 'delete', reportId: ReportsInput): void;
+  };
+  closeDialog: () => void;
 }
 
 const ReportDialogContext = createContext<ReportDialogContextType | null>(null);
@@ -20,11 +24,16 @@ export default function ReportDialogProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [report, setReport] = useState<ReportDetailInput | null>(null);
+  const [reportId, setReportId] = useState<number | null>(null);
+  const [report, setReport] = useState<ReportsInput | null>(null);
   const [openDialogType, setOpenDialogType] = useState<DialogType | null>(null);
 
-  const openDialog = (type: DialogType, report: ReportDetailInput) => {
-    setReport(report);
+  const openDialog = (type: DialogType, arg: number | ReportsInput) => {
+    if (type === 'view') {
+      setReportId(arg as number);
+    } else {
+      setReport(arg as ReportsInput);
+    }
     setOpenDialogType(type);
   };
 
@@ -39,7 +48,14 @@ export default function ReportDialogProvider({
 
   return (
     <ReportDialogContext.Provider
-      value={{ report, openDialogType, openDialog, closeDialog, isOpen }}
+      value={{
+        reportId,
+        report,
+        openDialogType,
+        openDialog,
+        closeDialog,
+        isOpen,
+      }}
     >
       {children}
     </ReportDialogContext.Provider>

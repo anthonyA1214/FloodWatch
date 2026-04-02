@@ -1,5 +1,3 @@
-// reported-comments-dialog-skeleton.tsx
-
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import ReporterReasonBreakdownSkeleton from './reporter-reason-breakdown-skeleton';

@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { IconMapPin } from '@tabler/icons-react';
+import { IconCheck, IconMapPin } from '@tabler/icons-react';
 import {
   Avatar as UIAvatar,
   AvatarFallback,
@@ -29,223 +29,361 @@ import { Spinner } from '@/components/ui/spinner';
 import { verifyReport } from '@/lib/actions/report-actions';
 import { useSWRConfig } from 'swr';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
-import NoPhotoEmpty from '@/components/shared/no-photo-empty';
+import { Badge } from '@/components/ui/badge';
+import { useReportDetail } from '@/hooks/use-report-detail';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import ViewReportDialogSkeleton from './skeleton/view-report-dialog-skeleton';
 
 export default function ViewReportDialog() {
-  const { report, isOpen, closeDialog } = useReportDialog();
+  const { reportId, isOpen, closeDialog } = useReportDialog();
+  const { reportDetail, isLoading, mutateReportDetail } =
+    useReportDetail(reportId);
   const [isPending, setIsPending] = useState(false);
   const { mutate } = useSWRConfig();
 
-  const handleVerify = async () => {
-    if (!report) return;
+  const handleSubmit = async () => {
+    if (!reportDetail) return;
     setIsPending(true);
     try {
-      await verifyReport(report.id);
+      await verifyReport(reportDetail.id);
       mutate(SWR_KEYS.reportMapPins);
-      mutate(SWR_KEYS.reportDetail(report.id));
-      mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reportsAdmin);
+      mutateReportDetail();
+      mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reports);
       closeDialog();
     } finally {
       setIsPending(false);
     }
   };
 
-  const formattedTime = report ? format(report.reportedAt, 'hh:mm a') : '';
-  const formattedDate = report
-    ? format(report.reportedAt, 'MMMM dd, yyyy')
+  const formattedTime = reportDetail
+    ? format(reportDetail.reportedAt, 'hh:mm a')
     : '';
+  const formattedDate = reportDetail
+    ? format(reportDetail.reportedAt, 'MMMM dd, yyyy')
+    : '';
+
+  const confirms = reportDetail?.confirms;
+  const denies = reportDetail?.denies;
+  const credibility =
+    confirms !== undefined && denies !== undefined
+      ? confirms + denies === 0
+        ? 0
+        : Math.round((confirms / (confirms + denies)) * 100)
+      : 0;
 
   return (
     <Dialog open={isOpen('view')} onOpenChange={closeDialog}>
-      <DialogContent className='flex flex-col min-w-[50vw] h-[80vh] p-0 overflow-hidden gap-0 border-0 [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-70 [&>button]:hover:opacity-100'>
-        {report && (
+      <DialogContent className='flex flex-col w-full max-w-full sm:max-w-2xl max-h-[85vh] p-0 overflow-hidden gap-0 border-0 [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-70 [&>button]:hover:opacity-100'>
+        {isLoading ? (
           <>
-            {/* ── Blue Header ── */}
-            <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl px-5 py-4 shrink-0 text-white'>
-              {/* Text */}
-              <DialogTitle className='flex items-center gap-3 sm:gap-4 font-poppins text-sm sm:text-base font-medium'>
-                FLOOD REPORT
-              </DialogTitle>
-            </DialogHeader>
+            <VisuallyHidden>
+              <DialogTitle>Flood Report</DialogTitle>
+            </VisuallyHidden>
+            <ViewReportDialogSkeleton />
+          </>
+        ) : (
+          reportDetail && (
+            <>
+              {/* ── Blue Header ── */}
+              <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl p-4 shrink-0 text-white'>
+                {/* Text */}
+                <DialogTitle className='flex items-center gap-3 sm:gap-4 font-poppins text-sm sm:text-base font-medium'>
+                  FLOOD REPORT
+                </DialogTitle>
+              </DialogHeader>
 
-            {/* ── Content Area ── */}
-            <div className='flex-1 min-h-0 overflow-y-auto'>
-              <div className='flex flex-col p-6 gap-6'>
-                <div className='flex flex-col gap-4'>
-                  <div className='flex-1 flex gap-6'>
-                    {/* Left Column: Map */}
-                    <div className='flex-1 flex flex-col gap-4 h-fit'>
-                      <div className='flex-1 flex aspect-square rounded-2xl overflow-hidden border h-fit'>
-                        <InteractiveMapReportedLocation
-                          latitude={report?.latitude}
-                          longitude={report?.longitude}
-                          range={report?.range}
-                          severity={report?.severity}
+              {/* ── Content Area ── */}
+              <div className='flex-1 min-h-0 overflow-y-auto'>
+                <div className='flex flex-col p-4 gap-4'>
+                  <div className='flex flex-col gap-4'>
+                    <div className='flex-1 flex gap-4'>
+                      {/* left column map */}
+                      <div className='flex-1 flex flex-col gap-4 h-fit'>
+                        <div className='flex-1 flex aspect-4/3 rounded-2xl overflow-hidden border h-fit'>
+                          <InteractiveMapReportedLocation
+                            latitude={reportDetail?.latitude}
+                            longitude={reportDetail?.longitude}
+                            range={reportDetail?.range}
+                            severity={reportDetail?.severity}
+                          />
+                        </div>
+                      </div>
+
+                      {/* right column details */}
+                      <div className='flex-1 flex items-center'>
+                        <div className='flex-1 flex flex-col gap-4 bg-accent border rounded-2xl py-4 h-fit'>
+                          {/*status*/}
+                          <div className='flex flex-col gap-2 px-4'>
+                            <span className='font-poppins font-medium text-gray-600 text-sm'>
+                              REPORTER
+                            </span>
+                            {/* avatar and user information */}
+                            <div className='flex items-center gap-3 w-auto'>
+                              <UIAvatar className='size-8'>
+                                <AvatarImage
+                                  src={
+                                    reportDetail?.reporter?.profilePicture || ''
+                                  }
+                                />
+                                <AvatarFallback>
+                                  <Avatar
+                                    name={`${reportDetail?.reporter?.name} ${reportDetail?.reporter?.id || ''}`}
+                                    variant='beam'
+                                    className='size-8'
+                                  />
+                                </AvatarFallback>
+                              </UIAvatar>
+                              <div className='flex flex-col'>
+                                <span className='text-sm font-medium'>
+                                  {reportDetail?.reporter?.name}
+                                </span>
+                                <span className='text-sm text-gray-600'>
+                                  {reportDetail?.reporter?.email}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <Separator />
+
+                          {/*severity and status*/}
+                          <div className='grid grid-cols-2 gap-4 px-4'>
+                            {/* severity */}
+                            <div className='flex flex-col gap-2'>
+                              <span className='font-poppins font-medium text-gray-600 text-sm'>
+                                SEVERITY
+                              </span>
+
+                              {/* severity badge */}
+                              <Badge
+                                className='text-xs'
+                                style={{
+                                  color:
+                                    SEVERITY_COLOR_MAP[
+                                      reportDetail?.severity || 'low'
+                                    ],
+                                  backgroundColor: `${SEVERITY_COLOR_MAP[reportDetail?.severity || 'low']}25`,
+                                }}
+                              >
+                                {reportDetail?.severity?.toUpperCase()}
+                              </Badge>
+                            </div>
+
+                            {/* status */}
+                            <div className='flex flex-col gap-2'>
+                              <span className='font-poppins font-medium text-gray-600 text-sm'>
+                                STATUS
+                              </span>
+
+                              {/* status badge */}
+                              <Badge
+                                className='text-xs'
+                                style={{
+                                  color:
+                                    REPORT_STATUS_COLOR_MAP[
+                                      reportDetail?.status || 'unverified'
+                                    ],
+                                  backgroundColor: `${REPORT_STATUS_COLOR_MAP[reportDetail?.status || 'unverified']}25`,
+                                }}
+                              >
+                                {reportDetail?.status?.toUpperCase()}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <Separator />
+
+                          {/*reported at*/}
+                          <div className='flex flex-col gap-4 px-4'>
+                            <div className='flex flex-col gap-2'>
+                              <span className='font-poppins font-medium text-gray-600 text-sm'>
+                                REPORTED AT
+                              </span>
+                              <div className='flex gap-2 items-center h-4'>
+                                <span className='text-sm text-gray-600'>
+                                  {formattedDate}
+                                </span>
+
+                                <Separator orientation='vertical' />
+
+                                <span className='text-sm text-gray-600'>
+                                  {formattedTime}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/*confirms, denies and credibility*/}
+                          {!reportDetail?.isAdmin && (
+                            <>
+                              <Separator />
+
+                              <div className='grid grid-cols-3 gap-4 px-4'>
+                                {/*confirms*/}
+                                <div className='flex flex-col gap-2 text-center'>
+                                  <span className='font-poppins font-medium text-gray-600 text-sm'>
+                                    CONFIRMS
+                                  </span>
+                                  <span className='font-poppins font-medium  text-[#16a34a]'>
+                                    {confirms !== undefined ? confirms : 'N/A'}
+                                  </span>
+                                </div>
+
+                                {/*denies*/}
+                                <div className='flex flex-col gap-2 text-center'>
+                                  <span className='font-poppins font-medium text-gray-600 text-sm'>
+                                    DENIES
+                                  </span>
+                                  <span className='font-poppins font-medium text-[#dc2626]'>
+                                    {denies !== undefined ? denies : 'N/A'}
+                                  </span>
+                                </div>
+
+                                {/*credibility*/}
+                                <div className='flex flex-col gap-2 text-center'>
+                                  <span className='font-poppins font-medium text-gray-600 text-sm'>
+                                    CREDIBILITY
+                                  </span>
+                                  <span
+                                    className='font-poppins font-medium'
+                                    style={{
+                                      color:
+                                        credibility >= 70
+                                          ? '#16a34a'
+                                          : credibility >= 40
+                                            ? '#d97706'
+                                            : '#dc2626',
+                                    }}
+                                  >
+                                    {credibility !== undefined
+                                      ? `${credibility}%`
+                                      : 'N/A'}
+                                  </span>
+                                </div>
+                              </div>
+                            </>
+                          )}
+
+                          {/**/}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── Map Pin (single, full-width) ── */}
+                    <div className='flex flex-col gap-4 bg-accent border rounded-2xl p-4 h-fit'>
+                      <div className='flex items-center gap-2'>
+                        <IconMapPin className='w-[1.5em]! h-[1.5em]! text-[#0066CC] mb-auto shrink-0' />
+                        <span className='text-sm text-gray-600'>
+                          {reportDetail?.location}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* description */}
+                  <div className='flex flex-col gap-2'>
+                    <span className='font-poppins text-base font-semibold text-gray-600'>
+                      DESCRIPTION
+                    </span>
+
+                    <div className='flex flex-col gap-4 bg-accent border rounded-2xl p-4 h-fit'>
+                      <p className='text-sm text-gray-600 italic'>
+                        {reportDetail?.description ||
+                          'No description provided.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* image */}
+                  {reportDetail?.image && (
+                    <div className='flex flex-col gap-2'>
+                      <span className='font-poppins text-base font-semibold text-gray-600'>
+                        IMAGE
+                      </span>
+
+                      <div className='relative h-full w-full aspect-video rounded-2xl overflow-hidden border border-dashed'>
+                        <Image
+                          src={reportDetail.image}
+                          alt='Affected location'
+                          fill
+                          className='object-cover'
                         />
                       </div>
                     </div>
-
-                    {/* Right Column: Details */}
-                    <div className='flex-2 flex items-center'>
-                      <div className='flex-1 flex flex-col gap-4 bg-accent border rounded-2xl p-4 h-fit'>
-                        <span className='font-poppins font-semibold text-gray-600 text-base'>
-                          REPORT DETAILS
-                        </span>
-
-                        <div className='flex flex-col gap-2'>
-                          <span className='font-poppins font-medium text-gray-600 text-sm'>
-                            REPORTER
-                          </span>
-                          {/* avatar and user information */}
-                          <div className='flex items-center gap-3 w-auto'>
-                            <UIAvatar className='size-8'>
-                              <AvatarImage
-                                src={report?.reporter?.profilePicture || ''}
-                              />
-                              <AvatarFallback>
-                                <Avatar
-                                  name={`${report?.reporter?.name} ${report?.reporter?.id || ''}`}
-                                  variant='beam'
-                                  className='size-8'
-                                />
-                              </AvatarFallback>
-                            </UIAvatar>
-                            <div className='flex flex-col'>
-                              <span className='font-medium'>
-                                {report?.reporter?.name}
-                              </span>
-                              <span className='text-sm text-gray-600'>
-                                {report?.reporter?.email}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <Separator className='my-2' />
-
-                        <div className='grid grid-cols-3 gap-4'>
-                          {/* severity */}
-                          <div className='flex flex-col gap-2'>
-                            <span className='font-poppins font-medium text-gray-600 text-sm'>
-                              SEVERITY
-                            </span>
-
-                            {/* severity badge */}
-                            <div
-                              className='flex items-center rounded-full px-3 py-1 w-fit'
-                              style={{
-                                color:
-                                  SEVERITY_COLOR_MAP[report?.severity || 'low'],
-                                backgroundColor: `${SEVERITY_COLOR_MAP[report?.severity || 'low']}25`,
-                              }}
-                            >
-                              <span className='text-xs font-bold'>
-                                {report?.severity?.toUpperCase()}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* status */}
-                          <div className='flex flex-col gap-2'>
-                            <span className='font-poppins font-medium text-gray-600 text-sm'>
-                              STATUS
-                            </span>
-
-                            {/* status badge */}
-                            <div
-                              className='flex items-center rounded-full px-3 py-1 w-fit'
-                              style={{
-                                color:
-                                  REPORT_STATUS_COLOR_MAP[
-                                    report?.status || 'unverified'
-                                  ],
-                                backgroundColor: `${REPORT_STATUS_COLOR_MAP[report?.status || 'unverified']}25`,
-                              }}
-                            >
-                              <span className='text-xs font-bold capitalize'>
-                                {report?.status?.toUpperCase()}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* reported at */}
-                          <div className='flex flex-col gap-2'>
-                            <span className='font-poppins font-medium text-gray-600 text-sm'>
-                              REPORTED AT
-                            </span>
-                            <div className='flex flex-col'>
-                              <span className='text-sm text-gray-600'>
-                                {formattedDate}
-                              </span>
-                              <span className='text-xs text-gray-600'>
-                                {formattedTime}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* ── Map Pin (single, full-width) ── */}
-                  <div className='flex items-center gap-2'>
-                    <IconMapPin className='w-[1.5em]! h-[1.5em]! text-[#0066CC] mb-auto' />
-                    <span className='text-sm text-gray-600'>
-                      {report?.location}
-                    </span>
-                  </div>
-                </div>
-
-                {/* description */}
-                <div className='flex flex-col gap-2'>
-                  <span className='font-poppins text-base font-semibold text-gray-600'>
-                    DESCRIPTION
-                  </span>
-
-                  <div className='flex flex-col gap-4 bg-accent border rounded-2xl p-4 h-fit'>
-                    <p className='text-sm text-gray-600'>
-                      {report?.description || 'No description provided.'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* image */}
-                <div className='flex flex-col gap-2'>
-                  <span className='font-poppins text-base font-semibold text-gray-600'>
-                    IMAGE
-                  </span>
-
-                  <div className='relative h-full w-full aspect-video rounded-2xl overflow-hidden'>
-                    {report?.image ? (
-                      <Image
-                        src={report.image}
-                        alt='Affected location'
-                        fill
-                        className='object-cover'
-                      />
-                    ) : (
-                      <div className='absolute inset-0'>
-                        <NoPhotoEmpty />
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
-            </div>
-            {report?.status !== 'verified' && (
-              <DialogFooter className='flex justify-end bg-[#F9F9F9] rounded-t-2xl px-5 py-4 shrink-0'>
-                <Button disabled={isPending} onClick={handleVerify}>
-                  {isPending ? (
-                    <>
-                      Verifying... <Spinner />
-                    </>
-                  ) : (
-                    'Verify Report'
-                  )}
-                </Button>
-              </DialogFooter>
-            )}
-          </>
+              {reportDetail?.status !== 'verified' ? (
+                <DialogFooter className='flex items-center bg-[#F9F9F9] rounded-t-2xl p-4 shrink-0'>
+                  <div className='flex w-full items-center justify-between'>
+                    <span className='text-start opacity-50 text-sm'>
+                      Review the report before verifying.
+                    </span>
+                    <div className='flex gap-2'>
+                      <Button
+                        variant='ghost'
+                        onClick={closeDialog}
+                        className='font-poppins'
+                      >
+                        <span>CANCEL</span>
+                      </Button>
+
+                      <Button
+                        variant='outline'
+                        disabled={isPending}
+                        onClick={handleSubmit}
+                        className='font-poppins flex items-center gap-2 border-[#0066CC] bg-white text-[#0066CC] hover:bg-[#0066CC10] hover:text-[#0066CC]'
+                      >
+                        {isPending ? (
+                          <Spinner />
+                        ) : (
+                          <IconCheck className='w-[1.5em]! h-[1.5em]!' />
+                        )}
+                        <span>
+                          {isPending ? 'VERIFYING...' : 'VERIFY REPORT'}
+                        </span>
+                      </Button>
+                    </div>
+                  </div>
+                </DialogFooter>
+              ) : (
+                <DialogFooter className='flex items-center bg-[#F9F9F9] rounded-t-2xl p-4 shrink-0'>
+                  <div className='flex flex-col gap-2 items-end'>
+                    <span className='font-poppins font-semibold text-gray-600 text-sm'>
+                      VERIFIED BY
+                    </span>
+                    <div className='flex items-center gap-2 w-auto text-end'>
+                      <div className='flex flex-col'>
+                        <span className='text-sm font-medium'>
+                          {reportDetail?.verifier?.name}
+                        </span>
+                        {reportDetail?.verifiedAt && (
+                          <span className='text-xs text-gray-600'>
+                            {format(reportDetail?.verifiedAt, 'PPP p')}
+                          </span>
+                        )}
+                      </div>
+
+                      <UIAvatar className='size-8'>
+                        <AvatarImage
+                          src={
+                            reportDetail?.verifier?.profilePicture || undefined
+                          }
+                        />
+                        <AvatarFallback>
+                          <Avatar
+                            name={`${reportDetail?.verifier?.name} ${reportDetail?.verifier?.id}`}
+                            variant='beam'
+                            className='size-8'
+                          />
+                        </AvatarFallback>
+                      </UIAvatar>
+                    </div>
+                  </div>
+                </DialogFooter>
+              )}
+            </>
+          )
         )}
       </DialogContent>
     </Dialog>

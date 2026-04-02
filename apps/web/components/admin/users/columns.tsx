@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useUserStatusDialog } from '@/contexts/user-status-dialog-context';
+import { Badge } from '@/components/ui/badge';
 
 export const columns: ColumnDef<UsersDto>[] = [
   {
@@ -38,7 +39,11 @@ export const columns: ColumnDef<UsersDto>[] = [
           <UIAvatar className='size-8'>
             <AvatarImage src={user.profilePicture || undefined} />
             <AvatarFallback>
-              <Avatar name={`${user.name} ${user.id}`} variant='beam' />
+              <Avatar
+                name={`${user.name} ${user.id}`}
+                variant='beam'
+                className='size-8'
+              />
             </AvatarFallback>
           </UIAvatar>
           <div className='flex flex-col'>
@@ -95,14 +100,12 @@ export const columns: ColumnDef<UsersDto>[] = [
 
       return (
         <div className='flex justify-center w-full'>
-          <div
-            className='inline-flex items-center rounded-full px-4 py-1.5'
+          <Badge
+            className='text-sm'
             style={{ backgroundColor: `${color}25`, color }}
           >
-            <span className='text-sm font-medium capitalize'>
-              {user.status.toUpperCase()}
-            </span>
-          </div>
+            {user.status.toUpperCase()}
+          </Badge>
         </div>
       );
     },

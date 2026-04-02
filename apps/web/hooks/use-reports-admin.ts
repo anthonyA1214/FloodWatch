@@ -7,7 +7,7 @@ import { ReportQueryInput } from '@repo/schemas';
 
 export function useReportsAdmin(params: ReportQueryInput) {
   const { data, error, isLoading, isValidating, mutate } = useSWR(
-    [SWR_KEYS.reportsAdmin, params],
+    [SWR_KEYS.reports, params],
     () => getReportsAdmin(params),
     { keepPreviousData: true },
   );

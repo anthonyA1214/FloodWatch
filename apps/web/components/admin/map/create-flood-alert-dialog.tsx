@@ -155,10 +155,10 @@ export default function CreateFloodAlertDialog() {
       toast.success('Flood alert created successfully!');
       resetForm();
       mutate(SWR_KEYS.reportMapPins);
-      mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reportsAdmin);
+      mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reports);
       setOpen(false);
     } catch (err) {
-      console.error('Failed to create flood alert:', err);
+      toast.error('Failed to create flood alert. Please try again.');
     } finally {
       setIsPending(false);
     }

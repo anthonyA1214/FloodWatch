@@ -5,7 +5,7 @@ import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { ReportDetailInput } from '@repo/schemas';
 import { getReportDetail } from '@/lib/fetchers/get-report-detail';
 
-export function useReportDetail(reportId: number) {
+export function useReportDetail(reportId: number | null) {
   const { data, error, isLoading, isValidating, mutate } =
     useSWR<ReportDetailInput>(
       reportId ? SWR_KEYS.reportDetail(reportId) : null,
