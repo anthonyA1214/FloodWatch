@@ -63,7 +63,6 @@ export default function AffectedLocationPanel({
 
   const confirms = reportDetail?.confirms;
   const denies = reportDetail?.denies;
-
   const credibility =
     confirms !== undefined && denies !== undefined
       ? confirms + denies === 0
@@ -292,7 +291,19 @@ export default function AffectedLocationPanel({
                     </span>
                   </div>
 
-                  <span className='font-poppins font-bold'>{credibility}%</span>
+                  <span
+                    className='font-poppins font-medium'
+                    style={{
+                      color:
+                        credibility >= 70
+                          ? '#16a34a'
+                          : credibility >= 40
+                            ? '#d97706'
+                            : '#dc2626',
+                    }}
+                  >
+                    {credibility !== undefined ? `${credibility}%` : 'N/A'}
+                  </span>
                 </div>
 
                 {/* vote buttons */}

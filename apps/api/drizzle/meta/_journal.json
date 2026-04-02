@@ -57,6 +57,13 @@
       "when": 1774898135268,
       "tag": "0007_known_queen_noir",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1775101273505,
+      "tag": "0008_spooky_sway",
+      "breakpoints": true
     }
   ]
 }

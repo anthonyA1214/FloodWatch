@@ -1,10 +1,10 @@
 export const SWR_KEYS = {
   me: '/users/me',
   users: '/users',
-  reportMapPins: '/reports',
+  reports: '/reports',
+  reportMapPins: '/reports/map-pins',
   reportDetail: (reportId: number) => `/reports/${reportId}`,
   reportList: '/reports/list',
-  reportsAdmin: '/admin/reports',
   safetyMapPins: '/safety',
   safetyDetail: (safetyId: number) => `/safety/${safetyId}`,
   safetyList: '/safety/list',

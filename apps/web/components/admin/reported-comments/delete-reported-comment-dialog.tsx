@@ -20,12 +20,11 @@ import { REPORT_COMMENT_STATUS_COLOR_MAP } from '@/lib/utils/get-color-map';
 import { useReportedCommentsDialog } from '@/contexts/reported-comments-dialog-context';
 import { Spinner } from '@/components/ui/spinner';
 import { useState } from 'react';
-import { apiFetchClient } from '@/lib/api-fetch-client';
 import { useSWRConfig } from 'swr';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { is } from 'zod/v4/locales';
+import { Badge } from '@/components/ui/badge';
 
 export default function DeleteReportedCommentDialog() {
   const { isOpen, closeDialog, reportedComment } = useReportedCommentsDialog();
@@ -70,16 +69,16 @@ export default function DeleteReportedCommentDialog() {
 
             {/*content area*/}
             <div className='flex-1 flex flex-col items-center gap-4 p-6 min-h-0'>
-              <div className='flex rounded-full bg-[#FB2C36]/10 shrink-0 p-4 w-fit'>
-                <IconAlertTriangle className='size-10 shrink-0 text-[#FB2C36]' />
+              <div className='flex rounded-full shrink-0 p-3 w-fit bg-[#FB2C36]/10'>
+                <IconAlertTriangle className='size-7 shrink-0 text-[#FB2C36]' />
               </div>
 
               {/* header */}
               <div className='text-center'>
-                <h3 className='text-base sm:text-lg font-bold'>
+                <h3 className='text-base font-bold'>
                   Are you sure you want to delete this report?
                 </h3>
-                <span className='text-xs sm:text-sm opacity-50'>
+                <span className='text-sm opacity-50'>
                   This action cannot be undone. The report record will be
                   permanently removed from the system.
                 </span>
@@ -120,14 +119,12 @@ export default function DeleteReportedCommentDialog() {
                 </div>
 
                 {/*badge*/}
-                <div
-                  className='inline-flex items-center rounded-full px-3 py-1 h-fit shrink-0'
+                <Badge
+                  className='text-xs'
                   style={{ backgroundColor: `${color}25`, color }}
                 >
-                  <span className='text-xs font-medium capitalize'>
-                    {reportedComment.status.toUpperCase()}
-                  </span>
-                </div>
+                  {reportedComment.status.toUpperCase()}
+                </Badge>
               </div>
             </div>
 

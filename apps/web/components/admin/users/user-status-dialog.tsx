@@ -15,13 +15,6 @@ import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { IconBan } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useSWRConfig } from 'swr';
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from '@/components/ui/item';
 import { cn } from '@/lib/utils';
 
 export default function UserStatusDialog() {
@@ -51,7 +44,7 @@ export default function UserStatusDialog() {
     <Dialog open={open} onOpenChange={closeDialog}>
       <DialogContent className='flex flex-col w-full max-w-full sm:max-w-lg max-h-[85vh] p-0 overflow-hidden gap-0 border-0 [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-70 [&>button]:hover:opacity-100'>
         {/* ── Blue Header ── */}
-        <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl px-5 py-4 shrink-0 text-white'>
+        <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl p-4 shrink-0 text-white'>
           {/* Text */}
           <DialogTitle className='flex items-center gap-3 sm:gap-4 font-poppins text-sm sm:text-base font-medium'>
             {isBlocking ? 'BLOCK USER' : 'UNBLOCK USER'}
@@ -60,7 +53,7 @@ export default function UserStatusDialog() {
 
         {/* ── Content Area ── */}
         <div className='flex-1 min-h-0 overflow-y-auto'>
-          <div className='flex flex-col p-6 gap-4'>
+          <div className='flex flex-col p-4 gap-4'>
             <div className='flex items-start gap-4'>
               <div
                 className={cn(
@@ -76,12 +69,12 @@ export default function UserStatusDialog() {
                 />
               </div>
               <div className='flex flex-col'>
-                <span className='text-base sm:text-lg font-bold'>
+                <span className='text-base font-bold'>
                   {isBlocking
                     ? 'Are you sure you want to block this user?'
                     : 'Are you sure you want to unblock this user?'}
                 </span>
-                <span className='text-xs sm:text-sm text-black opacity-50'>
+                <span className='text-sm text-black opacity-50'>
                   {isBlocking
                     ? 'Are you sure you want to block this user? They will no longer be able to log in or use the app.'
                     : 'Are you sure you want to unblock this user? They will regain access to the app.'}
@@ -91,7 +84,7 @@ export default function UserStatusDialog() {
           </div>
         </div>
 
-        <DialogFooter className='grid grid-cols-2  bg-[#F9F9F9] rounded-t-2xl px-5 py-4 shrink-0'>
+        <DialogFooter className='grid grid-cols-2  bg-[#F9F9F9] rounded-t-2xl p-4 shrink-0'>
           <Button
             variant='ghost'
             onClick={closeDialog}

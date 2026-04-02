@@ -84,6 +84,7 @@ export class ReportsService {
           name: sql<string>`CONCAT(${verifierProfile.firstName}, ' ', ${verifierProfile.lastName})`,
           profilePicture: verifierProfile.profilePicture,
         },
+        verifiedAt: reports.verifiedAt,
       })
       .from(reports)
       .leftJoin(users, eq(reports.userId, users.id))
@@ -154,7 +155,6 @@ export class ReportsService {
     // Build search condition once, reused across all queries
     const searchCondition = q
       ? or(
-          like(reports.location, `%${q}%`),
           like(users.email, `%${q}%`),
           like(profileInfo.firstName, `%${q}%`),
           like(profileInfo.lastName, `%${q}%`),
@@ -173,7 +173,16 @@ export class ReportsService {
     const [data, counts, statsResult] = await Promise.all([
       // Main paginated query
       this.db
-        .select()
+        .select({
+          id: reports.id,
+          reporterId: users.id,
+          reporterEmail: users.email,
+          reporterFirstName: profileInfo.firstName,
+          reporterLastName: profileInfo.lastName,
+          reporterProfilePicture: profileInfo.profilePicture,
+          reportedAt: reports.createdAt,
+          status: reports.status,
+        })
         .from(reports)
         .leftJoin(users, eq(reports.userId, users.id))
         .leftJoin(profileInfo, eq(users.id, profileInfo.userId))
@@ -206,26 +215,15 @@ export class ReportsService {
     const { totalCount, verifiedCount, unverifiedCount } = statsResult[0];
 
     const formattedData = data.map((item) => ({
-      id: item.reports.id,
-      location: item.reports.location,
-      description: item.reports.description,
-      image: item.reports.image,
-      severity: item.reports.severity,
-      status: item.reports.status,
-      latitude: item.reports.latitude,
-      longitude: item.reports.longitude,
-      range: item.reports.range,
-      reportedAt: item.reports.createdAt,
-      reporter: item.users
-        ? {
-            id: item.users.id,
-            email: item.users.email,
-            name: item.profile_info
-              ? `${item.profile_info.firstName} ${item.profile_info.lastName}`.trim()
-              : '',
-            profilePicture: item.profile_info?.profilePicture || '',
-          }
-        : null,
+      id: item.id,
+      reporter: {
+        id: item.reporterId,
+        email: item.reporterEmail,
+        name: `${item.reporterFirstName} ${item.reporterLastName}`,
+        profilePicture: item.reporterProfilePicture,
+      },
+      reportedAt: item.reportedAt,
+      status: item.status,
     }));
 
     return {
@@ -348,6 +346,7 @@ export class ReportsService {
       status: 'verified', // Admin-created reports are auto-verified
       isAdmin: true,
       verifierId: userId, // Set the admin as the verifier
+      verifiedAt: new Date(),
     });
 
     return { message: 'Report created and verified successfully' };
@@ -366,7 +365,12 @@ export class ReportsService {
 
     await this.db
       .update(reports)
-      .set({ verifierId: userId, status: 'verified', updatedAt: new Date() })
+      .set({
+        verifierId: userId,
+        status: 'verified',
+        verifiedAt: new Date(),
+        updatedAt: new Date(),
+      })
       .where(eq(reports.id, reportId));
 
     return { message: 'Report verified successfully' };

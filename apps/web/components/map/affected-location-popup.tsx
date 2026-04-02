@@ -196,7 +196,19 @@ export default function AffectedLocationPopup({
               </div>
 
               <div className='flex items-center gap-2'>
-                <span className='font-poppins font-bold'>{credibility}%</span>
+                <span
+                  className='font-poppins font-medium'
+                  style={{
+                    color:
+                      credibility >= 70
+                        ? '#16a34a'
+                        : credibility >= 40
+                          ? '#d97706'
+                          : '#dc2626',
+                  }}
+                >
+                  {credibility !== undefined ? `${credibility}%` : 'N/A'}
+                </span>
               </div>
             </div>
 

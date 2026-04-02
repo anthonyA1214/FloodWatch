@@ -1,0 +1,1 @@
+ALTER TABLE "reports" ADD COLUMN "verified_at" timestamp;

@@ -2,6 +2,7 @@
 
 import { ReportQueryInput, reportQuerySchema } from '@repo/schemas';
 import { apiFetchServer } from '../api-fetch-server';
+import { SWR_KEYS } from '../constants/swr-keys';
 
 export async function getReportsAdmin(params: ReportQueryInput) {
   const parsed = reportQuerySchema.safeParse(params);
@@ -21,7 +22,7 @@ export async function getReportsAdmin(params: ReportQueryInput) {
 
   try {
     const res = await apiFetchServer(
-      `/reports/admin?${querySearch.toString()}`,
+      `${SWR_KEYS.reports}?${querySearch.toString()}`,
       {
         method: 'GET',
       },

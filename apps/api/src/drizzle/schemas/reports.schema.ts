@@ -40,6 +40,7 @@ export const reports = pgTable('reports', {
   severity: severityEnum().notNull(),
   status: reportsStatusEnum().notNull().default('unverified'),
   isAdmin: boolean('is_admin').notNull().default(false),
+  verifiedAt: timestamp('verified_at'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

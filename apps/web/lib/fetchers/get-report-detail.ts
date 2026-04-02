@@ -12,5 +12,6 @@ export async function getReportDetail(reportId: number) {
   }
 
   const data = await res.json();
+  console.log(data);
   return data;
 }
