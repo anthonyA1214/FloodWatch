@@ -39,6 +39,41 @@ export type InteractiveMapHandle = {
   geolocate: () => void;
 };
 
+// ── Pulsing blue dot — shown at the user's position when a route is active ──
+function RouteUserDot() {
+  return (
+    <div style={{ position: 'relative', width: 18, height: 18 }}>
+      {/* Outer pulse ring */}
+      <span
+        style={{
+          position: 'absolute',
+          inset: -7,
+          borderRadius: '50%',
+          background: 'rgba(0, 102, 204, 0.22)',
+          animation: 'route-dot-pulse 1.8s ease-out infinite',
+        }}
+      />
+      {/* Inner solid dot */}
+      <div
+        style={{
+          width: 18,
+          height: 18,
+          borderRadius: '50%',
+          background: '#0066CC',
+          border: '3px solid #ffffff',
+          boxShadow: '0 1px 5px rgba(0,0,0,0.4)',
+        }}
+      />
+      <style>{`
+        @keyframes route-dot-pulse {
+          0%   { transform: scale(0.6); opacity: 0.9; }
+          100% { transform: scale(2.4); opacity: 0;   }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
   (props, ref) => {
     const mapRef = useRef<MapRef | null>(null);
@@ -74,14 +109,16 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
       flyToRef,
     } = useMapPopup();
 
-    const { route, clearRoute } = useMapRouting();
+    const { route, offRoadPath, routeOrigin, isNoRoad, clearRoute } =
+      useMapRouting();
 
-    // clear route when overlay is closed
+    // Clear route only when the overlay is dismissed.
     useEffect(() => {
       if (!activeOverlay) clearRoute();
-    }, [activeOverlay, clearRoute]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeOverlay]);
 
-    // fly to fit route bounds after route is set
+    // Fly to fit route bounds after route is set
     useEffect(() => {
       if (!route || !mapRef.current) return;
 
@@ -102,7 +139,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
           duration: 1000,
         },
       );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [route]);
 
     useEffect(() => {
@@ -119,7 +156,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isMobile]);
 
-    // for next and prev panel, fly to the next or prev report
+    // For next/prev panel navigation, fly to that report
     useEffect(() => {
       if (activeOverlay?.type !== 'report') return;
 
@@ -136,13 +173,17 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
       });
     }, [activeOverlay, reportMapPins]);
 
-    // map controls exposed to parent component
+    // Map controls exposed to parent
     useImperativeHandle(ref, () => ({
       zoomIn: () => mapRef.current?.zoomIn(),
       zoomOut: () => mapRef.current?.zoomOut(),
       geolocate: () =>
         getUserLocation().then((pos) => {
-          if (pos && mapRef.current && (mapRef.current as any)._loaded) {
+          if (
+            pos &&
+            mapRef.current &&
+            (mapRef.current as unknown as { _loaded: boolean })._loaded
+          ) {
             const { longitude, latitude } = pos;
             setUserLocation({ longitude, latitude });
             mapRef.current!.flyTo({
@@ -169,7 +210,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
         dragRotate={false}
         onClick={() => closePopup()}
       >
-        {/* boundary fill */}
+        {/* Boundary fill */}
         {caloocanGeoJSON && (
           <Source id='caloocan' type='geojson' data={caloocanGeoJSON}>
             <Layer
@@ -183,7 +224,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
           </Source>
         )}
 
-        {/* boundary outline */}
+        {/* Boundary outline */}
         {caloocanOutlineGeoJSON && (
           <Source
             id='caloocan-outline'
@@ -201,12 +242,12 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
           </Source>
         )}
 
-        {/* OSRM route line */}
-        {route && (
-          <Source id='osrm-route' type='geojson' data={route}>
-            {/* casing / outline for contrast */}
+        {/* ── Normal OSRM route (solid blue) ───────────────────────────── */}
+        {route && !isNoRoad && (
+          <Source id='route-road' type='geojson' data={route}>
+            {/* White casing for contrast */}
             <Layer
-              id='osrm-route-casing'
+              id='route-road-casing'
               type='line'
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
               paint={{
@@ -215,9 +256,9 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
                 'line-opacity': 0.9,
               }}
             />
-            {/* main route line */}
+            {/* Solid blue line */}
             <Layer
-              id='osrm-route-line'
+              id='route-road-line'
               type='line'
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
               paint={{
@@ -227,6 +268,74 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
               }}
             />
           </Source>
+        )}
+
+        {/* ── No-road fallback (round dotted line) ─────────────────────── */}
+        {route && isNoRoad && (
+          <Source id='route-noroad' type='geojson' data={route}>
+            <Layer
+              id='route-noroad-halo'
+              type='line'
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{
+                'line-color': '#ffffff',
+                'line-width': 9,
+                'line-opacity': 0.6,
+                'line-dasharray': [0, 2.2],
+              }}
+            />
+            <Layer
+              id='route-noroad-dots'
+              type='line'
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{
+                'line-color': '#0066CC',
+                'line-width': 6,
+                'line-opacity': 0.9,
+                'line-dasharray': [0, 2.2],
+              }}
+            />
+          </Source>
+        )}
+
+        {/* ── Off-Road Connection Gaps (round dotted line) ──────────── */}
+        {offRoadPath && (
+          <Source id='route-offroad' type='geojson' data={offRoadPath}>
+            <Layer
+              id='route-offroad-halo'
+              type='line'
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{
+                'line-color': '#ffffff',
+                'line-width': 9,
+                'line-opacity': 0.6,
+                'line-dasharray': [0, 2.2],
+              }}
+            />
+            <Layer
+              id='route-offroad-dots'
+              type='line'
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{
+                'line-color': '#0066CC',
+                'line-width': 6,
+                'line-opacity': 0.9,
+                'line-dasharray': [0, 2.2],
+              }}
+            />
+          </Source>
+        )}
+
+        {/* ── Pulsing blue user dot — shown at true origin ─────────────── */}
+        {routeOrigin && (
+          <Marker
+            longitude={routeOrigin[0]}
+            latitude={routeOrigin[1]}
+            anchor='center'
+            style={{ pointerEvents: 'none', zIndex: 20 }}
+          >
+            <RouteUserDot />
+          </Marker>
         )}
 
         {/* Flood report pins */}
@@ -254,7 +363,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
           </Fragment>
         ))}
 
-        {/* safety locations pin */}
+        {/* Safety location pins */}
         {filteredSafetyMapPins?.map((safety) => (
           <Marker
             key={safety.id}
@@ -270,8 +379,8 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
           </Marker>
         ))}
 
-        {/* user location pin */}
-        {userLocation && (
+        {/* User location pin (geolocate button) */}
+        {userLocation && !routeOrigin && (
           <Marker
             longitude={userLocation.longitude}
             latitude={userLocation.latitude}
