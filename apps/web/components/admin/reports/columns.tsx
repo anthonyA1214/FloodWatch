@@ -1,7 +1,7 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { ReportDetailInput, ReportsInput } from '@repo/schemas';
+import { ReportInput } from '@repo/schemas';
 import {
   Avatar as UIAvatar,
   AvatarFallback,
@@ -20,7 +20,7 @@ import { REPORT_STATUS_COLOR_MAP } from '@/lib/utils/get-color-map';
 import { useReportDialog } from '@/contexts/report-dialog-context';
 import { Badge } from '@/components/ui/badge';
 
-export const columns: ColumnDef<ReportsInput>[] = [
+export const columns: ColumnDef<ReportInput>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -100,7 +100,7 @@ export const columns: ColumnDef<ReportsInput>[] = [
   },
 ];
 
-function ActionCell({ report }: { report: ReportsInput }) {
+function ActionCell({ report }: { report: ReportInput }) {
   const { openDialog } = useReportDialog();
 
   return (

@@ -20,7 +20,10 @@ import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
 import { useMapFilter } from '@/contexts/map-filter-context';
 import SafetyLocationsCardSkeleton from './skeletons/safety-locations-card-skeleton';
 import LocationsListEmpty from './empty/locations-list-empty';
-import { SafetyListItemInput, SafetyLocationQueryInput } from '@repo/schemas';
+import {
+  SafetyLocationListItemInput,
+  SafetyLocationQueryInput,
+} from '@repo/schemas';
 import { useSearchParams } from 'next/navigation';
 import PagePagination from '../shared/page-pagination';
 import SafetyLocationsCard from '../shared/safety-locations-card';
@@ -137,7 +140,7 @@ export default function SafetyLocationsListDrawer() {
               ) : !safetyList || safetyList?.length === 0 ? (
                 <LocationsListEmpty />
               ) : (
-                safetyList?.map((safety: SafetyListItemInput) => (
+                safetyList?.map((safety: SafetyLocationListItemInput) => (
                   <SafetyLocationsCard
                     key={safety.id}
                     isActive={

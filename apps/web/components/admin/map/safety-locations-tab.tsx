@@ -5,7 +5,7 @@ import { useMapFilterAdmin } from '@/contexts/map-filter-admin-context';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
-  SafetyListItemInput,
+  SafetyLocationListItemInput,
   SafetyLocationListQueryInput,
 } from '@repo/schemas';
 import { useSafetyList } from '@/hooks/use-safety-list';
@@ -82,7 +82,7 @@ export default function SafetyLocationsTab() {
             ) : !safetyList || safetyList?.length === 0 ? (
               <LocationsListEmpty />
             ) : (
-              safetyList?.map((safety: SafetyListItemInput) => (
+              safetyList?.map((safety: SafetyLocationListItemInput) => (
                 <SafetyLocationsCard
                   key={safety.id}
                   isActive={

@@ -1,10 +1,10 @@
 'use client';
 
-import { ReportMapPinInput, SafetyMapPinInput } from '@repo/schemas';
+import { ReportMapPinInput, SafetyLocationMapPinInput } from '@repo/schemas';
 import { createContext, useContext, useState } from 'react';
 
 type FloodSeverity = ReportMapPinInput['severity'];
-type SafetyType = SafetyMapPinInput['type'];
+type SafetyType = SafetyLocationMapPinInput['type'];
 
 type MapFilters = {
   severities: Set<FloodSeverity>;

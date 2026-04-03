@@ -15,11 +15,11 @@ import { useSafetyLocationsDialog } from '@/contexts/safety-locations-dialog-con
 import { useState } from 'react';
 
 export default function DeleteSafetyLocationDialog() {
-  const { safetyLocations, isOpen, closeDialog } = useSafetyLocationsDialog();
+  const { safetyLocation, isOpen, closeDialog } = useSafetyLocationsDialog();
   const [isPending, setIsPending] = useState(false);
 
   // ✅ If no safety location is selected, don't render anything
-  if (!safetyLocations) {
+  if (!safetyLocation) {
     return (
       <Dialog open={false}>
         <DialogContent />
@@ -33,7 +33,7 @@ export default function DeleteSafetyLocationDialog() {
     try {
       // TODO: Add your API call here to delete the safety location
       // await deleteSafetyLocation(safetyLocations.id);
-      console.log('Deleting safety location:', safetyLocations.id);
+      console.log('Deleting safety location:', safetyLocation.id);
 
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -52,7 +52,7 @@ export default function DeleteSafetyLocationDialog() {
           <DialogDescription>
             Are you sure you want to delete{' '}
             <span className='font-semibold text-gray-900'>
-              {safetyLocations.location}
+              {safetyLocation.location}
             </span>
             ? This action cannot be undone.
           </DialogDescription>

@@ -40,7 +40,7 @@ import { cn } from '@/lib/utils';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { Badge } from '@/components/ui/badge';
 
-export default function ReportedCommentsDialog() {
+export default function ViewReportedCommentDialog() {
   const { commentId, isOpen, closeDialog } = useReportedCommentsDialog();
   const { reportedComment, isLoading, mutateReportedComment } =
     useReportedCommentDetail(commentId);

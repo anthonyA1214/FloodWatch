@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -16,8 +15,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
-  type CreateSafetyLocationInput,
-  createSafetyLocationSchema,
+  CreateSafetyLocationDto,
   SafetyLocationListQueryDto,
   SafetyLocationQueryDto,
 } from '@repo/schemas';
@@ -69,18 +67,9 @@ export class SafetyController {
   @UseInterceptors(FileInterceptor('image'))
   async createSafetyLocation(
     @Request() req: AuthRequest,
-    @Body() safetyLocationDto: CreateSafetyLocationInput,
+    @Body() safetyLocationDto: CreateSafetyLocationDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
-    const parsedData = createSafetyLocationSchema.safeParse(safetyLocationDto);
-
-    if (!parsedData.success) {
-      throw new BadRequestException({
-        message: 'Validation failed',
-        issues: parsedData.error.issues,
-      });
-    }
-
     return await this.safetyService.createSafetyLocation(
       safetyLocationDto,
       image,

@@ -20,7 +20,7 @@ import SafetyLocationsCardSkeleton from './skeletons/safety-locations-card-skele
 import LocationsListEmpty from './empty/locations-list-empty';
 import { useSearchParams } from 'next/navigation';
 import {
-  SafetyListItemInput,
+  SafetyLocationListItemInput,
   SafetyLocationListQueryInput,
 } from '@repo/schemas';
 import PagePagination from '../shared/page-pagination';
@@ -131,7 +131,7 @@ export default function SafetyLocationsListPanel() {
             ) : !safetyList || safetyList?.length === 0 ? (
               <LocationsListEmpty />
             ) : (
-              safetyList?.map((safety: SafetyListItemInput) => (
+              safetyList?.map((safety: SafetyLocationListItemInput) => (
                 <SafetyLocationsCard
                   key={safety.id}
                   isActive={

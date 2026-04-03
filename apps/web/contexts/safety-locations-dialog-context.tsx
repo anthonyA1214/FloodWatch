@@ -1,16 +1,21 @@
 'use client';
 
-import { SafetyDetailInput } from '@repo/schemas';
+import { SafetyLocationInput } from '@repo/schemas';
 import { createContext, useContext, useState } from 'react';
 
 type DialogType = 'view' | 'delete' | 'edit';
 
 interface SafetyLocationsDialogContextType {
-  safetyLocations: SafetyDetailInput | null;
-  openDialogType: DialogType | null;
-  openDialog: (type: DialogType, safetyLocations: SafetyDetailInput) => void;
-  closeDialog: () => void;
+  safetyLocationId: number | null;
+  safetyLocation: SafetyLocationInput | null;
   isOpen: (type: DialogType) => boolean;
+  openDialogType: DialogType | null;
+  openDialog: {
+    (type: 'view', safetyLocationId: number): void;
+    (type: 'delete', safetyLocation: SafetyLocationInput): void;
+    (type: 'edit', safetyLocationId: number): void;
+  };
+  closeDialog: () => void;
 }
 
 const SafetyLocationsDialogContext =
@@ -21,19 +26,24 @@ export default function SafetyLocationsDialogProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [safetyLocations, setSafetyLocations] =
-    useState<SafetyDetailInput | null>(null);
+  const [safetyLocationId, setSafetyLocationId] = useState<number | null>(null);
+  const [safetyLocation, setSafetyLocation] =
+    useState<SafetyLocationInput | null>(null);
   const [openDialogType, setOpenDialogType] = useState<DialogType | null>(null);
 
-  const openDialog = (type: DialogType, safetyLocations: SafetyDetailInput) => {
-    setSafetyLocations(safetyLocations);
+  const openDialog = (type: DialogType, arg: number | SafetyLocationInput) => {
+    if (type === 'view' || type === 'edit') {
+      setSafetyLocationId(arg as number);
+    } else {
+      setSafetyLocation(arg as SafetyLocationInput);
+    }
     setOpenDialogType(type);
   };
 
   const closeDialog = () => {
     setOpenDialogType(null);
     setTimeout(() => {
-      setSafetyLocations(null);
+      setSafetyLocation(null);
     }, 150);
   };
 
@@ -42,7 +52,8 @@ export default function SafetyLocationsDialogProvider({
   return (
     <SafetyLocationsDialogContext.Provider
       value={{
-        safetyLocations,
+        safetyLocationId,
+        safetyLocation,
         openDialogType,
         openDialog,
         closeDialog,
