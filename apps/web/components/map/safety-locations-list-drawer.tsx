@@ -22,7 +22,7 @@ import SafetyLocationsCardSkeleton from './skeletons/safety-locations-card-skele
 import LocationsListEmpty from './empty/locations-list-empty';
 import {
   SafetyLocationListItemInput,
-  SafetyLocationQueryInput,
+  SafetyLocationListQueryInput,
 } from '@repo/schemas';
 import { useSearchParams } from 'next/navigation';
 import PagePagination from '../shared/page-pagination';
@@ -37,12 +37,19 @@ export default function SafetyLocationsListDrawer() {
     (searchParams.get('status') as 'all-types' | 'shelter' | 'hospital') ||
       'all-types',
   );
-  const { q } = useMapFilter();
+  const { q, setQ, setInputValue, filters } = useMapFilter();
 
-  const params: SafetyLocationQueryInput = {
+  const activeTypes =
+    type !== 'all-types'
+      ? filters.safetyTypes.has(type)
+        ? [type]
+        : [] // dropdown pick is unchecked in popover = empty
+      : [...filters.safetyTypes];
+
+  const params: SafetyLocationListQueryInput = {
     page: Number(page),
     limit: Number(searchParams.get('limit') || '10'),
-    type: type === 'all-types' ? undefined : type,
+    types: activeTypes,
     q: q || undefined,
   };
 
@@ -63,7 +70,11 @@ export default function SafetyLocationsListDrawer() {
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
-    if (!isOpen) close();
+    if (!isOpen) {
+      setQ('');
+      setInputValue('');
+      close?.();
+    }
   };
 
   return (

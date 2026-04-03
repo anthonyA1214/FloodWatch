@@ -28,7 +28,7 @@ export default function AffectedLocationsListPanel() {
     'all-levels' | 'critical' | 'high' | 'moderate' | 'low'
   >('all-levels');
   const [page, setPage] = useState(1);
-  const { q, filters } = useMapFilter();
+  const { q, setQ, setInputValue, filters } = useMapFilter();
 
   const activeSeverities =
     severity !== 'all-levels'
@@ -78,16 +78,20 @@ export default function AffectedLocationsListPanel() {
       <button
         className='absolute bg-white top-1/2 translate-x-full right-0 h-16 -translate-y-1/2
         rounded-r-2xl ps-1 py-1 pr-1.5 text-xs z-30 shadow-[4px_0px_6px_-1px_rgba(0,0,0,0.1)]'
-        onClick={close}
+        onClick={() => {
+          setQ('');
+          setInputValue('');
+          close();
+        }}
       >
-        <IconChevronLeft className='w-[1.5em]! h-[1.5em]!' />
+        <IconChevronLeft className='size-[1.5em]! shrink-0' />
       </button>
 
       <div className='flex flex-col flex-1 min-h-0'>
         <div className='flex flex-col flex-1 min-h-0 gap-4 pt-4'>
           {/* Header */}
           <div className='flex items-center gap-2 font-semibold text-lg px-4'>
-            <IconAlertTriangle className='w-[1.5em]! h-[1.5em]! text-[#FB2C36]' />
+            <IconAlertTriangle className='size-[1.5em]! shrink-0 text-[#FB2C36]' />
             <span>Affected Locations</span>
           </div>
 

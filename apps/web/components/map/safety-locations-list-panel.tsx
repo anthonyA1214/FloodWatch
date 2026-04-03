@@ -32,7 +32,7 @@ export default function SafetyLocationsListPanel() {
     (searchParams.get('status') as 'all-types' | 'shelter' | 'hospital') ||
       'all-types',
   );
-  const { q, filters } = useMapFilter();
+  const { q, setQ, setInputValue, filters } = useMapFilter();
 
   const activeTypes =
     type !== 'all-types'
@@ -81,7 +81,11 @@ export default function SafetyLocationsListPanel() {
       <button
         className='absolute bg-white top-1/2 translate-x-full right-0 h-16 -translate-y-1/2
         rounded-r-2xl ps-1 py-1 pr-1.5 text-xs z-30 shadow-[4px_0px_6px_-1px_rgba(0,0,0,0.1)]'
-        onClick={close}
+        onClick={() => {
+          setQ('');
+          setInputValue('');
+          close();
+        }}
       >
         <IconChevronLeft className='w-[1.5em]! h-[1.5em]!' />
       </button>

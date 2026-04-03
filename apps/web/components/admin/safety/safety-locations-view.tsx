@@ -40,7 +40,7 @@ export default function SafetyLocationsView() {
   return (
     <div className='flex-1 flex flex-col bg-white p-8 rounded-2xl gap-8 min-h-0'>
       {/* Header */}
-      <h1 className='font-poppins text-3xl font-bold'>Safety Locations</h1>
+      <h1 className='font-poppins text-3xl font-bold'>SAFETY LOCATIONS</h1>
 
       <div className='flex justify-between gap-4'>
         <div className='flex-1'>

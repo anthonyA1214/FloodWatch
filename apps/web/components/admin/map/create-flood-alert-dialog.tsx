@@ -199,7 +199,7 @@ export default function CreateFloodAlertDialog() {
       mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reports);
       mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reportList);
       setOpen(false);
-    } catch (err) {
+    } catch {
       toast.error('Failed to create flood alert. Please try again.');
     } finally {
       setIsPending(false);
@@ -419,6 +419,11 @@ export default function CreateFloodAlertDialog() {
                   value={formData.range || ''}
                   onChange={handleChange}
                   aria-invalid={!!state.errors?.range?.length}
+                  onKeyDown={(e) => {
+                    if (['e', 'E', '+', '-'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                 />
 
                 {state.errors?.range && (
