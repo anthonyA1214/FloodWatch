@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { SAFETY_TYPE_COLOR_MAP } from '@/lib/utils/get-color-map';
-import { useSafetyLocationsDialog } from '@/contexts/safety-locations-dialog-context';
+import { useSafetyLocationDialog } from '@/contexts/safety-location-dialog-context';
 
 export const columns: ColumnDef<SafetyLocationInput>[] = [
   {
@@ -68,7 +68,7 @@ function ActionCell({
 }: {
   safetyLocation: SafetyLocationInput;
 }) {
-  const { openDialog } = useSafetyLocationsDialog();
+  const { openDialog } = useSafetyLocationDialog();
 
   return (
     <div className='flex justify-center gap-2'>
@@ -105,7 +105,7 @@ function ActionCell({
           className={cn(
             `text-[#FB323B] bg-[#FB323B]/10 rounded-lg p-1.5 hover:bg-[#FB323B]/20 transition`,
           )}
-          onClick={() => openDialog('delete', safetyLocation)}
+          onClick={() => openDialog('delete', safetyLocation.id)}
         >
           <IconTrash className='w-[1.5em]! h-[1.5em]!' />
         </TooltipTrigger>

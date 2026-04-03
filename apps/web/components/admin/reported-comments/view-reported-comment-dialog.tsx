@@ -31,7 +31,7 @@ import {
   ACTION_TAKEN_LABELS,
   REASON_LABELS,
 } from '@/lib/utils/get-reason-labels';
-import ReportedCommentsDialogSkeleton from './skeleton/reported-comments-dialog-skeleton';
+import ViewReportedCommentsDialogSkeleton from './skeleton/view-reported-comments-dialog-skeleton';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { toast } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
@@ -83,7 +83,7 @@ export default function ViewReportedCommentDialog() {
             <VisuallyHidden>
               <DialogTitle>Reported Comment</DialogTitle>
             </VisuallyHidden>
-            <ReportedCommentsDialogSkeleton />
+            <ViewReportedCommentsDialogSkeleton />
           </>
         ) : (
           reportedComment && (

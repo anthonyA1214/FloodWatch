@@ -17,17 +17,19 @@ import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { IconAlertTriangle, IconTrash } from '@tabler/icons-react';
 
 export default function DeleteReportDialog() {
-  const { report, isOpen, closeDialog } = useReportDialog();
+  const { reportId, isOpen, closeDialog } = useReportDialog();
   const [isPending, setIsPending] = useState(false);
   const { mutate } = useSWRConfig();
 
+  console.log(reportId);
+
   const handleDelete = async () => {
-    if (!report) return;
+    if (!reportId) return;
     setIsPending(true);
     try {
-      await deleteReport(report.id);
+      await deleteReport(reportId);
       mutate(SWR_KEYS.reportMapPins);
-      mutate(SWR_KEYS.reportDetail(report.id), null);
+      mutate(SWR_KEYS.reportDetail(reportId), null);
       mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reportList);
       mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reports);
       closeDialog();

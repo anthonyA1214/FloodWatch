@@ -24,8 +24,6 @@ import {
   CreateCommentDto,
   CreateFloodAlertDto,
   createFloodAlertSchema,
-  ReportFloodAlertDto,
-  reportFloodAlertSchema,
   ReportListQueryDto,
   ReportQueryDto,
   VoteDto,
@@ -162,7 +160,7 @@ export class ReportsController {
   }
 
   @Roles('admin')
-  @Delete(':id/delete')
+  @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard, UserStatusGuard)
   async deleteReport(@Param('id', ParseIntPipe) id: number) {

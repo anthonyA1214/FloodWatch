@@ -9,16 +9,29 @@ import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { Separator } from '../ui/separator';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Checkbox } from '../ui/checkbox';
-import { useMapFilter } from '@/contexts/map-filter-context';
 import {
   SAFETY_TYPE_COLOR_MAP,
   SEVERITY_COLOR_MAP,
 } from '@/lib/utils/get-color-map';
+import {
+  FloodSeverity,
+  MapFilters,
+  SafetyType,
+} from '@/contexts/map-filter-base';
 
-export default function MapFilterPopover() {
-  const { filters, toggleSeverity, toggleSafetyType, resetFilters } =
-    useMapFilter();
+type MapFilterPopoverProps = {
+  filters: MapFilters;
+  toggleSeverity: (severity: FloodSeverity) => void;
+  toggleSafetyType: (safetyType: SafetyType) => void;
+  resetFilters: () => void;
+};
 
+export default function MapFilterPopover({
+  filters,
+  toggleSeverity,
+  toggleSafetyType,
+  resetFilters,
+}: MapFilterPopoverProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>

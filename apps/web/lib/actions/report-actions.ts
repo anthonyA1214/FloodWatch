@@ -17,7 +17,7 @@ export async function verifyReport(reportId: number) {
 
 export async function deleteReport(reportId: number) {
   try {
-    await apiFetchServer(`/reports/${reportId}/delete`, {
+    await apiFetchServer(`/reports/${reportId}`, {
       method: 'DELETE',
     });
 

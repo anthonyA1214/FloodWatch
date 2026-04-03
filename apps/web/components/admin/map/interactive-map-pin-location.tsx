@@ -19,6 +19,7 @@ type BaseProps = {
     longitude: number;
     latitude: number;
   }) => void;
+  initialLocation?: { longitude: number; latitude: number } | null;
 };
 
 type SafetyProps = BaseProps & {
@@ -49,7 +50,7 @@ const InteractiveMapPinLocation = forwardRef<
   const [location, setLocation] = useState<{
     longitude: number;
     latitude: number;
-  } | null>(null);
+  } | null>(props.initialLocation || null);
   const [isOutside, setIsOutside] = useState(false);
 
   const { onLocationSelect, variant } = props;
@@ -156,9 +157,9 @@ const InteractiveMapPinLocation = forwardRef<
       id='interactive-map-location'
       ref={mapRef}
       initialViewState={{
-        latitude: 14.69906,
-        longitude: 120.99772,
-        zoom: 11.5,
+        latitude: props.initialLocation?.latitude ?? 14.69906,
+        longitude: props.initialLocation?.longitude ?? 120.99772,
+        zoom: props.initialLocation ? 16 : 11.5,
       }}
       mapStyle='https://tiles.openfreemap.org/styles/bright'
       onClick={handleMapClick}

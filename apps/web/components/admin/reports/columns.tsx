@@ -122,7 +122,7 @@ function ActionCell({ report }: { report: ReportInput }) {
           className={cn(
             `text-[#FB2C36] bg-[#FB2C36]/10 rounded-lg p-1.5 hover:bg-[#FB2C36]/20 transition`,
           )}
-          onClick={() => openDialog('delete', report)}
+          onClick={() => openDialog('delete', report.id)}
         >
           <IconTrash className='w-[1.5em]! h-[1.5em]!' />
         </TooltipTrigger>

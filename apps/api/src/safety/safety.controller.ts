@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Request,
@@ -18,6 +20,7 @@ import {
   CreateSafetyLocationDto,
   SafetyLocationListQueryDto,
   SafetyLocationQueryDto,
+  UpdateSafetyLocationDto,
 } from '@repo/schemas';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { type AuthRequest } from 'src/auth/types/auth-request.type';
@@ -71,6 +74,31 @@ export class SafetyController {
     @UploadedFile() image: Express.Multer.File,
   ) {
     return await this.safetyService.createSafetyLocation(
+      safetyLocationDto,
+      image,
+    );
+  }
+
+  @Roles('admin')
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  async deleteSafetyLocation(@Param('id', ParseIntPipe) id: number) {
+    return await this.safetyService.deleteSafetyLocation(id);
+  }
+
+  @Roles('admin')
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  @UseInterceptors(FileInterceptor('image'))
+  async updateSafetyLocation(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() safetyLocationDto: UpdateSafetyLocationDto,
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
+    return await this.safetyService.updateSafetyLocation(
+      id,
       safetyLocationDto,
       image,
     );

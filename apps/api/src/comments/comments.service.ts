@@ -165,7 +165,11 @@ export class CommentsService {
     image: Express.Multer.File,
   ) {
     const [comment] = await this.db
-      .select()
+      .select({
+        userId: comments.userId,
+        image: comments.image,
+        imagePublicId: comments.imagePublicId,
+      })
       .from(comments)
       .where(eq(comments.id, commentId))
       .limit(1);

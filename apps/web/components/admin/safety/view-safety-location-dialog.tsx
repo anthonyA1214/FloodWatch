@@ -14,12 +14,12 @@ import Image from 'next/image';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { useSafetyLocationsDialog } from '@/contexts/safety-locations-dialog-context';
+import { useSafetyLocationDialog } from '@/contexts/safety-location-dialog-context';
 import { useSafetyLocationDetail } from '@/hooks/use-safety-location-detail';
 import ViewSafetyLocationDialogSkeleton from './skeleton/view-safety-location-dialog-skeleton';
 
 export default function ViewSafetyLocationDialog() {
-  const { safetyLocationId, isOpen, closeDialog } = useSafetyLocationsDialog();
+  const { safetyLocationId, isOpen, closeDialog } = useSafetyLocationDialog();
   const { safetyDetail, isLoading } = useSafetyLocationDetail(safetyLocationId);
 
   const formattedTime = safetyDetail

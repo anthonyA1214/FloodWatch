@@ -6,8 +6,12 @@ const typeEnum = z.enum(['shelter', 'hospital']);
 export const createSafetyLocationSchema = z.object({
   latitude: z.coerce.number(),
   longitude: z.coerce.number(),
-  locationName: z.string(),
-  address: z.string(),
+  locationName: z.string().refine((val) => val.length > 0, {
+    error: 'Location name is required.',
+  }),
+  address: z.string().refine((val) => val.length > 0, {
+    error: 'Address is required.',
+  }),
   availability: z.string().optional(),
   contactNumber: z.string().optional(),
   description: z.string().optional(),
@@ -63,6 +67,13 @@ export const safetyLocationListQuerySchema = z.object({
   q: z.string().optional(),
 });
 
+export const updateSafetyLocationSchema = createSafetyLocationSchema.extend({
+  removeImage: z
+    .literal('true')
+    .transform(() => true)
+    .optional(),
+});
+
 export class CreateSafetyLocationDto extends createZodDto(
   createSafetyLocationSchema,
 ) {}
@@ -81,6 +92,9 @@ export class SafetyLocationQueryDto extends createZodDto(
 ) {}
 export class SafetyLocationListQueryDto extends createZodDto(
   safetyLocationListQuerySchema,
+) {}
+export class UpdateSafetyLocationDto extends createZodDto(
+  updateSafetyLocationSchema,
 ) {}
 
 export type CreateSafetyLocationInput = z.infer<
@@ -101,4 +115,7 @@ export type SafetyLocationQueryInput = z.infer<
 >;
 export type SafetyLocationListQueryInput = z.infer<
   typeof safetyLocationListQuerySchema
+>;
+export type UpdateSafetyLocationInput = z.infer<
+  typeof updateSafetyLocationSchema
 >;

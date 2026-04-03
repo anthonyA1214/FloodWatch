@@ -1,7 +1,9 @@
 'use client';
 
-import SafetyLocationsDialogProvider from '@/contexts/safety-locations-dialog-context';
+import SafetyLocationDialogProvider from '@/contexts/safety-location-dialog-context';
 import ViewSafetyLocationDialog from './view-safety-location-dialog';
+import DeleteSafetyLocationDialog from './delete-safety-location-dialog';
+import EditSafetyLocationDialog from './edit-safety-location-dialog';
 
 export default function SafetyLocationsClient({
   children,
@@ -9,9 +11,11 @@ export default function SafetyLocationsClient({
   children: React.ReactNode;
 }) {
   return (
-    <SafetyLocationsDialogProvider>
+    <SafetyLocationDialogProvider>
       {children}
       <ViewSafetyLocationDialog />
-    </SafetyLocationsDialogProvider>
+      <EditSafetyLocationDialog />
+      <DeleteSafetyLocationDialog />
+    </SafetyLocationDialogProvider>
   );
 }

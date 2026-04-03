@@ -1,8 +1,8 @@
 'use client';
 
-import CreateSafetyLocationsDialog from './create-safety-locations-dialog';
+import CreateSafetyLocationDialog from './create-safety-location-dialog';
 import { useMapFilterAdmin } from '@/contexts/map-filter-admin-context';
-import { useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   SafetyLocationListItemInput,
@@ -30,12 +30,19 @@ export default function SafetyLocationsTab() {
     (searchParams.get('status') as 'all-types' | 'shelter' | 'hospital') ||
       'all-types',
   );
-  const { q } = useMapFilterAdmin();
+  const { q, filters } = useMapFilterAdmin();
+
+  const activeTypes =
+    type !== 'all-types'
+      ? filters.safetyTypes.has(type)
+        ? [type]
+        : [] // dropdown pick is unchecked in popover = empty
+      : [...filters.safetyTypes];
 
   const params: SafetyLocationListQueryInput = {
     page: Number(page),
     limit: Number(searchParams.get('limit') || '10'),
-    types: type !== 'all-types' ? [type] : undefined,
+    types: activeTypes,
     q: q || undefined,
   };
 
@@ -51,9 +58,25 @@ export default function SafetyLocationsTab() {
 
   const { safetyList, meta, isLoading } = useSafetyLocationList(params);
 
+  useEffect(() => {
+    if (type !== 'all-types' && !filters.safetyTypes.has(type)) {
+      startTransition(() => {
+        setType('all-types');
+        setPage(1);
+      });
+    }
+  }, [filters.safetyTypes, type]);
+
+  // reset page when popover filter changes
+  useEffect(() => {
+    startTransition(() => {
+      setPage(1);
+    });
+  }, [filters.safetyTypes, q]);
+
   return (
     <>
-      <CreateSafetyLocationsDialog />
+      <CreateSafetyLocationDialog />
       <div className='flex-1 flex flex-col rounded-2xl border min-h-0 overflow-hidden'>
         <Select
           value={type}
@@ -68,8 +91,13 @@ export default function SafetyLocationsTab() {
 
           <SelectContent>
             <SelectItem value='all-types'>All Types</SelectItem>
-            <SelectItem value='shelter'>Shelter</SelectItem>
-            <SelectItem value='hospital'>Hospital</SelectItem>
+            {(['shelter', 'hospital'] as const).map((type) =>
+              filters.safetyTypes.has(type) ? (
+                <SelectItem key={type} value={type}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </SelectItem>
+              ) : null,
+            )}
           </SelectContent>
         </Select>
 
