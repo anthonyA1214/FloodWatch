@@ -6,7 +6,7 @@ export default function SettingsPage() {
     <div className='flex-1 flex flex-col bg-white p-8 rounded-2xl gap-8 min-h-0'>
       {/* Header */}
       <div className='space-y-2'>
-        <h1 className='font-poppins text-3xl font-bold'>Profile</h1>
+        <h1 className='font-poppins text-3xl font-bold'>SETTINGS</h1>
         <p>Manage your account settings and preferences</p>
       </div>
 

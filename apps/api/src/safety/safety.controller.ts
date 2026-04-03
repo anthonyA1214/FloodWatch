@@ -1,12 +1,13 @@
 import {
-  BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Request,
@@ -16,10 +17,10 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
-  type CreateSafetyLocationInput,
-  createSafetyLocationSchema,
+  CreateSafetyLocationDto,
   SafetyLocationListQueryDto,
   SafetyLocationQueryDto,
+  UpdateSafetyLocationDto,
 } from '@repo/schemas';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { type AuthRequest } from 'src/auth/types/auth-request.type';
@@ -32,18 +33,18 @@ import { Public } from 'src/common/decorators/public.decorator';
 export class SafetyController {
   constructor(private safetyService: SafetyService) {}
 
-  @Public()
-  @Get('')
-  @HttpCode(HttpStatus.OK)
-  async getAllSafetyMapPins() {
-    return await this.safetyService.getAllSafetyMapPins();
-  }
-
   @Roles('admin')
-  @Get('admin')
+  @Get('')
   @HttpCode(HttpStatus.OK)
   async getAllSafety(@Query() safetyLocationQuery: SafetyLocationQueryDto) {
     return await this.safetyService.getAllSafety(safetyLocationQuery);
+  }
+
+  @Public()
+  @Get('map-pins')
+  @HttpCode(HttpStatus.OK)
+  async getAllSafetyMapPins() {
+    return await this.safetyService.getAllSafetyMapPins();
   }
 
   @Public()
@@ -69,19 +70,35 @@ export class SafetyController {
   @UseInterceptors(FileInterceptor('image'))
   async createSafetyLocation(
     @Request() req: AuthRequest,
-    @Body() safetyLocationDto: CreateSafetyLocationInput,
+    @Body() safetyLocationDto: CreateSafetyLocationDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
-    const parsedData = createSafetyLocationSchema.safeParse(safetyLocationDto);
-
-    if (!parsedData.success) {
-      throw new BadRequestException({
-        message: 'Validation failed',
-        issues: parsedData.error.issues,
-      });
-    }
-
     return await this.safetyService.createSafetyLocation(
+      safetyLocationDto,
+      image,
+    );
+  }
+
+  @Roles('admin')
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  async deleteSafetyLocation(@Param('id', ParseIntPipe) id: number) {
+    return await this.safetyService.deleteSafetyLocation(id);
+  }
+
+  @Roles('admin')
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  @UseInterceptors(FileInterceptor('image'))
+  async updateSafetyLocation(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() safetyLocationDto: UpdateSafetyLocationDto,
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
+    return await this.safetyService.updateSafetyLocation(
+      id,
       safetyLocationDto,
       image,
     );

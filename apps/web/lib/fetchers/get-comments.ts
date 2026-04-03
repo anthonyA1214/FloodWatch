@@ -1,13 +1,13 @@
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { apiFetchClient } from '../api-fetch-client';
-import { CommentsResponseInput } from '@repo/schemas';
+import { CommentResponseInput } from '@repo/schemas';
 
 type Cursor = { cursorDate: string; cursorId: number } | null;
 
 export async function getComments(
   reportId: number,
   cursor?: Cursor,
-): Promise<CommentsResponseInput | null> {
+): Promise<CommentResponseInput | null> {
   const params = new URLSearchParams({ limit: '5' });
 
   if (cursor) {

@@ -7,14 +7,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { IconAlertTriangle, IconTrash } from '@tabler/icons-react';
+import {
+  IconAlertTriangle,
+  IconPointFilled,
+  IconTrash,
+} from '@tabler/icons-react';
 import {
   Avatar as UIAvatar,
   AvatarFallback,
   AvatarImage,
 } from '@/components/ui/avatar';
 import Avatar from 'boring-avatars';
-import { Separator } from '@/components/ui/separator';
 import { REPORT_COMMENT_STATUS_COLOR_MAP } from '@/lib/utils/get-color-map';
 
 import { useReportedCommentsDialog } from '@/contexts/reported-comments-dialog-context';
@@ -103,12 +106,12 @@ export default function DeleteReportedCommentDialog() {
                     <span className='text-sm font-medium'>
                       {reportedComment?.commenter?.name}
                     </span>
-                    <div className='flex items-center gap-1.5 h-4'>
-                      <span className='text-xs text-gray-600'>
+                    <div className='flex items-center gap-1.5 h-4 opacity-50'>
+                      <span className='text-xs'>
                         {reportedComment?.commenter?.email}
                       </span>
-                      <Separator orientation='vertical' />
-                      <span className='text-xs text-gray-600'>
+                      <IconPointFilled className='size-[0.5em]! shrink-0' />
+                      <span className='text-xs '>
                         {reportedComment?.reportCount}{' '}
                         {reportedComment?.reportCount === 1
                           ? 'report'
@@ -145,7 +148,7 @@ export default function DeleteReportedCommentDialog() {
                 {isPending ? (
                   <Spinner />
                 ) : (
-                  <IconTrash className='w-[1.5em]! h-[1.5em]!' />
+                  <IconTrash className='size-[1.5em]!' />
                 )}
                 <span>{isPending ? 'DELETING...' : 'DELETE REPORT'}</span>
               </Button>

@@ -159,8 +159,8 @@ export default function CommentEditForm({
             />
             {/* overlay */}
             <div
-              className='absolute inset-0 bg-black/50 
-                top-0 left-0 flex flex-col gap-1 items-center 
+              className='absolute inset-0 bg-black/50
+                top-0 left-0 flex flex-col gap-1 items-center
                 justify-center text-white opacity-0 cursor-pointer
                 group-hover:opacity-100 transition-opacity rounded-lg'
               onClick={() => fileInputRef.current?.click()}

@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react';
 import { Separator } from '../ui/separator';
 import { SAFETY_TYPE_COLOR_MAP } from '@/lib/utils/get-color-map';
-import { useSafetyDetail } from '@/hooks/use-safety-detail';
+import { useSafetyLocationDetail } from '@/hooks/use-safety-location-detail';
 import SafetyLocationPopupSkeleton from './skeletons/safety-location-popup-skeleton';
 
 export default function SafetyLocationPopup({
@@ -22,7 +22,7 @@ export default function SafetyLocationPopup({
   safetyId: number;
   onSelectSafety?: () => void;
 }) {
-  const { safetyDetail, isLoading } = useSafetyDetail(safetyId);
+  const { safetyDetail, isLoading } = useSafetyLocationDetail(safetyId);
 
   if (isLoading || !safetyDetail) return <SafetyLocationPopupSkeleton />;
 

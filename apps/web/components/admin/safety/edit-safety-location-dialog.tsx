@@ -1,239 +1,674 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
+  DialogHeader,
+  DialogFooter,
 } from '@/components/ui/dialog';
-import { IconShield } from '@tabler/icons-react';
-import { Separator } from '@/components/ui/separator';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import InteractiveMapPinLocation, {
+  InteractiveMapHandle,
+} from '@/components/admin/map/interactive-map-pin-location';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { SAFETY_TYPE_COLOR_MAP } from '@/lib/utils/get-color-map';
-import { useSafetyLocationsDialog } from '@/contexts/safety-locations-dialog-context';
-import { format } from 'date-fns';
-import { useState } from 'react';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import {
+  IconCurrentLocation,
+  IconDeviceFloppy,
+  IconMinus,
+  IconPhoto,
+  IconPlus,
+  IconX,
+} from '@tabler/icons-react';
+import { useEffect, useRef, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
+import { toast } from 'sonner';
+import { createSafetyLocationSchema } from '@repo/schemas';
+import { z } from 'zod';
+import { apiFetchClient } from '@/lib/api-fetch-client';
+import { useSWRConfig } from 'swr';
+import { SWR_KEYS } from '@/lib/constants/swr-keys';
+import Image from 'next/image';
+import { useSafetyLocationDialog } from '@/contexts/safety-location-dialog-context';
+import { useSafetyLocationDetail } from '@/hooks/use-safety-location-detail';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import EditSafetyLocationDialogSkeleton from './skeleton/edit-safety-location-dialog-skeleton';
 
 export default function EditSafetyLocationDialog() {
-  // ✅ USE THE CONTEXT DATA
-  const { safetyLocations, isOpen, closeDialog } = useSafetyLocationsDialog();
+  const interactiveMapRef = useRef<InteractiveMapHandle>(null);
+  const { safetyLocationId, isOpen, closeDialog } = useSafetyLocationDialog();
+  const { safetyDetail, isLoading, mutateSafetyDetail } =
+    useSafetyLocationDetail(safetyLocationId);
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const { mutate } = useSWRConfig();
 
-  // ✅ Local state for form fields
-  const [formData, setFormData] = useState({
-    location: safetyLocations?.location || '',
-    address: safetyLocations?.address || '',
-    type: safetyLocations?.type || 'hospital',
-    description: safetyLocations?.description || '',
+  const [preview, setPreview] = useState<string | null>(
+    safetyDetail?.image ?? null,
+  );
+  const [removeImage, setRemoveImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // errors
+  const [state, setState] = useState<{
+    status: 'error' | 'success' | null;
+    errors: Record<string, string[]> | null;
+  }>({
+    status: null,
+    errors: null,
   });
 
-  const [isPending, setIsPending] = useState(false);
+  // form data
+  const [formData, setFormData] = useState<{
+    locationName: string;
+    address: string;
+    availability: string;
+    contactNumber: string;
+    type: 'shelter' | 'hospital';
+    description: string;
+    image: File | null;
+    location: { longitude: number; latitude: number } | null;
+  }>({
+    locationName: safetyDetail?.location ?? '',
+    address: safetyDetail?.address ?? '',
+    availability: safetyDetail?.availability ?? '',
+    contactNumber: safetyDetail?.contactNumber ?? '',
+    type: safetyDetail?.type ?? 'shelter',
+    description: safetyDetail?.description ?? '',
+    image: null,
+    location: {
+      longitude: safetyDetail?.longitude ?? 0,
+      latitude: safetyDetail?.latitude ?? 0,
+    },
+  });
 
-  // ✅ If no safety location is selected, don't render anything
-  if (!safetyLocations) {
-    return (
-      <Dialog open={false}>
-        <DialogContent />
-      </Dialog>
-    );
-  }
+  useEffect(() => {
+    if (safetyDetail) {
+      setFormData({
+        locationName: safetyDetail.location ?? '',
+        address: safetyDetail.address ?? '',
+        availability: safetyDetail.availability ?? '',
+        contactNumber: safetyDetail.contactNumber ?? '',
+        type: safetyDetail.type ?? 'shelter',
+        description: safetyDetail.description ?? '',
+        image: null,
+        location: {
+          longitude: safetyDetail.longitude,
+          latitude: safetyDetail.latitude,
+        },
+      });
+      setPreview(safetyDetail.image ?? null);
+    }
+  }, [safetyDetail]);
 
-  // ✅ Format the createdAt date
-  const createdAt = safetyLocations.createdAt || new Date();
-  const formattedTime = format(new Date(createdAt), 'hh:mm a');
-  const formattedDate = format(new Date(createdAt), 'MMMM dd, yyyy');
+  const resetForm = () => {
+    if (preview && preview !== safetyDetail?.image)
+      URL.revokeObjectURL(preview);
+    setPreview(safetyDetail?.image ?? null);
+    setRemoveImage(false);
+    setFormData({
+      locationName: safetyDetail?.location ?? '',
+      address: safetyDetail?.address ?? '',
+      availability: safetyDetail?.availability ?? '',
+      contactNumber: safetyDetail?.contactNumber ?? '',
+      type: safetyDetail?.type ?? 'shelter',
+      description: safetyDetail?.description ?? '',
+      image: null,
+      location: safetyDetail
+        ? {
+            longitude: safetyDetail.longitude,
+            latitude: safetyDetail.latitude,
+          }
+        : null,
+    });
+    setState({ status: null, errors: null });
+  };
 
-  const safetyTypeColor = SAFETY_TYPE_COLOR_MAP[formData.type] || '#0066CC';
-
-  // ✅ Handle form input changes
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setState((prev) => ({
       ...prev,
-      [field]: value,
+      errors: prev.errors ? { ...prev.errors, [name]: [] } : null,
     }));
   };
 
-  // ✅ Handle save
-  const handleSave = async () => {
-    setIsPending(true);
+  const handleSelectChange = (name: string) => (value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setState((prev) => ({
+      ...prev,
+      errors: prev.errors ? { ...prev.errors, [name]: [] } : null,
+    }));
+  };
+
+  const handleUseCurrentLocation = async () => {
     try {
-      // TODO: Add your API call here to update the safety location
-      // await updateSafetyLocation(safetyLocations.id, formData);
-      console.log('Saving:', formData);
+      setLoadingLocation(true);
+      await interactiveMapRef.current?.geolocate();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingLocation(false);
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      setFormData((prev) => ({ ...prev, image: null }));
+      return;
+    }
+
+    // Validate type
+    if (!file.type.startsWith('image/')) {
+      toast.warning('Please select a valid image file.');
+      e.target.value = ''; // reset input
+      return;
+    }
+
+    // Validate size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.warning('File size must be less than 5MB.');
+      e.target.value = ''; // reset input
+      return;
+    }
+
+    if (preview && preview !== safetyDetail?.image)
+      URL.revokeObjectURL(preview);
+
+    setFormData((prev) => ({ ...prev, image: file }));
+    setPreview(URL.createObjectURL(file));
+    setRemoveImage(false);
+  };
+
+  const handleRemoveImage = () => {
+    if (preview && preview !== safetyDetail?.image)
+      URL.revokeObjectURL(preview);
+    setFormData((prev) => ({ ...prev, image: null }));
+    setPreview(null);
+    setRemoveImage(true);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!formData?.location)
+      return toast.error('Location is required to create a safety location.');
+
+    const parsedData = createSafetyLocationSchema.safeParse({
+      latitude: formData.location!.latitude,
+      longitude: formData.location!.longitude,
+      locationName: formData.locationName,
+      address: formData.address,
+      availability: formData.availability,
+      contactNumber: formData.contactNumber,
+      type: formData.type,
+      description: formData.description,
+    });
+
+    if (!parsedData.success) {
+      setState({
+        status: 'error',
+        errors: z.flattenError(parsedData.error).fieldErrors,
+      });
+      return;
+    }
+
+    const {
+      latitude,
+      longitude,
+      description,
+      type,
+      locationName,
+      address,
+      availability,
+      contactNumber,
+    } = parsedData.data;
+
+    const form = new FormData();
+    form.append('latitude', latitude.toString());
+    form.append('longitude', longitude.toString());
+    form.append('locationName', locationName);
+    form.append('address', address);
+    form.append('type', type);
+    if (availability) form.append('availability', availability);
+    if (contactNumber) form.append('contactNumber', contactNumber);
+    if (description) form.append('description', description);
+    if (formData.image) form.append('image', formData.image);
+    if (removeImage) form.append('removeImage', 'true');
+
+    try {
+      setIsPending(true);
+      await apiFetchClient(`/safety/${safetyLocationId}`, {
+        method: 'PATCH',
+        body: form,
+      });
+      setState({ status: 'success', errors: null });
+      toast.success('Safety location updated  successfully!');
+      resetForm();
+      mutate(SWR_KEYS.safetyLocationMapPins);
+      mutateSafetyDetail();
+      mutate(
+        (key) => Array.isArray(key) && key[0] === SWR_KEYS.safetyLocations,
+      );
+      mutate(
+        (key) => Array.isArray(key) && key[0] === SWR_KEYS.safetyLocationList,
+      );
       closeDialog();
+    } catch {
+      toast.error('Failed to update safety location.');
     } finally {
       setIsPending(false);
     }
   };
 
-  // ✅ Handle cancel
-  const handleCancel = () => {
-    // Reset form to original data
-    setFormData({
-      location: safetyLocations?.location || '',
-      address: safetyLocations?.address || '',
-      type: safetyLocations?.type || 'hospital',
-      description: safetyLocations?.description || '',
-    });
+  const handleOpenChange = () => {
+    if (isOpen('edit')) resetForm(); // reset when closing
     closeDialog();
   };
 
   return (
-    <Dialog open={isOpen('edit')} onOpenChange={handleCancel}>
-      <DialogContent className='flex flex-col min-w-[50vw] h-[80vh] p-0 overflow-hidden gap-0 border-0 [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-70 [&>button]:hover:opacity-100'>
-        {/* ── Blue Header with Shield Icon ── */}
-        <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl px-6 py-5 shrink-0'>
-          {/* ✅ Shield Icon */}
-          <div className='flex items-center justify-center w-12 h-12 bg-white/20 rounded-lg'>
-            <IconShield className='w-6 h-6 text-white' />
-          </div>
+    <Dialog open={isOpen('edit')} onOpenChange={handleOpenChange}>
+      <DialogContent className='flex flex-col w-full max-w-full sm:max-w-lg max-h-[85vh] p-0 overflow-hidden gap-0 border-0 [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-70 [&>button]:hover:opacity-100'>
+        {isLoading ? (
+          <>
+            <VisuallyHidden>
+              <DialogTitle>Reported Comment</DialogTitle>
+            </VisuallyHidden>
+            <EditSafetyLocationDialogSkeleton />
+          </>
+        ) : (
+          safetyDetail && (
+            <>
+              {/* ── Blue Header ── */}
+              <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl px-5 py-4 shrink-0 text-white'>
+                {/* Text */}
+                <DialogTitle className='flex items-center gap-3 sm:gap-4 font-poppins text-sm sm:text-base font-medium'>
+                  EDIT SAFETY LOCATION
+                </DialogTitle>
+              </DialogHeader>
 
-          {/* ✅ Text Section */}
-          <div className='flex flex-col space-y-0 text-white'>
-            <DialogTitle className='font-poppins text-base font-medium'>
-              Edit Safety Location
-            </DialogTitle>
-            <DialogDescription className='text-sm text-blue-100'>
-              {formattedDate} {formattedTime}
-            </DialogDescription>
-          </div>
-        </DialogHeader>
-
-        {/* ── Content Area (Scrollable) ── */}
-        <div className='flex-1 min-h-0 overflow-y-auto'>
-          <div className='flex flex-col p-6 gap-6'>
-            {/* ── Map and Details Section (Equal Height) ── */}
-            <div className='flex gap-6 h-80'>
-              {/* ✅ Left Column: Image */}
-              <div className='flex-1'>
-                <div className='relative w-full h-full rounded-2xl overflow-hidden border border-gray-200 bg-gray-100'>
-                  {safetyLocations.image ? (
-                    <Image
-                      src={safetyLocations.image}
-                      alt={safetyLocations.location}
-                      fill
-                      className='object-cover'
-                    />
-                  ) : (
-                    <Image
-                      src='/no-data-rafiki.svg'
-                      alt='No image available'
-                      fill
-                      className='object-cover opacity-40'
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* ✅ Right Column: Editable Details */}
-              <div className='flex-1'>
-                <div className='w-full h-full flex flex-col gap-4 bg-white border border-gray-200 rounded-2xl p-6 overflow-y-auto'>
-                  {/* ── Location Name ── */}
-                  <div className='flex flex-col gap-2'>
-                    <label className='font-poppins font-medium text-gray-600 text-xs uppercase'>
-                      NAME
-                    </label>
-                    <Input
-                      type='text'
-                      value={formData.location}
-                      onChange={(e) =>
-                        handleInputChange('location', e.target.value)
-                      }
-                      placeholder='Enter location name'
-                      className='text-sm'
-                    />
-                  </div>
-
-                  <Separator className='my-0' />
-
-                  {/* ── Type Dropdown ── */}
-                  <div className='flex flex-col gap-2'>
-                    <label className='font-poppins font-medium text-gray-600 text-xs uppercase'>
-                      TYPE
-                    </label>
-                    <Select
-                      value={formData.type}
-                      onValueChange={(value) =>
-                        handleInputChange('type', value)
-                      }
+              {/* ── Content Area ── */}
+              <div className='flex-1 min-h-0 overflow-y-auto'>
+                <div className='flex flex-col p-4 gap-4'>
+                  {/**/}
+                  <div className='flex items-center justify-between'>
+                    <span className='font-poppins text-sm font-medium text-gray-600'>
+                      PIN LOCATION ON MAP
+                    </span>
+                    <button
+                      className='font-poppins text-xs flex gap-2 border px-3 py-1.5 rounded-lg items-center hover:bg-gray-100'
+                      onClick={handleUseCurrentLocation}
                     >
-                      <SelectTrigger className='text-sm'>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value='hospital'>Hospital</SelectItem>
-                        <SelectItem value='shelter'>Shelter</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      {loadingLocation ? (
+                        <>
+                          <Spinner />
+                          <span>GETTING YOUR LOCATION...</span>
+                        </>
+                      ) : (
+                        <>
+                          <IconCurrentLocation className='size-[1.5em]! shrink-0' />
+                          <span>USE MY CURRENT LOCATION</span>
+                        </>
+                      )}
+                    </button>
                   </div>
-
-                  <Separator className='my-0' />
-
-                  {/* ── Address ── */}
-                  <div className='flex flex-col gap-2 flex-1 overflow-y-auto'>
-                    <label className='font-poppins font-medium text-gray-600 text-xs uppercase'>
-                      ADDRESS
-                    </label>
-                    <Input
-                      type='text'
-                      value={formData.address}
-                      onChange={(e) =>
-                        handleInputChange('address', e.target.value)
+                  {/*interactive map*/}
+                  <div className='relative flex-1 flex aspect-video rounded-2xl overflow-hidden border h-fit'>
+                    <InteractiveMapPinLocation
+                      ref={interactiveMapRef}
+                      variant='safety'
+                      type={formData.type}
+                      initialLocation={formData.location}
+                      onLocationSelect={(location) =>
+                        setFormData((prev) => ({ ...prev, location }))
                       }
-                      placeholder='Enter address'
-                      className='text-sm'
                     />
+                    {/*map controls*/}
+                    <div className='absolute flex flex-col top-4 left-4 z-1 w-fit gap-2 h-fit'>
+                      <div className='flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 text-xs'>
+                        <button
+                          onClick={() => interactiveMapRef.current?.zoomIn()}
+                          className='aspect-square hover:bg-gray-200 rounded-md p-1'
+                          title='Zoom In'
+                        >
+                          <IconPlus
+                            className='w-[1.5em]! h-[1.5em]!'
+                            strokeWidth={1.5}
+                          />
+                        </button>
+                        <button
+                          onClick={() => interactiveMapRef.current?.zoomOut()}
+                          className='aspect-square hover:bg-gray-200 rounded-md p-1'
+                          title='Zoom Out'
+                        >
+                          <IconMinus
+                            className='w-[1.5em]! h-[1.5em]!'
+                            strokeWidth={1.5}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                    {/*  */}
                   </div>
+
+                  {/* latitude and longitude */}
+                  <div className='grid grid-cols-2 gap-2'>
+                    {/*latitude*/}
+                    <Field data-invalid={!!state.errors?.latitude?.length}>
+                      <FieldLabel
+                        htmlFor='latitude'
+                        className='font-poppins text-sm font-medium'
+                      >
+                        LATITUDE
+                      </FieldLabel>
+                      <Input
+                        id='latitude'
+                        name='latitude'
+                        type='latitude'
+                        placeholder='--'
+                        value={formData.location?.latitude ?? ''}
+                        readOnly
+                        onChange={handleChange}
+                        aria-invalid={!!state.errors?.latitude?.length}
+                      />
+
+                      {state.errors?.latitude && (
+                        <FieldError>{state.errors.latitude[0]}</FieldError>
+                      )}
+                    </Field>
+
+                    {/*longitude*/}
+                    <Field data-invalid={!!state.errors?.longitude?.length}>
+                      <FieldLabel
+                        htmlFor='longitude'
+                        className='font-poppins text-sm font-medium'
+                      >
+                        LONGITUDE
+                      </FieldLabel>
+                      <Input
+                        id='longitude'
+                        name='longitude'
+                        type='longitude'
+                        placeholder='--'
+                        value={formData.location?.longitude ?? ''}
+                        readOnly
+                        onChange={handleChange}
+                        aria-invalid={!!state.errors?.longitude?.length}
+                      />
+
+                      {state.errors?.longitude && (
+                        <FieldError>{state.errors.longitude[0]}</FieldError>
+                      )}
+                    </Field>
+                  </div>
+
+                  {/*location name*/}
+                  <Field data-invalid={!!state.errors?.locationName?.length}>
+                    <FieldLabel
+                      htmlFor='locationName'
+                      className='font-poppins text-sm font-medium'
+                    >
+                      LOCATION NAME
+                    </FieldLabel>
+                    <Input
+                      id='locationName'
+                      name='locationName'
+                      type='text'
+                      placeholder='e.g., Riverside Park'
+                      value={formData.locationName}
+                      onChange={handleChange}
+                      aria-invalid={!!state.errors?.locationName?.length}
+                    />
+
+                    {state.errors?.locationName && (
+                      <FieldError>{state.errors.locationName[0]}</FieldError>
+                    )}
+                  </Field>
+
+                  {/*safety type and availability*/}
+                  <div className='grid grid-cols-2 gap-2'>
+                    {/*safety type*/}
+                    <Field data-invalid={!!state.errors?.type?.length}>
+                      <FieldLabel
+                        htmlFor='type'
+                        className='font-poppins text-sm font-medium'
+                      >
+                        SAFETY LOCATION TYPE
+                      </FieldLabel>
+                      <Select
+                        name='type'
+                        value={formData.type}
+                        onValueChange={handleSelectChange('type')}
+                      >
+                        <SelectTrigger className='w-full'>
+                          <SelectValue placeholder='Safety Location Type' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Safety Location Type</SelectLabel>
+                            <SelectItem value='shelter'>Shelter</SelectItem>
+                            <SelectItem value='hospital'>Hospital</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+
+                      {state.errors?.type && (
+                        <FieldError>{state.errors.type[0]}</FieldError>
+                      )}
+                    </Field>
+
+                    {/*availability*/}
+                    <Field data-invalid={!!state.errors?.availability?.length}>
+                      <FieldLabel
+                        htmlFor='availability'
+                        className='font-poppins text-sm font-medium'
+                      >
+                        AVAILABILITY
+                        <span className='font-inter text-xs opacity-50'>
+                          (Optional)
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        id='availability'
+                        name='availability'
+                        type='text'
+                        placeholder='e.g., 24/7, 9am-5pm'
+                        value={formData.availability}
+                        onChange={handleChange}
+                        aria-invalid={!!state.errors?.availability?.length}
+                      />
+
+                      {state.errors?.availability && (
+                        <FieldError>{state.errors.availability[0]}</FieldError>
+                      )}
+                    </Field>
+                  </div>
+
+                  {/*contact number*/}
+                  <Field data-invalid={!!state.errors?.contactNumber?.length}>
+                    <FieldLabel
+                      htmlFor='contactNumber'
+                      className='font-poppins text-sm font-medium'
+                    >
+                      CONTACT NUMBER
+                    </FieldLabel>
+                    <Input
+                      id='contactNumber'
+                      name='contactNumber'
+                      type='text'
+                      placeholder='e.g., +1 234 567 8900'
+                      maxLength={20}
+                      value={formData.contactNumber}
+                      onChange={handleChange}
+                      aria-invalid={!!state.errors?.contactNumber?.length}
+                    />
+
+                    {state.errors?.contactNumber && (
+                      <FieldError>{state.errors.contactNumber[0]}</FieldError>
+                    )}
+                  </Field>
+
+                  {/*address*/}
+                  <Field data-invalid={!!state.errors?.address?.length}>
+                    <FieldLabel
+                      htmlFor='address'
+                      className='font-poppins text-sm font-medium'
+                    >
+                      ADDRESS
+                    </FieldLabel>
+                    <Input
+                      id='address'
+                      name='address'
+                      type='text'
+                      placeholder='e.g., 123 Main St, Springfield'
+                      value={formData.address}
+                      onChange={handleChange}
+                      aria-invalid={!!state.errors?.address?.length}
+                    />
+
+                    {state.errors?.address && (
+                      <FieldError>{state.errors.address[0]}</FieldError>
+                    )}
+                  </Field>
+
+                  {/*description*/}
+                  <Field data-invalid={!!state.errors?.description?.length}>
+                    <FieldLabel
+                      htmlFor='description'
+                      className='font-poppins text-sm font-medium'
+                    >
+                      ADDITIONAL DETAILS
+                      <span className='font-inter text-xs opacity-50'>
+                        (Optional)
+                      </span>
+                    </FieldLabel>
+                    <Textarea
+                      id='description'
+                      name='description'
+                      placeholder='Enter the description'
+                      className='no-scrollbar min-h-[120px] max-h-[120px]'
+                      maxLength={300}
+                      style={{ wordBreak: 'break-word' }}
+                      value={formData.description}
+                      onChange={handleChange}
+                      aria-invalid={!!state.errors?.description?.length}
+                    />
+
+                    {state.errors?.description && (
+                      <FieldError>{state.errors.description[0]}</FieldError>
+                    )}
+                  </Field>
+
+                  {/*image upload*/}
+                  <Field data-invalid={!!state.errors?.image?.length}>
+                    <FieldLabel
+                      htmlFor='image'
+                      className='font-poppins text-sm font-medium'
+                    >
+                      UPLOAD IMAGE
+                      <span className='font-inter text-xs opacity-50'>
+                        (Optional)
+                      </span>
+                    </FieldLabel>
+                    <Input
+                      ref={fileInputRef}
+                      id='image'
+                      type='file'
+                      accept='image/*'
+                      name='image'
+                      onChange={handleImageChange}
+                      aria-invalid={!!state.errors?.image?.length}
+                    />
+
+                    {state.errors?.image && (
+                      <FieldError>{state.errors.image[0]}</FieldError>
+                    )}
+                  </Field>
+
+                  {/*image preview*/}
+                  {preview && (
+                    <div className='relative w-fit'>
+                      {/* group only wraps the image + overlay */}
+                      <div className='relative group w-fit'>
+                        <Image
+                          src={preview}
+                          alt='Preview'
+                          width={320}
+                          height={180}
+                          unoptimized
+                          className='rounded-lg object-cover border max-h-48 w-auto'
+                        />
+                        {/* overlay */}
+                        <div
+                          className='absolute inset-0 bg-black/50
+                          top-0 left-0 flex flex-col gap-1 items-center
+                          justify-center text-white opacity-0 cursor-pointer
+                          group-hover:opacity-100 transition-opacity rounded-lg'
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <IconPhoto className='w-[1.5em]! h-[1.5em]!' />
+                          <span className='font-poppins font-medium text-sm'>
+                            REPLACE
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* X button outside the group */}
+                      <button
+                        type='button'
+                        onClick={handleRemoveImage}
+                        className='absolute -top-1.5 -right-1.5 bg-black text-white rounded-full p-0.5 hover:bg-gray-700 z-10'
+                      >
+                        <IconX className='size-3.5' />
+                      </button>
+                    </div>
+                  )}
+
+                  {/**/}
                 </div>
               </div>
-            </div>
 
-            {/* ── Description Section (Full Width) ── */}
-            <div className='flex flex-col gap-4'>
-              <label className='font-poppins text-sm font-semibold text-gray-800 uppercase'>
-                DESCRIPTION
-              </label>
-              <div className='flex flex-col gap-4 bg-gray-50 border border-gray-200 rounded-2xl p-6'>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    handleInputChange('description', e.target.value)
-                  }
-                  placeholder='Enter description'
-                  className='text-sm min-h-32 resize-none'
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Footer with Action Buttons ── */}
-        <DialogFooter className='flex justify-end gap-3 bg-[#F9F9F9] border-t border-gray-200 rounded-t-2xl px-6 py-4 shrink-0'>
-          <Button variant='outline' disabled={isPending} onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button disabled={isPending} onClick={handleSave}>
-            {isPending ? (
-              <>
-                Saving... <Spinner />
-              </>
-            ) : (
-              'Save Changes'
-            )}
-          </Button>
-        </DialogFooter>
+              <DialogFooter className='grid grid-cols-2  bg-[#F9F9F9] rounded-t-2xl p-4 shrink-0'>
+                <Button
+                  variant='ghost'
+                  onClick={handleOpenChange}
+                  className='font-poppins'
+                >
+                  <span>CANCEL</span>
+                </Button>
+                <Button
+                  variant='outline'
+                  disabled={isPending}
+                  onClick={handleSubmit}
+                  className='font-poppins flex items-center gap-2 border-[#0066CC] bg-white text-[#0066CC] hover:bg-[#0066CC10] hover:text-[#0066CC]'
+                >
+                  {isPending ? (
+                    <Spinner />
+                  ) : (
+                    <IconDeviceFloppy className='size-[1.5em]! shrink-0' />
+                  )}
+                  <span>{isPending ? 'SAVING...' : 'SAVE CHANGES'}</span>
+                </Button>
+              </DialogFooter>
+            </>
+          )
+        )}
       </DialogContent>
     </Dialog>
   );

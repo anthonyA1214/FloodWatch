@@ -2,13 +2,13 @@
 
 import useSWR from 'swr';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
-import { SafetyMapPinInput } from '@repo/schemas';
-import { getSafetyMapPins } from '@/lib/fetchers/get-safety-map-pins';
+import { SafetyLocationMapPinInput } from '@repo/schemas';
+import { getSafetyLocationMapPins } from '@/lib/fetchers/get-safety-location-map-pins';
 
-export function useSafetyMapPins() {
+export function useSafetyLocationMapPins() {
   const { data, error, isLoading, isValidating, mutate } = useSWR<
-    SafetyMapPinInput[]
-  >(SWR_KEYS.safetyMapPins, getSafetyMapPins);
+    SafetyLocationMapPinInput[]
+  >(SWR_KEYS.safetyLocationMapPins, getSafetyLocationMapPins);
 
   return {
     safetyMapPins: data,

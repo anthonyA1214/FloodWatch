@@ -42,8 +42,8 @@ export default function CommentPreview({
               {comment?.author?.name}
             </span>
           </div>
-          <div className='flex items-center gap-1 text-xs text-gray-600'>
-            <IconClock className='w-[1.5em]! h-[1.5em]!' />
+          <div className='flex items-center gap-1 text-xs opacity-50'>
+            <IconClock className='size-[1.5em]! shrink-0' />
             <span>
               {formattedDate}, {formattedTime}
             </span>

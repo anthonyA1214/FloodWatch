@@ -15,7 +15,7 @@ import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
 import NoPhotoEmpty from '../shared/no-photo-empty';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
-import { useSafetyDetail } from '@/hooks/use-safety-detail';
+import { useSafetyLocationDetail } from '@/hooks/use-safety-location-detail';
 import { format } from 'date-fns';
 import { SafetyLocationPanelSkeleton } from './skeletons/safety-location-panel-skeleton';
 
@@ -25,7 +25,7 @@ export default function SafetyLocationPanel({
   safetyId: number;
 }) {
   const { close } = useMapOverlay();
-  const { safetyDetail, isLoading } = useSafetyDetail(safetyId);
+  const { safetyDetail, isLoading } = useSafetyLocationDetail(safetyId);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 

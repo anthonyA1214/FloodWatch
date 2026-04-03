@@ -34,14 +34,14 @@ import {
 import { useRef, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
-import { createFloodAlertSchema } from '@repo/schemas';
+import { createSafetyLocationSchema } from '@repo/schemas';
 import { z } from 'zod';
 import { apiFetchClient } from '@/lib/api-fetch-client';
 import { useSWRConfig } from 'swr';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import Image from 'next/image';
 
-export default function CreateFloodAlertDialog() {
+export default function CreateSafetyLocationDialog() {
   const interactiveMapRef = useRef<InteractiveMapHandle>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [isPending, setIsPending] = useState(false);
@@ -51,6 +51,7 @@ export default function CreateFloodAlertDialog() {
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // errors
   const [state, setState] = useState<{
     status: 'error' | 'success' | null;
     errors: Record<string, string[]> | null;
@@ -62,15 +63,19 @@ export default function CreateFloodAlertDialog() {
   // form data
   const [formData, setFormData] = useState<{
     locationName: string;
-    severity: 'low' | 'moderate' | 'high' | 'critical';
-    range: number;
+    address: string;
+    availability: string;
+    contactNumber: string;
+    type: 'shelter' | 'hospital';
     description: string;
     image: File | null;
     location: { longitude: number; latitude: number } | null;
   }>({
     locationName: '',
-    severity: 'low',
-    range: 0,
+    address: '',
+    availability: '',
+    contactNumber: '',
+    type: 'shelter',
     description: '',
     image: null,
     location: null,
@@ -80,8 +85,10 @@ export default function CreateFloodAlertDialog() {
     setPreview(null);
     setFormData({
       locationName: '',
-      severity: 'low',
-      range: 0,
+      address: '',
+      availability: '',
+      contactNumber: '',
+      type: 'shelter',
       description: '',
       image: null,
       location: null,
@@ -155,15 +162,17 @@ export default function CreateFloodAlertDialog() {
     e.preventDefault();
     e.stopPropagation();
     if (!formData?.location)
-      return toast.error('Location is required to create a flood alert.');
+      return toast.error('Location is required to create a safety location.');
 
-    const parsedData = createFloodAlertSchema.safeParse({
+    const parsedData = createSafetyLocationSchema.safeParse({
       latitude: formData.location!.latitude,
       longitude: formData.location!.longitude,
       locationName: formData.locationName,
-      range: formData.range,
+      address: formData.address,
+      availability: formData.availability,
+      contactNumber: formData.contactNumber,
+      type: formData.type,
       description: formData.description,
-      severity: formData.severity,
     });
 
     if (!parsedData.success) {
@@ -174,33 +183,47 @@ export default function CreateFloodAlertDialog() {
       return;
     }
 
-    const { latitude, longitude, range, description, severity, locationName } =
-      parsedData.data;
+    const {
+      latitude,
+      longitude,
+      description,
+      type,
+      locationName,
+      address,
+      availability,
+      contactNumber,
+    } = parsedData.data;
 
     const form = new FormData();
     form.append('latitude', latitude.toString());
     form.append('longitude', longitude.toString());
     form.append('locationName', locationName);
-    form.append('severity', severity);
-    form.append('range', range.toString());
+    form.append('address', address);
+    form.append('type', type);
+    if (availability) form.append('availability', availability);
+    if (contactNumber) form.append('contactNumber', contactNumber);
     if (description) form.append('description', description);
     if (formData.image) form.append('image', formData.image);
 
     try {
       setIsPending(true);
-      await apiFetchClient('/reports/admin/create', {
+      await apiFetchClient('/safety/create', {
         method: 'POST',
         body: form,
       });
       setState({ status: 'success', errors: null });
-      toast.success('Flood alert created successfully!');
+      toast.success('Safety location created successfully!');
       resetForm();
-      mutate(SWR_KEYS.reportMapPins);
-      mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reports);
-      mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reportList);
+      mutate(SWR_KEYS.safetyLocationMapPins);
+      mutate(
+        (key) => Array.isArray(key) && key[0] === SWR_KEYS.safetyLocations,
+      );
+      mutate(
+        (key) => Array.isArray(key) && key[0] === SWR_KEYS.safetyLocationList,
+      );
       setOpen(false);
-    } catch (err) {
-      toast.error('Failed to create flood alert. Please try again.');
+    } catch {
+      toast.error('Failed to create safety location. Please try again.');
     } finally {
       setIsPending(false);
     }
@@ -214,14 +237,14 @@ export default function CreateFloodAlertDialog() {
   return (
     <Dialog open={open} onOpenChange={() => handleOpenChange(!open)}>
       <DialogTrigger asChild>
-        <Button className='font-poppins py-6'>CREATE FLOOD ALERT</Button>
+        <Button className='font-poppins py-6'>CREATE SAFETY LOCATION</Button>
       </DialogTrigger>
       <DialogContent className='flex flex-col w-full max-w-full sm:max-w-lg max-h-[85vh] p-0 overflow-hidden gap-0 border-0 [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-70 [&>button]:hover:opacity-100'>
         {/* ── Blue Header ── */}
         <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl px-5 py-4 shrink-0 text-white'>
           {/* Text */}
           <DialogTitle className='flex items-center gap-3 sm:gap-4 font-poppins text-sm sm:text-base font-medium'>
-            CREATE FLOOD ALERT
+            CREATE SAFETY LOCATION
           </DialogTitle>
         </DialogHeader>
 
@@ -254,9 +277,8 @@ export default function CreateFloodAlertDialog() {
             <div className='relative flex-1 flex aspect-video rounded-2xl overflow-hidden border h-fit'>
               <InteractiveMapPinLocation
                 ref={interactiveMapRef}
-                variant='report'
-                severity={formData.severity}
-                range={formData.range}
+                variant='safety'
+                type={formData.type}
                 onLocationSelect={(location) =>
                   setFormData((prev) => ({ ...prev, location }))
                 }
@@ -363,69 +385,111 @@ export default function CreateFloodAlertDialog() {
               )}
             </Field>
 
-            {/*severity and range*/}
+            {/*safety type and availability*/}
             <div className='grid grid-cols-2 gap-2'>
-              {/*severity*/}
-              <Field data-invalid={!!state.errors?.severity?.length}>
+              {/*safety type*/}
+              <Field data-invalid={!!state.errors?.type?.length}>
                 <FieldLabel
-                  htmlFor='severity'
+                  htmlFor='type'
                   className='font-poppins text-sm font-medium'
                 >
-                  SEVERITY LEVEL
+                  SAFETY LOCATION TYPE
                 </FieldLabel>
                 <Select
-                  name='severity'
-                  value={formData.severity}
-                  onValueChange={handleSelectChange('severity')}
+                  name='type'
+                  value={formData.type}
+                  onValueChange={handleSelectChange('type')}
                 >
                   <SelectTrigger className='w-full'>
-                    <SelectValue placeholder='Severity Level' />
+                    <SelectValue placeholder='Safety Location Type' />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectLabel>Severity Level</SelectLabel>
-                      <SelectItem value='low'>Low</SelectItem>
-                      <SelectItem value='moderate'>Moderate</SelectItem>
-                      <SelectItem value='high'>High</SelectItem>
-                      <SelectItem value='critical'>Critical</SelectItem>
+                      <SelectLabel>Safety Location Type</SelectLabel>
+                      <SelectItem value='shelter'>Shelter</SelectItem>
+                      <SelectItem value='hospital'>Hospital</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
 
-                {state.errors?.severity && (
-                  <FieldError>{state.errors.severity[0]}</FieldError>
+                {state.errors?.type && (
+                  <FieldError>{state.errors.type[0]}</FieldError>
                 )}
               </Field>
 
-              {/*range*/}
-              <Field data-invalid={!!state.errors?.range?.length}>
+              {/*availability*/}
+              <Field data-invalid={!!state.errors?.availability?.length}>
                 <FieldLabel
-                  htmlFor='range'
+                  htmlFor='availability'
                   className='font-poppins text-sm font-medium'
                 >
-                  AFFECTED RANGE
+                  AVAILABILITY
                   <span className='font-inter text-xs opacity-50'>
-                    (meters)
+                    (Optional)
                   </span>
                 </FieldLabel>
-
                 <Input
-                  id='range'
-                  name='range'
-                  type='number'
-                  placeholder='e.g., 100'
-                  min={1}
-                  minLength={1}
-                  value={formData.range || ''}
+                  id='availability'
+                  name='availability'
+                  type='text'
+                  placeholder='e.g., 24/7, 9am-5pm'
+                  value={formData.availability}
                   onChange={handleChange}
-                  aria-invalid={!!state.errors?.range?.length}
+                  aria-invalid={!!state.errors?.availability?.length}
                 />
 
-                {state.errors?.range && (
-                  <FieldError>{state.errors.range[0]}</FieldError>
+                {state.errors?.availability && (
+                  <FieldError>{state.errors.availability[0]}</FieldError>
                 )}
               </Field>
             </div>
+
+            {/*contact number*/}
+            <Field data-invalid={!!state.errors?.contactNumber?.length}>
+              <FieldLabel
+                htmlFor='contactNumber'
+                className='font-poppins text-sm font-medium'
+              >
+                CONTACT NUMBER
+              </FieldLabel>
+              <Input
+                id='contactNumber'
+                name='contactNumber'
+                type='text'
+                placeholder='e.g., +1 234 567 8900'
+                maxLength={20}
+                value={formData.contactNumber}
+                onChange={handleChange}
+                aria-invalid={!!state.errors?.contactNumber?.length}
+              />
+
+              {state.errors?.contactNumber && (
+                <FieldError>{state.errors.contactNumber[0]}</FieldError>
+              )}
+            </Field>
+
+            {/*address*/}
+            <Field data-invalid={!!state.errors?.address?.length}>
+              <FieldLabel
+                htmlFor='address'
+                className='font-poppins text-sm font-medium'
+              >
+                ADDRESS
+              </FieldLabel>
+              <Input
+                id='address'
+                name='address'
+                type='text'
+                placeholder='e.g., 123 Main St, Springfield'
+                value={formData.address}
+                onChange={handleChange}
+                aria-invalid={!!state.errors?.address?.length}
+              />
+
+              {state.errors?.address && (
+                <FieldError>{state.errors.address[0]}</FieldError>
+              )}
+            </Field>
 
             {/*description*/}
             <Field data-invalid={!!state.errors?.description?.length}>
@@ -543,7 +607,7 @@ export default function CreateFloodAlertDialog() {
             ) : (
               <IconPlus className='size-[1.5em]! shrink-0' />
             )}
-            <span>{isPending ? 'CREATING...' : 'CREATE FLOOD ALERT'}</span>
+            <span>{isPending ? 'CREATING...' : 'CREATE SAFETY LOCATION'}</span>
           </Button>
         </DialogFooter>
       </DialogContent>

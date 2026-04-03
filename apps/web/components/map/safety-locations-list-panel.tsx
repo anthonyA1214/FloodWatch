@@ -11,16 +11,16 @@ import {
 import { Separator } from '../ui/separator';
 import SafetyLocationsCard from '../shared/safety-locations-card';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
-import { useSafetyList } from '@/hooks/use-safety-list';
+import { useSafetyLocationList } from '@/hooks/use-safety-location-list';
 import { useMapFilter } from '@/contexts/map-filter-context';
-import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
+import { useSafetyLocationMapPins } from '@/hooks/use-safety-location-map-pins';
 import { useMapPopup } from '@/contexts/map-popup-context';
 import { startTransition, useEffect, useState } from 'react';
 import SafetyLocationsCardSkeleton from './skeletons/safety-locations-card-skeleton';
 import LocationsListEmpty from './empty/locations-list-empty';
 import { useSearchParams } from 'next/navigation';
 import {
-  SafetyListItemInput,
+  SafetyLocationListItemInput,
   SafetyLocationListQueryInput,
 } from '@repo/schemas';
 import PagePagination from '../shared/page-pagination';
@@ -48,10 +48,10 @@ export default function SafetyLocationsListPanel() {
     q: q || undefined,
   };
 
-  const { safetyList, meta, isLoading } = useSafetyList(params);
+  const { safetyList, meta, isLoading } = useSafetyLocationList(params);
   const { close } = useMapOverlay();
   const { activePopup, openSafetyPopup } = useMapPopup();
-  const { safetyMapPins } = useSafetyMapPins();
+  const { safetyMapPins } = useSafetyLocationMapPins();
 
   const handleCardClick = (safetyId: number) => {
     const pin = safetyMapPins?.find((p) => p.id === safetyId);
@@ -131,7 +131,7 @@ export default function SafetyLocationsListPanel() {
             ) : !safetyList || safetyList?.length === 0 ? (
               <LocationsListEmpty />
             ) : (
-              safetyList?.map((safety: SafetyListItemInput) => (
+              safetyList?.map((safety: SafetyLocationListItemInput) => (
                 <SafetyLocationsCard
                   key={safety.id}
                   isActive={

@@ -12,17 +12,20 @@ export const reportFloodAlertSchema = z.object({
 });
 
 export const createFloodAlertSchema = z.object({
-  locationName: z.string('Location name is required.'),
+  locationName: z.string().refine((val) => val.length > 0, {
+    error: 'Location name is required.',
+    abort: true,
+  }),
   latitude: z.coerce.number(),
   longitude: z.coerce.number(),
   range: z.coerce
-    .number('Affected radius is required.')
+    .number('Affected range is required.')
     .refine((val) => val > 0, {
-      error: 'Affected radius must be at least 1 meter.',
+      error: 'Affected range must be at least 1 meter.',
       abort: true,
     })
     .refine((val) => val <= 1000, {
-      error: 'Affected radius cannot exceed 1,000 meters.',
+      error: 'Affected range cannot exceed 1,000 meters.',
       abort: true,
     }),
   description: z
@@ -41,7 +44,7 @@ export const reportMapPinSchema = z.object({
   status: z.enum(['verified', 'unverified']),
 });
 
-export const reportsSchema = z.object({
+export const reportSchema = z.object({
   id: z.number(),
   reporter: z.object({
     id: z.number(),
@@ -53,7 +56,7 @@ export const reportsSchema = z.object({
   status: z.enum(['verified', 'unverified']),
 });
 
-export const reportDetailSchema = reportsSchema.extend({
+export const reportDetailSchema = reportSchema.extend({
   location: z.string(),
   description: z.string().nullable(),
   latitude: z.number(),
@@ -103,7 +106,7 @@ export const reportListQuerySchema = z.object({
 export class ReportFloodAlertDto extends createZodDto(reportFloodAlertSchema) {}
 export class CreateFloodAlertDto extends createZodDto(createFloodAlertSchema) {}
 export class ReportMapPinDto extends createZodDto(reportMapPinSchema) {}
-export class ReportsDto extends createZodDto(reportsSchema) {}
+export class ReportDto extends createZodDto(reportSchema) {}
 export class ReportDetailDto extends createZodDto(reportDetailSchema) {}
 export class ReportListItemDto extends createZodDto(reportListItemSchema) {}
 export class ReportQueryDto extends createZodDto(reportQuerySchema) {}
@@ -112,7 +115,7 @@ export class ReportListQueryDto extends createZodDto(reportListQuerySchema) {}
 export type ReportFloodAlertInput = z.infer<typeof reportFloodAlertSchema>;
 export type CreateFloodAlertInput = z.infer<typeof createFloodAlertSchema>;
 export type ReportMapPinInput = z.infer<typeof reportMapPinSchema>;
-export type ReportsInput = z.infer<typeof reportsSchema>;
+export type ReportInput = z.infer<typeof reportSchema>;
 export type ReportDetailInput = z.infer<typeof reportDetailSchema>;
 export type ReportListItemInput = z.infer<typeof reportListItemSchema>;
 export type ReportQueryInput = z.infer<typeof reportQuerySchema>;

@@ -4,7 +4,7 @@ import SearchBar from '@/components/map/search-bar';
 import InteractiveMap, {
   InteractiveMapHandle,
 } from '@/components/map/interactive-map';
-import { Suspense, useRef, useState } from 'react';
+import { Suspense, useRef } from 'react';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
 import { GoogleLinkToastHandler } from '@/components/shared/google-link-toast-handler';
 import { IconCurrentLocation, IconMinus, IconPlus } from '@tabler/icons-react';
@@ -16,11 +16,15 @@ import SafetyLocationsListOverlay from './safety-locations-list-overlay';
 import WeatherOverlay from './weather-overlay';
 import SafetyLocationOverlay from './safety-location-overlay';
 import MapLegendPopover from '../shared/map-legend-popover';
-import MapFilterPopover from './map-filter-popover';
+import MapFilterPopover from '../shared/map-filter-popover';
+import { useMapFilter } from '@/contexts/map-filter-context';
 
 export default function InteractiveMapPage() {
   const { activeOverlay } = useMapOverlay();
   const interactiveMapRef = useRef<InteractiveMapHandle>(null);
+
+  const { filters, toggleSeverity, toggleSafetyType, resetFilters } =
+    useMapFilter();
 
   return (
     <div className='relative w-full h-full'>
@@ -93,7 +97,12 @@ export default function InteractiveMapPage() {
           <MapLegendPopover />
 
           {/*  */}
-          <MapFilterPopover />
+          <MapFilterPopover
+            filters={filters}
+            toggleSeverity={toggleSeverity}
+            toggleSafetyType={toggleSafetyType}
+            resetFilters={resetFilters}
+          />
         </div>
 
         {(activeOverlay?.type === 'notification' ||

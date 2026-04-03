@@ -31,7 +31,7 @@ import {
   ACTION_TAKEN_LABELS,
   REASON_LABELS,
 } from '@/lib/utils/get-reason-labels';
-import ReportedCommentsDialogSkeleton from './skeleton/reported-comments-dialog-skeleton';
+import ViewReportedCommentsDialogSkeleton from './skeleton/view-reported-comments-dialog-skeleton';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { toast } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
@@ -40,7 +40,7 @@ import { cn } from '@/lib/utils';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { Badge } from '@/components/ui/badge';
 
-export default function ReportedCommentsDialog() {
+export default function ViewReportedCommentDialog() {
   const { commentId, isOpen, closeDialog } = useReportedCommentsDialog();
   const { reportedComment, isLoading, mutateReportedComment } =
     useReportedCommentDetail(commentId);
@@ -83,7 +83,7 @@ export default function ReportedCommentsDialog() {
             <VisuallyHidden>
               <DialogTitle>Reported Comment</DialogTitle>
             </VisuallyHidden>
-            <ReportedCommentsDialogSkeleton />
+            <ViewReportedCommentsDialogSkeleton />
           </>
         ) : (
           reportedComment && (
@@ -125,7 +125,7 @@ export default function ReportedCommentsDialog() {
                           <span className='font-medium'>
                             {reportedComment?.commenter?.name}
                           </span>
-                          <span className='text-sm text-gray-600'>
+                          <span className='text-sm opacity-50'>
                             {reportedComment?.commenter?.email}
                           </span>
                         </div>
@@ -195,7 +195,7 @@ export default function ReportedCommentsDialog() {
                                   {reporter?.name}
                                 </span>
                                 {reporter?.createdAt && (
-                                  <span className='text-xs text-gray-600'>
+                                  <span className='text-xs opacity-50'>
                                     {format(reporter.createdAt, 'PPP p')}
                                   </span>
                                 )}

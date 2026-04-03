@@ -24,7 +24,7 @@ import { UserLocationMarker } from '../shared/markers/user-location-marker';
 import { SearchLocationMarker } from '../shared/markers/search-location-marker';
 import { useReportMapPins } from '@/hooks/use-report-map-pins';
 import { useBoundary } from '@/hooks/use-boundary';
-import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
+import { useSafetyLocationMapPins } from '@/hooks/use-safety-location-map-pins';
 import { SafetyMarker } from '../shared/markers/safety-marker';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
@@ -48,7 +48,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
       latitude: number;
     } | null>(null);
     const { reportMapPins } = useReportMapPins();
-    const { safetyMapPins } = useSafetyMapPins();
+    const { safetyMapPins } = useSafetyLocationMapPins();
     const { activeOverlay, openReport, openSafety } = useMapOverlay();
     const isMobile = useIsMobile();
 

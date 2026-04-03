@@ -3,12 +3,12 @@
 import useSWR from 'swr';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { SafetyLocationListQueryInput } from '@repo/schemas';
-import { getSafetyList } from '@/lib/fetchers/get-safety-list';
+import { getSafetyLocationList } from '@/lib/fetchers/get-safety-location-list';
 
-export function useSafetyList(params: SafetyLocationListQueryInput) {
+export function useSafetyLocationList(params: SafetyLocationListQueryInput) {
   const { data, error, isLoading, isValidating, mutate } = useSWR(
-    [SWR_KEYS.safetyList, params],
-    () => getSafetyList(params),
+    [SWR_KEYS.safetyLocationList, params],
+    () => getSafetyLocationList(params),
     { keepPreviousData: true },
   );
 

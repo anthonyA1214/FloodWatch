@@ -2,7 +2,7 @@
 
 import CreateFloodAlertDialog from './create-flood-alert-dialog';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 import { ReportListItemInput, ReportListQueryInput } from '@repo/schemas';
 import {
   Select,
@@ -26,13 +26,20 @@ export default function AffectedLocationsTab() {
     'all-levels' | 'critical' | 'high' | 'moderate' | 'low'
   >('all-levels');
   const [page, setPage] = useState(1);
-  const { q } = useMapFilterAdmin();
+  const { q, filters } = useMapFilterAdmin();
   const { reportMapPins } = useReportMapPins();
+
+  const activeSeverities =
+    severity !== 'all-levels'
+      ? filters.severities.has(severity)
+        ? [severity]
+        : [] // dropdown pick is unchecked in popover = empty
+      : [...filters.severities];
 
   const params: ReportListQueryInput = {
     page: Number(page),
     limit: Number(searchParams.get('limit') || '10'),
-    severities: severity !== 'all-levels' ? [severity] : undefined,
+    severities: activeSeverities,
     q: q || undefined,
   };
 
@@ -45,6 +52,23 @@ export default function AffectedLocationsTab() {
       setActivePin({ type: 'report', report: pin });
     }
   };
+
+  // reset severity dropdown if its selection gets unchecked in popover
+  useEffect(() => {
+    if (severity !== 'all-levels' && !filters.severities.has(severity)) {
+      startTransition(() => {
+        setSeverity('all-levels');
+        setPage(1);
+      });
+    }
+  }, [filters.severities, severity]);
+
+  // reset page when popover filter changes
+  useEffect(() => {
+    startTransition(() => {
+      setPage(1);
+    });
+  }, [filters.severities, q]);
 
   return (
     <>
@@ -66,10 +90,13 @@ export default function AffectedLocationsTab() {
 
           <SelectContent>
             <SelectItem value='all-levels'>All Levels</SelectItem>
-            <SelectItem value='critical'>Critical</SelectItem>
-            <SelectItem value='high'>High</SelectItem>
-            <SelectItem value='moderate'>Moderate</SelectItem>
-            <SelectItem value='low'>Low</SelectItem>
+            {(['critical', 'high', 'moderate', 'low'] as const).map((s) =>
+              filters.severities.has(s) ? (
+                <SelectItem key={s} value={s}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </SelectItem>
+              ) : null,
+            )}
           </SelectContent>
         </Select>
 

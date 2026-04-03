@@ -1,6 +1,6 @@
 'use client';
 
-import InteractiveMapReportedLocation from '@/components/shared/interactive-map-reported-location';
+import InteractiveMapLocation from '@/components/shared/interactive-map-location';
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { IconCheck, IconMapPin } from '@tabler/icons-react';
+import { IconCheck, IconMapPin, IconPointFilled } from '@tabler/icons-react';
 import {
   Avatar as UIAvatar,
   AvatarFallback,
@@ -100,7 +100,8 @@ export default function ViewReportDialog() {
                       {/* left column map */}
                       <div className='flex-1 flex flex-col gap-4 h-fit'>
                         <div className='flex-1 flex aspect-4/3 rounded-2xl overflow-hidden border h-fit'>
-                          <InteractiveMapReportedLocation
+                          <InteractiveMapLocation
+                            variant='report'
                             latitude={reportDetail?.latitude}
                             longitude={reportDetail?.longitude}
                             range={reportDetail?.range}
@@ -137,7 +138,7 @@ export default function ViewReportDialog() {
                                 <span className='text-sm font-medium'>
                                   {reportDetail?.reporter?.name}
                                 </span>
-                                <span className='text-sm text-gray-600'>
+                                <span className='text-sm opacity-50'>
                                   {reportDetail?.reporter?.email}
                                 </span>
                               </div>
@@ -200,15 +201,11 @@ export default function ViewReportDialog() {
                                 REPORTED AT
                               </span>
                               <div className='flex gap-2 items-center h-4'>
-                                <span className='text-sm text-gray-600'>
-                                  {formattedDate}
-                                </span>
+                                <span className='text-sm'>{formattedDate}</span>
 
-                                <Separator orientation='vertical' />
+                                <IconPointFilled className='size-[0.5em]! shrink-0' />
 
-                                <span className='text-sm text-gray-600'>
-                                  {formattedTime}
-                                </span>
+                                <span className='text-sm'>{formattedTime}</span>
                               </div>
                             </div>
                           </div>
@@ -273,7 +270,7 @@ export default function ViewReportDialog() {
                     <div className='flex flex-col gap-4 bg-accent border rounded-2xl p-4 h-fit'>
                       <div className='flex items-center gap-2'>
                         <IconMapPin className='w-[1.5em]! h-[1.5em]! text-[#0066CC] mb-auto shrink-0' />
-                        <span className='text-sm text-gray-600'>
+                        <span className='text-sm '>
                           {reportDetail?.location}
                         </span>
                       </div>
@@ -287,10 +284,15 @@ export default function ViewReportDialog() {
                     </span>
 
                     <div className='flex flex-col gap-4 bg-accent border rounded-2xl p-4 h-fit'>
-                      <p className='text-sm text-gray-600 italic'>
-                        {reportDetail?.description ||
-                          'No description provided.'}
-                      </p>
+                      {reportDetail?.description ? (
+                        <span className='text-sm'>
+                          {reportDetail?.description}
+                        </span>
+                      ) : (
+                        <span className='text-sm italic opacity-50'>
+                          No description provided.
+                        </span>
+                      )}
                     </div>
                   </div>
 

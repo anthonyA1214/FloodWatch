@@ -3,12 +3,16 @@
 import InteractiveMap, {
   InteractiveMapHandle,
 } from '@/components/admin/map/interactive-map';
+import MapFilterPopover from '@/components/shared/map-filter-popover';
 import MapLegendPopover from '@/components/shared/map-legend-popover';
+import { useMapFilterAdmin } from '@/contexts/map-filter-admin-context';
 import { IconCurrentLocation, IconMinus, IconPlus } from '@tabler/icons-react';
 import { useRef } from 'react';
 
 export default function MapLeft() {
   const interactiveMapRef = useRef<InteractiveMapHandle>(null);
+  const { filters, toggleSeverity, toggleSafetyType, resetFilters } =
+    useMapFilterAdmin();
 
   return (
     <div className='relative flex-2 bg-gray-100 min-h-0 rounded-2xl overflow-hidden border'>
@@ -49,6 +53,13 @@ export default function MapLeft() {
 
         {/* toggle legend */}
         <MapLegendPopover />
+
+        <MapFilterPopover
+          filters={filters}
+          toggleSeverity={toggleSeverity}
+          toggleSafetyType={toggleSafetyType}
+          resetFilters={resetFilters}
+        />
       </div>
     </div>
   );

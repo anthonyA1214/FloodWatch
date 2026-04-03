@@ -6,19 +6,37 @@ import RadiusCircle from '@/components/shared/radius-circle';
 import { Spinner } from '@/components/ui/spinner';
 import { useBoundary } from '@/hooks/use-boundary';
 import { FloodMarker } from './markers/flood-marker';
+import { SafetyMarker } from './markers/safety-marker';
 
-export default function InteractiveMapReportedLocation({
-  longitude,
-  latitude,
-  range,
-  severity,
-}: {
+type BaseProps = {
+  longitude: number | null;
+  latitude: number | null;
+};
+
+type SafetyProps = BaseProps & {
+  variant: 'safety';
+  type: 'hospital' | 'shelter';
+};
+
+type ReportProps = BaseProps & {
+  variant: 'report';
   longitude: number | null;
   latitude: number | null;
   range: number;
   severity: 'critical' | 'high' | 'moderate' | 'low';
-}) {
+};
+
+type InteractiveMapLocationProps = SafetyProps | ReportProps;
+
+export default function InteractiveMapLocation(
+  props: InteractiveMapLocationProps,
+) {
+  const { variant, longitude, latitude } = props;
   const { caloocanGeoJSON, caloocanOutlineGeoJSON } = useBoundary();
+
+  const severity = variant === 'report' ? props.severity : undefined;
+  const range = variant === 'report' ? props.range : undefined;
+  const type = variant === 'safety' ? props.type : undefined;
 
   if (longitude === null || latitude === null) {
     return (
@@ -71,20 +89,37 @@ export default function InteractiveMapReportedLocation({
         </Source>
       )}
 
-      <RadiusCircle
-        longitude={longitude}
-        latitude={latitude}
-        range={range}
-        severity={severity}
-      />
-      <Marker
-        key={severity}
-        longitude={longitude}
-        latitude={latitude}
-        anchor='bottom'
-      >
-        <FloodMarker severity={severity} />
-      </Marker>
+      {variant === 'report' && (
+        <>
+          <RadiusCircle
+            longitude={longitude}
+            latitude={latitude}
+            range={range}
+            severity={severity as ReportProps['severity']}
+          />
+          <Marker
+            key={severity}
+            longitude={longitude}
+            latitude={latitude}
+            anchor='bottom'
+          >
+            <FloodMarker severity={severity as ReportProps['severity']} />
+          </Marker>
+        </>
+      )}
+
+      {variant === 'safety' && (
+        <>
+          <Marker
+            key={type}
+            longitude={longitude}
+            latitude={latitude}
+            anchor='bottom'
+          >
+            <SafetyMarker type={type as SafetyProps['type']} />
+          </Marker>
+        </>
+      )}
     </Map>
   );
 }

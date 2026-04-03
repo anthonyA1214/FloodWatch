@@ -1,7 +1,7 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { ReportDetailInput, ReportsInput } from '@repo/schemas';
+import { ReportInput } from '@repo/schemas';
 import {
   Avatar as UIAvatar,
   AvatarFallback,
@@ -20,7 +20,7 @@ import { REPORT_STATUS_COLOR_MAP } from '@/lib/utils/get-color-map';
 import { useReportDialog } from '@/contexts/report-dialog-context';
 import { Badge } from '@/components/ui/badge';
 
-export const columns: ColumnDef<ReportsInput>[] = [
+export const columns: ColumnDef<ReportInput>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -100,7 +100,7 @@ export const columns: ColumnDef<ReportsInput>[] = [
   },
 ];
 
-function ActionCell({ report }: { report: ReportsInput }) {
+function ActionCell({ report }: { report: ReportInput }) {
   const { openDialog } = useReportDialog();
 
   return (
@@ -122,7 +122,7 @@ function ActionCell({ report }: { report: ReportsInput }) {
           className={cn(
             `text-[#FB2C36] bg-[#FB2C36]/10 rounded-lg p-1.5 hover:bg-[#FB2C36]/20 transition`,
           )}
-          onClick={() => openDialog('delete', report)}
+          onClick={() => openDialog('delete', report.id)}
         >
           <IconTrash className='w-[1.5em]! h-[1.5em]!' />
         </TooltipTrigger>

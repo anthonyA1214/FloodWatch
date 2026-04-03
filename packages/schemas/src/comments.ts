@@ -41,7 +41,7 @@ export const commentQuerySchema = z
     },
   );
 
-const CommentSchema = z.object({
+const commentSchema = z.object({
   id: z.number(),
   content: z.string(),
   image: z.string().nullable(),
@@ -57,7 +57,7 @@ const CommentSchema = z.object({
     .nullable(),
 });
 
-const CommentPreviewSchema = CommentSchema.pick({
+const commentPreviewSchema = commentSchema.pick({
   id: true,
   content: true,
   image: true,
@@ -65,8 +65,8 @@ const CommentPreviewSchema = CommentSchema.pick({
   author: true,
 });
 
-export const CommentsResponseSchema = z.object({
-  data: CommentSchema.array(),
+export const commentResponseSchema = z.object({
+  data: commentSchema.array(),
   meta: z.object({
     hasMore: z.boolean(),
     nextCursor: z
@@ -96,7 +96,7 @@ export const reportedCommentSchema = z.object({
 });
 
 export const reportedCommentDetailSchema = reportedCommentSchema.extend({
-  comment: CommentPreviewSchema,
+  comment: commentPreviewSchema,
   reviewer: z
     .object({
       id: z.number(),
@@ -134,9 +134,9 @@ export const reportedCommentActionSchema = z.object({
 export class CreateCommentDto extends createZodDto(createCommentSchema) {}
 export class UpdateCommentDto extends createZodDto(updateCommentSchema) {}
 export class CommentQueryDto extends createZodDto(commentQuerySchema) {}
-export class CommentDto extends createZodDto(CommentSchema) {}
-export class CommentPreviewDto extends createZodDto(CommentPreviewSchema) {}
-export class CommentsResponseDto extends createZodDto(CommentsResponseSchema) {}
+export class CommentDto extends createZodDto(commentSchema) {}
+export class CommentPreviewDto extends createZodDto(commentPreviewSchema) {}
+export class CommentResponseDto extends createZodDto(commentResponseSchema) {}
 export class ReportCommentDto extends createZodDto(reportCommentSchema) {}
 export class ReportedCommentDto extends createZodDto(reportedCommentSchema) {}
 export class ReportedCommentDetailDto extends createZodDto(
@@ -152,9 +152,9 @@ export class ReportedCommentActionDto extends createZodDto(
 export type CreateCommentInput = z.infer<typeof createCommentSchema>;
 export type UpdateCommentInput = z.infer<typeof updateCommentSchema>;
 export type CommentQueryInput = z.infer<typeof commentQuerySchema>;
-export type CommentInput = z.infer<typeof CommentSchema>;
-export type CommentPreviewInput = z.infer<typeof CommentPreviewSchema>;
-export type CommentsResponseInput = z.infer<typeof CommentsResponseSchema>;
+export type CommentInput = z.infer<typeof commentSchema>;
+export type CommentPreviewInput = z.infer<typeof commentPreviewSchema>;
+export type CommentResponseInput = z.infer<typeof commentResponseSchema>;
 export type ReportCommentInput = z.infer<typeof reportCommentSchema>;
 export type ReportedCommentInput = z.infer<typeof reportedCommentSchema>;
 export type ReportedCommentDetailInput = z.infer<

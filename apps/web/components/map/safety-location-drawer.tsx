@@ -20,7 +20,7 @@ import NoPhotoEmpty from '../shared/no-photo-empty';
 import { Button } from '../ui/button';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
-import { useSafetyDetail } from '@/hooks/use-safety-detail';
+import { useSafetyLocationDetail } from '@/hooks/use-safety-location-detail';
 import { SafetyLocationDrawerSkeleton } from './skeletons/safety-location-drawer-skeleton';
 
 const snapPoints = ['0px', '355px', 1];
@@ -39,7 +39,7 @@ export default function SafetyLocationDrawer({
     if (!isOpen) close?.();
   };
 
-  const { safetyDetail, isLoading } = useSafetyDetail(safetyId);
+  const { safetyDetail, isLoading } = useSafetyLocationDetail(safetyId);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 

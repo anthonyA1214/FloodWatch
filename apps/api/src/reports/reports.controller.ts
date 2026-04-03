@@ -24,8 +24,6 @@ import {
   CreateCommentDto,
   CreateFloodAlertDto,
   createFloodAlertSchema,
-  ReportFloodAlertDto,
-  reportFloodAlertSchema,
   ReportListQueryDto,
   ReportQueryDto,
   VoteDto,
@@ -100,17 +98,9 @@ export class ReportsController {
   @ApiBody({ type: ReportFloodAlertWithImageDto })
   async createReport(
     @Request() req: AuthRequest,
-    @Body() createFloodAlertDto: ReportFloodAlertDto,
+    @Body() createFloodAlertDto: CreateFloodAlertDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
-    const parsed = reportFloodAlertSchema.safeParse(createFloodAlertDto);
-    if (!parsed.success) {
-      throw new BadRequestException({
-        message: 'Validation failed',
-        issues: parsed.error.issues,
-      });
-    }
-
     return await this.reportsService.createReport(
       req.user.id,
       createFloodAlertDto,
@@ -170,7 +160,7 @@ export class ReportsController {
   }
 
   @Roles('admin')
-  @Delete(':id/delete')
+  @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard, UserStatusGuard)
   async deleteReport(@Param('id', ParseIntPipe) id: number) {
