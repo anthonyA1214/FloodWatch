@@ -8,7 +8,7 @@ import {
   SafetyLocationListItemInput,
   SafetyLocationListQueryInput,
 } from '@repo/schemas';
-import { useSafetyList } from '@/hooks/use-safety-list';
+import { useSafetyLocationList } from '@/hooks/use-safety-location-list';
 import {
   Select,
   SelectContent,
@@ -20,7 +20,7 @@ import SafetyLocationsCardSkeleton from '@/components/map/skeletons/safety-locat
 import LocationsListEmpty from '@/components/map/empty/locations-list-empty';
 import SafetyLocationsCard from '@/components/shared/safety-locations-card';
 import PagePagination from '@/components/shared/page-pagination';
-import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
+import { useSafetyLocationMapPins } from '@/hooks/use-safety-location-map-pins';
 import { useMapHighlight } from '@/contexts/map-highlight-context';
 
 export default function SafetyLocationsTab() {
@@ -39,7 +39,7 @@ export default function SafetyLocationsTab() {
     q: q || undefined,
   };
 
-  const { safetyMapPins } = useSafetyMapPins();
+  const { safetyMapPins } = useSafetyLocationMapPins();
   const { activePin, setActivePin } = useMapHighlight();
 
   const handleCardClick = (safetyId: number) => {
@@ -49,7 +49,7 @@ export default function SafetyLocationsTab() {
     }
   };
 
-  const { safetyList, meta, isLoading } = useSafetyList(params);
+  const { safetyList, meta, isLoading } = useSafetyLocationList(params);
 
   return (
     <>

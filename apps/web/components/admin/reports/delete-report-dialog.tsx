@@ -3,9 +3,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -30,6 +28,7 @@ export default function DeleteReportDialog() {
       await deleteReport(report.id);
       mutate(SWR_KEYS.reportMapPins);
       mutate(SWR_KEYS.reportDetail(report.id), null);
+      mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reportList);
       mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reports);
       closeDialog();
     } finally {

@@ -12,17 +12,20 @@ export const reportFloodAlertSchema = z.object({
 });
 
 export const createFloodAlertSchema = z.object({
-  locationName: z.string('Location name is required.'),
+  locationName: z.string().refine((val) => val.length > 0, {
+    error: 'Location name is required.',
+    abort: true,
+  }),
   latitude: z.coerce.number(),
   longitude: z.coerce.number(),
   range: z.coerce
-    .number('Affected radius is required.')
+    .number('Affected range is required.')
     .refine((val) => val > 0, {
-      error: 'Affected radius must be at least 1 meter.',
+      error: 'Affected range must be at least 1 meter.',
       abort: true,
     })
     .refine((val) => val <= 1000, {
-      error: 'Affected radius cannot exceed 1,000 meters.',
+      error: 'Affected range cannot exceed 1,000 meters.',
       abort: true,
     }),
   description: z

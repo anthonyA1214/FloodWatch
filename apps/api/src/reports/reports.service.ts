@@ -246,10 +246,11 @@ export class ReportsService {
 
   async createReport(
     userId: number,
-    floodAlertDto: ReportFloodAlertInput,
+    createFloodAlertDto: CreateFloodAlertInput,
     image: Express.Multer.File,
   ) {
-    const { latitude, longitude, severity, description, range } = floodAlertDto;
+    const { latitude, longitude, severity, description, range } =
+      createFloodAlertDto;
 
     let imageUrl: string | null = null;
     let imagePublicId: string | null = null;

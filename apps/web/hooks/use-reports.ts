@@ -2,13 +2,13 @@
 
 import useSWR from 'swr';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
-import { getReportsAdmin } from '@/lib/fetchers/get-reports-admin';
+import { getReports } from '@/lib/fetchers/get-reports';
 import { ReportQueryInput } from '@repo/schemas';
 
-export function useReportsAdmin(params: ReportQueryInput) {
+export function useReports(params: ReportQueryInput) {
   const { data, error, isLoading, isValidating, mutate } = useSWR(
     [SWR_KEYS.reports, params],
-    () => getReportsAdmin(params),
+    () => getReports(params),
     { keepPreviousData: true },
   );
 

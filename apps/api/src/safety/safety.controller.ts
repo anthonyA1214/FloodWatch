@@ -30,18 +30,18 @@ import { Public } from 'src/common/decorators/public.decorator';
 export class SafetyController {
   constructor(private safetyService: SafetyService) {}
 
-  @Public()
-  @Get('')
-  @HttpCode(HttpStatus.OK)
-  async getAllSafetyMapPins() {
-    return await this.safetyService.getAllSafetyMapPins();
-  }
-
   @Roles('admin')
-  @Get('admin')
+  @Get('')
   @HttpCode(HttpStatus.OK)
   async getAllSafety(@Query() safetyLocationQuery: SafetyLocationQueryDto) {
     return await this.safetyService.getAllSafety(safetyLocationQuery);
+  }
+
+  @Public()
+  @Get('map-pins')
+  @HttpCode(HttpStatus.OK)
+  async getAllSafetyMapPins() {
+    return await this.safetyService.getAllSafetyMapPins();
   }
 
   @Public()

@@ -10,7 +10,7 @@ import StatCardSkeleton from '@/components/shared/admin/skeleton/stat-card-skele
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
 import SafetyStatCards from './safety-stat-cards';
-import { useSafetyLocationsAdmin } from '@/hooks/use-safety-admin';
+import { useSafetyLocations } from '@/hooks/use-safety-locations';
 import { SafetyLocationQueryInput } from '@repo/schemas';
 import { SafetyLocationsDataTableSkeleton } from './skeleton/safety-locations-data-table-skeleton';
 import SafetyLocationsPageSkeleton from './skeleton/safety-locations-page-skeleton';
@@ -31,7 +31,7 @@ export default function SafetyLocationsView() {
   };
 
   const { safetyLocations, meta, stats, isLoading, isValidating } =
-    useSafetyLocationsAdmin(params);
+    useSafetyLocations(params);
 
   const isFirstLoad = !safetyLocations;
 

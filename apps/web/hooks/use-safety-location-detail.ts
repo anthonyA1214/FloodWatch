@@ -3,13 +3,13 @@
 import useSWR from 'swr';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { SafetyLocationDetailInput } from '@repo/schemas';
-import { getSafetyDetail } from '@/lib/fetchers/get-safety-detail';
+import { getSafetyLocationDetail } from '@/lib/fetchers/get-safety-location-detail';
 
-export function useSafetyDetail(safetyId: number | null) {
+export function useSafetyLocationDetail(safetyId: number | null) {
   const { data, error, isLoading, isValidating, mutate } =
     useSWR<SafetyLocationDetailInput>(
-      safetyId ? SWR_KEYS.safetyDetail(safetyId) : null,
-      () => getSafetyDetail(safetyId!),
+      safetyId ? SWR_KEYS.safetyLocationDetail(safetyId) : null,
+      () => getSafetyLocationDetail(safetyId!),
     );
 
   return {

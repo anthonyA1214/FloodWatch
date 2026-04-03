@@ -15,11 +15,12 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { useSafetyLocationsDialog } from '@/contexts/safety-locations-dialog-context';
-import { useSafetyDetail } from '@/hooks/use-safety-detail';
+import { useSafetyLocationDetail } from '@/hooks/use-safety-location-detail';
+import ViewSafetyLocationDialogSkeleton from './skeleton/view-safety-location-dialog-skeleton';
 
 export default function ViewSafetyLocationDialog() {
   const { safetyLocationId, isOpen, closeDialog } = useSafetyLocationsDialog();
-  const { safetyDetail, isLoading } = useSafetyDetail(safetyLocationId);
+  const { safetyDetail, isLoading } = useSafetyLocationDetail(safetyLocationId);
 
   const formattedTime = safetyDetail
     ? format(safetyDetail.createdAt, 'hh:mm a')
@@ -36,6 +37,7 @@ export default function ViewSafetyLocationDialog() {
             <VisuallyHidden>
               <DialogTitle>Safety Location</DialogTitle>
             </VisuallyHidden>
+            <ViewSafetyLocationDialogSkeleton />
           </>
         ) : (
           safetyDetail && (
@@ -152,15 +154,11 @@ export default function ViewSafetyLocationDialog() {
                                 ADDED ON
                               </span>
                               <div className='flex gap-2 items-center h-4'>
-                                <span className='text-sm font-medium'>
-                                  {formattedDate}
-                                </span>
+                                <span className='text-sm'>{formattedDate}</span>
 
                                 <IconPointFilled className='size-[0.5em]! shrink-0' />
 
-                                <span className='text-sm font-medium'>
-                                  {formattedTime}
-                                </span>
+                                <span className='text-sm'>{formattedTime}</span>
                               </div>
                             </div>
                           </div>

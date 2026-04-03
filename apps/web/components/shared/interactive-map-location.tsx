@@ -8,14 +8,17 @@ import { useBoundary } from '@/hooks/use-boundary';
 import { FloodMarker } from './markers/flood-marker';
 import { SafetyMarker } from './markers/safety-marker';
 
-type SafetyProps = {
-  variant: 'safety';
+type BaseProps = {
   longitude: number | null;
   latitude: number | null;
+};
+
+type SafetyProps = BaseProps & {
+  variant: 'safety';
   type: 'hospital' | 'shelter';
 };
 
-type ReportProps = {
+type ReportProps = BaseProps & {
   variant: 'report';
   longitude: number | null;
   latitude: number | null;

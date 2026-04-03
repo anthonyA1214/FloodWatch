@@ -125,7 +125,7 @@ export default function ViewReportedCommentDialog() {
                           <span className='font-medium'>
                             {reportedComment?.commenter?.name}
                           </span>
-                          <span className='text-sm text-gray-600'>
+                          <span className='text-sm opacity-50'>
                             {reportedComment?.commenter?.email}
                           </span>
                         </div>
@@ -195,7 +195,7 @@ export default function ViewReportedCommentDialog() {
                                   {reporter?.name}
                                 </span>
                                 {reporter?.createdAt && (
-                                  <span className='text-xs text-gray-600'>
+                                  <span className='text-xs opacity-50'>
                                     {format(reporter.createdAt, 'PPP p')}
                                   </span>
                                 )}

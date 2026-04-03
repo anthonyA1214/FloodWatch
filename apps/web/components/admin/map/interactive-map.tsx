@@ -17,7 +17,7 @@ import { getUserLocation } from '@/lib/utils/get-user-location';
 import { UserLocationMarker } from '@/components/shared/markers/user-location-marker';
 import { useReportMapPins } from '@/hooks/use-report-map-pins';
 import { useBoundary } from '@/hooks/use-boundary';
-import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
+import { useSafetyLocationMapPins } from '@/hooks/use-safety-location-map-pins';
 import { SafetyMarker } from '@/components/shared/markers/safety-marker';
 import { useMapHighlight } from '@/contexts/map-highlight-context';
 
@@ -36,7 +36,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
       latitude: number;
     } | null>(null);
     const { reportMapPins } = useReportMapPins();
-    const { safetyMapPins } = useSafetyMapPins();
+    const { safetyMapPins } = useSafetyLocationMapPins();
 
     const { flyToRef, activePin, setActivePin } = useMapHighlight();
 

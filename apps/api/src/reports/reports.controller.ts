@@ -100,17 +100,9 @@ export class ReportsController {
   @ApiBody({ type: ReportFloodAlertWithImageDto })
   async createReport(
     @Request() req: AuthRequest,
-    @Body() createFloodAlertDto: ReportFloodAlertDto,
+    @Body() createFloodAlertDto: CreateFloodAlertDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
-    const parsed = reportFloodAlertSchema.safeParse(createFloodAlertDto);
-    if (!parsed.success) {
-      throw new BadRequestException({
-        message: 'Validation failed',
-        issues: parsed.error.issues,
-      });
-    }
-
     return await this.reportsService.createReport(
       req.user.id,
       createFloodAlertDto,
