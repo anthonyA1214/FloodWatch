@@ -20,7 +20,7 @@ export default function StatCard({
         <Icon className='w-[1.5em]! h-[1.5em]!' />
       </div>
       <div className='grid space-y-2'>
-        <span className=' text-xl'>{label}</span>
+        <span className='font-poppins opacity-50 text-lg'>{label}</span>
         <h3 className='text-4xl font-bold'>{count}</h3>
       </div>
     </div>

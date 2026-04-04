@@ -38,7 +38,7 @@ export default function FloodReportsView() {
   if (isLoading && isFirstLoad) return <FloodReportsPageSkeleton />;
 
   return (
-    <div className='flex-1 flex flex-col bg-white p-8 rounded-2xl gap-8 min-h-0'>
+    <div className='flex-1 flex flex-col bg-white px-8 pt-8 rounded-2xl gap-8 min-h-0 overflow-y-auto'>
       {/* Header */}
       <h1 className='font-poppins text-3xl font-bold'>FLOOD REPORTS</h1>
 
@@ -85,28 +85,31 @@ export default function FloodReportsView() {
           </>
         )}
 
-        {isFirstLoad ? (
-          <div className='flex items-center justify-between'>
-            <Skeleton className='h-4 w-40' />
-            <PaginationSkeleton />
-          </div>
-        ) : (
-          <div className='flex items-center justify-between'>
-            <span className='text-sm text-gray-600'>
-              Showing {reports?.length ?? 0} of {stats?.totalCount ?? 0} reports
-            </span>
+        <div className='flex items-center justify-between pb-8'>
+          {isFirstLoad ? (
+            <>
+              <Skeleton className='h-4 w-40' />
+              <PaginationSkeleton />
+            </>
+          ) : (
+            <>
+              <span className='text-sm text-gray-600'>
+                Showing {reports?.length ?? 0} of {stats?.totalCount ?? 0}{' '}
+                reports
+              </span>
 
-            <div>
-              <PagePagination
-                currentPage={meta?.page ?? 1}
-                totalPages={meta?.totalPages ?? 1}
-                hasNextPage={meta?.hasNextPage ?? false}
-                hasPrevPage={meta?.hasPrevPage ?? false}
-                onPageChange={setPage}
-              />
-            </div>
-          </div>
-        )}
+              <div>
+                <PagePagination
+                  currentPage={meta?.page ?? 1}
+                  totalPages={meta?.totalPages ?? 1}
+                  hasNextPage={meta?.hasNextPage ?? false}
+                  hasPrevPage={meta?.hasPrevPage ?? false}
+                  onPageChange={setPage}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

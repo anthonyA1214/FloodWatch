@@ -72,7 +72,7 @@ export default function ReportedCommentsStatCard({
         />
       )}
       <h3 className='font-poppins font-semibold text-base xl:text-xl'>
-        {label}
+        {label.toUpperCase()}
       </h3>
       <div className='flex flex-col gap-2 flex-1'>
         <div className='flex justify-between flex-1'>
@@ -85,13 +85,13 @@ export default function ReportedCommentsStatCard({
                 : { backgroundColor: '#E0E0E0' }
             }
           >
-            <Icon className='w-[1.5em]! h-[1.5em]!' />
+            <Icon className='size-[1.5em]!' />
           </div>
         </div>
 
         {isActive && (
           <div className='flex gap-2 items-center text-sm' style={{ color }}>
-            <IconCircleCheck className='w-[1.5em]! h-[1.5em]!' />
+            <IconCircleCheck className='size-[1.5em]!' />
             <p>{statusText}</p>
           </div>
         )}

@@ -1,25 +1,20 @@
 import { formatDistanceToNow } from 'date-fns';
 import { IconClock, IconMapPin } from '@tabler/icons-react';
+import { SEVERITY_COLOR_MAP } from '@/lib/utils/get-color-map';
+import { Badge } from '@/components/ui/badge';
 
-export default function ActiveFloodAlertsCard({
+export default function AffectedLocationCard({
   severity = 'high',
   location = 'Barangay 176',
-  message = 'Floodwaters reaching waist level, residents advised to evacuate immediately.',
+  description = 'Floodwaters reaching waist level, residents advised to evacuate immediately.',
   reportedAt = '2026-01-28T10:30:00Z',
 }: {
   severity: 'critical' | 'high' | 'moderate' | 'low';
   location: string;
-  message: string;
+  description: string;
   reportedAt: string;
 }) {
-  const severityColorMap = {
-    critical: '#FB2C36',
-    high: '#FF6900',
-    moderate: '#F0B204',
-    low: '#2B7FFF',
-  };
-
-  const color = severityColorMap[severity];
+  const color = SEVERITY_COLOR_MAP[severity];
 
   return (
     <div
@@ -37,16 +32,16 @@ export default function ActiveFloodAlertsCard({
         </div>
 
         {/* Badge */}
-        <div
-          className='flex items-center rounded-full px-4 py-1.5'
+        <Badge
+          className='text-sm'
           style={{ color: color, backgroundColor: `${color}25` }}
         >
-          <span className='text-sm font-medium'>{severity.toUpperCase()}</span>
-        </div>
+          {severity?.toUpperCase()}
+        </Badge>
       </div>
 
-      {/* message */}
-      <p>{message}</p>
+      {/* description */}
+      <p>{description}</p>
 
       {/* reported at */}
       <div className='flex items-center text-sm gap-2 text-gray-600'>

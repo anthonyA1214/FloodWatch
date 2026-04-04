@@ -1,6 +1,8 @@
+import { Badge } from '@/components/ui/badge';
+import { SAFETY_TYPE_COLOR_MAP } from '@/lib/utils/get-color-map';
 import { IconClock, IconMapPin } from '@tabler/icons-react';
 
-export default function SafetyLocationsCard({
+export default function SafetyLocationCard({
   type = 'hospital',
   name = 'Community Safe Haven',
   address = '123 Safety St, Safeville',
@@ -11,12 +13,7 @@ export default function SafetyLocationsCard({
   address: string;
   availability: string;
 }) {
-  const typeColorMap = {
-    hospital: '#00D69B',
-    shelter: '#0066CC',
-  };
-
-  const color = typeColorMap[type];
+  const color = SAFETY_TYPE_COLOR_MAP[type];
 
   return (
     <div
@@ -34,12 +31,12 @@ export default function SafetyLocationsCard({
         </div>
 
         {/* Badge */}
-        <div
-          className='flex items-center rounded-full px-4 py-1.5'
+        <Badge
+          className='text-sm'
           style={{ color: color, backgroundColor: `${color}25` }}
         >
-          <span className='text-sm font-medium'>{type.toUpperCase()}</span>
-        </div>
+          {type?.toUpperCase()}
+        </Badge>
       </div>
 
       {/* address */}

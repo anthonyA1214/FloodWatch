@@ -54,7 +54,7 @@ export default function TopNav() {
             )}
             onClick={() => openLocations('affected-list')}
           >
-            <IconMapPinExclamation className='w-[1.5em]! h-[1.5em]! shrink-0' />
+            <IconMapPinExclamation className='size-[1.5em]! shrink-0 shrink-0' />
             <span className='font-medium truncate'>AFFECTED LOCATIONS</span>
           </button>
 
@@ -71,7 +71,7 @@ export default function TopNav() {
             )}
             onClick={() => openLocations('safety-list')}
           >
-            <IconShieldPin className='w-[1.5em]! h-[1.5em]! shrink-0' />
+            <IconShieldPin className='size-[1.5em]! shrink-0 shrink-0' />
             <span className='font-medium truncate'>SAFETY LOCATIONS</span>
           </button>
         </div>
@@ -96,7 +96,7 @@ export default function TopNav() {
                 openLocations('affected-list');
               }}
             >
-              <IconMapPinExclamation className='w-[1.5em]! h-[1.5em]!' />
+              <IconMapPinExclamation className='size-[1.5em]! shrink-0' />
               <span className='font-medium'> AFFECTED LOCATIONS</span>
             </button>
 
@@ -117,7 +117,7 @@ export default function TopNav() {
                 openLocations('safety-list');
               }}
             >
-              <IconShieldPin className='w-[1.5em]! h-[1.5em]!' />
+              <IconShieldPin className='size-[1.5em]! shrink-0' />
               <span className='font-medium'>SAFETY LOCATIONS</span>
             </button>
           </div>
@@ -137,7 +137,7 @@ export default function TopNav() {
                 className='text-base text-white hover:text-[#F5F5F5] active:text-[#EAEAEA] transition-colors shrink-0'
                 onClick={() => toggle('notification')}
               >
-                <IconBell className='w-[1.5em]! h-[1.5em]!' />
+                <IconBell className='size-[1.5em]! shrink-0' />
               </button>
 
               <button onClick={() => toggle('profile')}>

@@ -1,16 +1,14 @@
 'use client';
 
-import { TrendingUp } from 'lucide-react';
-import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
-
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  Bar,
+  BarChart,
+  CartesianGrid,
+  LabelList,
+  XAxis,
+  YAxis,
+} from 'recharts';
+
 import {
   ChartContainer,
   ChartTooltip,
@@ -18,38 +16,46 @@ import {
   type ChartConfig,
 } from '@/components/ui/chart';
 
-export const description = 'A bar chart';
+export const description = 'A bar chart with a label';
 
 const chartData = [
-  { month: 'January', desktop: 186 },
-  { month: 'February', desktop: 305 },
-  { month: 'March', desktop: 237 },
-  { month: 'April', desktop: 73 },
-  { month: 'May', desktop: 209 },
-  { month: 'June', desktop: 214 },
+  { month: 'January', reports: 186 },
+  { month: 'February', reports: 305 },
+  { month: 'March', reports: 237 },
+  { month: 'April', reports: 73 },
+  { month: 'May', reports: 209 },
+  { month: 'June', reports: 214 },
 ];
 
 const chartConfig = {
-  desktop: {
-    label: 'Desktop',
+  reports: {
+    label: 'Reports',
     color: 'var(--chart-1)',
   },
 } satisfies ChartConfig;
 
-export function MonthlyReportsChart() {
+export default function MonthlyReportsCard() {
   return (
-    <Card className='h-full'>
-      <CardHeader>
-        <CardTitle>Monthly Reports</CardTitle>
-        <CardDescription>
-          {' '}
-          Submitted Reports - From Last 6 months
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <BarChart accessibilityLayer data={chartData}>
+    <div className='h-full flex flex-col rounded-2xl border shadow-xs p-4 gap-4'>
+      {/*header*/}
+      <div className='flex flex-col'>
+        <h3 className='font-poppins font-medium text-lg'>MONTHLY REPORTS</h3>
+        <span className='opacity-50'>
+          Submitted reports for the last 6 months
+        </span>
+      </div>
+
+      <div>
+        <ChartContainer config={chartConfig} className='h-[250px] w-full'>
+          <BarChart
+            accessibilityLayer
+            data={chartData}
+            margin={{
+              top: 20,
+            }}
+          >
             <CartesianGrid vertical={false} />
+            <YAxis tickLine={false} axisLine={false} tickMargin={8} />
             <XAxis
               dataKey='month'
               tickLine={false}
@@ -61,10 +67,17 @@ export function MonthlyReportsChart() {
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey='desktop' fill='var(--color-desktop)' radius={8} />
+            <Bar dataKey='reports' fill='#0066CC' radius={8}>
+              <LabelList
+                position='top'
+                offset={12}
+                className='fill-foreground'
+                fontSize={12}
+              />
+            </Bar>
           </BarChart>
         </ChartContainer>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
