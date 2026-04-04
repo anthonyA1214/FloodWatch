@@ -38,9 +38,9 @@ export default function SafetyLocationsView() {
   if (isLoading && isFirstLoad) return <SafetyLocationsPageSkeleton />;
 
   return (
-    <div className='flex-1 flex flex-col bg-white p-8 rounded-2xl gap-8 min-h-0'>
+    <div className='flex-1 flex flex-col bg-white px-8 pt-8 rounded-2xl gap-8 min-h-0 overflow-y-auto'>
       {/* Header */}
-      <h1 className='font-poppins text-3xl font-bold'>Safety Locations</h1>
+      <h1 className='font-poppins text-3xl font-bold'>SAFETY LOCATIONS</h1>
 
       <div className='flex justify-between gap-4'>
         <div className='flex-1'>
@@ -55,7 +55,7 @@ export default function SafetyLocationsView() {
         </div>
       </div>
 
-      <div className='flex-1 flex flex-col min-h-0 gap-4'>
+      <div className='flex-1 flex flex-col min-h-0 gap-4 pb-8'>
         {isFirstLoad ? (
           <div className='grid grid-cols-3 gap-8'>
             {Array.from({ length: 3 }).map((_, i) => (
@@ -81,29 +81,31 @@ export default function SafetyLocationsView() {
           <DataTable columns={columns} data={safetyLocations || []} />
         )}
 
-        {isFirstLoad ? (
-          <div className='flex items-center justify-between'>
-            <Skeleton className='h-4 w-40' />
-            <PaginationSkeleton />
-          </div>
-        ) : (
-          <div className='flex items-center justify-between'>
-            <span className='text-sm text-gray-600'>
-              Showing {safetyLocations?.length ?? 0} of {stats?.totalCount ?? 0}{' '}
-              safety locations
-            </span>
+        <div className='flex items-center justify-between pb-8'>
+          {isFirstLoad ? (
+            <>
+              <Skeleton className='h-4 w-40' />
+              <PaginationSkeleton />
+            </>
+          ) : (
+            <>
+              <span className='text-sm text-gray-600'>
+                Showing {safetyLocations?.length ?? 0} of{' '}
+                {stats?.totalCount ?? 0} safety locations
+              </span>
 
-            <div>
-              <PagePagination
-                currentPage={meta?.page ?? 1}
-                totalPages={meta?.totalPages ?? 1}
-                hasNextPage={meta?.hasNextPage ?? false}
-                hasPrevPage={meta?.hasPrevPage ?? false}
-                onPageChange={setPage}
-              />
-            </div>
-          </div>
-        )}
+              <div>
+                <PagePagination
+                  currentPage={meta?.page ?? 1}
+                  totalPages={meta?.totalPages ?? 1}
+                  hasNextPage={meta?.hasNextPage ?? false}
+                  hasPrevPage={meta?.hasPrevPage ?? false}
+                  onPageChange={setPage}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

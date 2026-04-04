@@ -1,74 +1,82 @@
 'use client';
 
-import { Pie, PieChart, Cell } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Pie, PieChart } from 'recharts';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/components/ui/chart';
 
-/* static chart data matching the screenshot */
 const chartData = [
-  { label: 'Critical', value: 10, color: '#FF1D1D' },
-  { label: 'High', value: 7, color: '#FF7A00' },
-  { label: 'Moderate', value: 11, color: '#F2B600' },
-  { label: 'Low', value: 15, color: '#1F6FFF' },
+  { severity: 'critical', reports: 275, fill: '#FB2C36' },
+  { severity: 'high', reports: 200, fill: '#FF6900' },
+  { severity: 'moderate', reports: 187, fill: '#F0B204' },
+  { severity: 'low', reports: 173, fill: '#2B7FFF' },
 ];
 
-export function AlertDistributionPieChart() {
-  return (
-    <Card className='h-full rounded-2xl border border-slate-200 shadow-sm'>
-      {/* changed: header aligned to the left like the reference */}
-      <CardHeader className='pb-2'>
-        <CardTitle className='text-[20px] font-semibold text-slate-700'>
-          Alert Distribution
-        </CardTitle>
-      </CardHeader>
+const chartConfig = {
+  critical: {
+    label: 'Critical',
+    color: 'var(--chart-0)',
+  },
+  high: {
+    label: 'High',
+    color: 'var(--chart-1)',
+  },
+  moderate: {
+    label: 'Moderate',
+    color: 'var(--chart-2)',
+  },
+  low: {
+    label: 'Low',
+    color: 'var(--chart-3)',
+  },
+} satisfies ChartConfig;
 
-      {/* changed: content uses a 2-column layout for donut + legend */}
-      <CardContent className='flex h-full items-center justify-between gap-8 pt-2'>
-        {/* changed: donut chart section */}
-        <div className='flex items-center justify-center'>
-          <PieChart width={320} height={320}>
+export default function AlertDistributionCard() {
+  return (
+    <div className='flex flex-col rounded-2xl border shadow-xs p-4 gap-4'>
+      {/*header*/}
+      <div className='flex flex-col'>
+        <h3 className='font-poppins font-medium text-lg'>ALERT DISTRIBUTION</h3>
+        <span className='opacity-50'>
+          Overview of active alerts by severity level
+        </span>
+      </div>
+
+      <div className='grid grid-cols-2 gap-4 items-center'>
+        <ChartContainer
+          config={chartConfig}
+          className='aspect-square max-h-[350px]'
+        >
+          <PieChart>
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
             <Pie
               data={chartData}
-              dataKey='value'
-              nameKey='label'
-              cx='50%'
-              cy='50%'
-              innerRadius={70}
-              outerRadius={110}
-              stroke='none'
-            >
-              {chartData.map((entry) => (
-                <Cell key={entry.label} fill={entry.color} />
-              ))}
-            </Pie>
+              dataKey='reports'
+              nameKey='severity'
+              innerRadius={80}
+            />
           </PieChart>
-        </div>
+        </ChartContainer>
 
-        {/* changed: custom legend section to match screenshot */}
-        <div className='flex flex-1 flex-col justify-center gap-6 pe-4'>
+        <div className='flex flex-col justify-center space-y-2'>
           {chartData.map((item) => (
-            <div
-              key={item.label}
-              className='flex items-center justify-between gap-6'
-            >
-              <div className='flex items-center gap-4'>
-                {/* legend color dot */}
-                <span
-                  className='h-8 w-8 rounded-full'
-                  style={{ backgroundColor: item.color }}
-                />
-                <span className='text-[16px] font-medium text-slate-700'>
-                  {item.label}
-                </span>
-              </div>
-
-              {/* legend value */}
-              <span className='text-[16px] font-semibold text-slate-700'>
-                {item.value}
-              </span>
+            <div key={item.severity} className='flex items-center gap-2'>
+              <div
+                className='w-3 h-3 rounded-full shrink-0'
+                style={{ backgroundColor: item.fill }}
+              />
+              <span className='capitalize text-sm flex-1'>{item.severity}</span>
+              <span className='text-sm font-medium'>{item.reports}</span>
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

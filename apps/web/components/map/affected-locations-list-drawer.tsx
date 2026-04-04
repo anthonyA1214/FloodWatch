@@ -33,7 +33,7 @@ export default function AffectedLocationsListDrawer() {
     'all-levels' | 'critical' | 'high' | 'moderate' | 'low'
   >('all-levels');
   const [page, setPage] = useState(1);
-  const { q, filters } = useMapFilter();
+  const { q, setQ, setInputValue, filters } = useMapFilter();
 
   const activeSeverities =
     severity !== 'all-levels'
@@ -66,7 +66,11 @@ export default function AffectedLocationsListDrawer() {
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
-    if (!isOpen) close?.();
+    if (!isOpen) {
+      setQ('');
+      setInputValue('');
+      close?.();
+    }
   };
 
   return (

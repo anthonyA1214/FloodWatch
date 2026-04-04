@@ -14,6 +14,8 @@ export type MapFilterContextType = {
   resetFilters: () => void;
   q: string;
   setQ: (q: string) => void;
+  inputValue: string;
+  setInputValue: (v: string) => void;
   toggleSeverity: (severity: FloodSeverity) => void;
   toggleSafetyType: (safetyType: SafetyType) => void;
 };
@@ -34,6 +36,7 @@ export const DEFAULT_FILTERS: MapFilters = {
 export function useMapFilterState(): MapFilterContextType {
   const [filters, setFilters] = useState<MapFilters>(DEFAULT_FILTERS);
   const [q, setQ] = useState('');
+  const [inputValue, setInputValue] = useState('');
 
   const toggleSeverity = (severity: FloodSeverity) =>
     setFilters((prev) => {
@@ -59,5 +62,14 @@ export function useMapFilterState(): MapFilterContextType {
 
   const resetFilters = () => setFilters(DEFAULT_FILTERS);
 
-  return { filters, resetFilters, q, setQ, toggleSeverity, toggleSafetyType };
+  return {
+    filters,
+    resetFilters,
+    q,
+    setQ,
+    inputValue,
+    setInputValue,
+    toggleSeverity,
+    toggleSafetyType,
+  };
 }

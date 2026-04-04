@@ -40,7 +40,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className='rounded-lg border overflow-hidden flex flex-col flex-1 min-h-0'>
+    <div className='rounded-lg border overflow-hidden flex flex-col flex-1 min-h-[400px]'>
       {/* Sticky header */}
       <div className='overflow-hidden shrink-0'>
         <Table className='w-full table-fixed'>

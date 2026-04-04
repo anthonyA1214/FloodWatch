@@ -21,7 +21,6 @@ import RadiusCircle from '@/components/shared/radius-circle';
 import { FloodMarker } from '../shared/markers/flood-marker';
 import { getUserLocation } from '@/lib/utils/get-user-location';
 import { UserLocationMarker } from '../shared/markers/user-location-marker';
-import { SearchLocationMarker } from '../shared/markers/search-location-marker';
 import { useReportMapPins } from '@/hooks/use-report-map-pins';
 import { useBoundary } from '@/hooks/use-boundary';
 import { useSafetyLocationMapPins } from '@/hooks/use-safety-location-map-pins';
@@ -222,18 +221,6 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
             <UserLocationMarker />
           </Marker>
         )}
-
-        {/* Search-selected location pin */}
-        {/*{selectedLocation && (
-        <Marker
-          longitude={selectedLocation.longitude}
-          latitude={selectedLocation.latitude}
-          anchor='bottom'
-          style={{ pointerEvents: 'none', opacity: 0.8 }} // allow clicks to pass through to the map
-        >
-          <SearchLocationMarker />
-        </Marker>
-      )}*/}
 
         {activePopup?.type === 'report' && (
           <Popup
