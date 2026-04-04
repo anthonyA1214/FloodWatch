@@ -43,9 +43,20 @@ export type InteractiveMapHandle = {
 };
 
 const CLUSTER_ZOOM_THRESHOLD = 14;
-const CLUSTER_TO_PIN_BUFFER = 0.2;
-const PIN_SHOW_EARLY_OFFSET = 0.3;
 const CLUSTER_CLICK_EXTRA_ZOOM = 0.8;
+
+const REPORT_SEVERITY_STYLES = {
+  low: '#14B8A6',
+  moderate: '#F59E0B',
+  high: '#F97316',
+  critical: '#EF4444',
+} as const;
+
+const SAFETY_CLUSTER_COLOR = '#156CC2';
+
+type ClusterSource = GeoJSONSource & {
+  getClusterExpansionZoom: (clusterId: number) => Promise<number>;
+};
 
 type CombinedPin =
   | {
@@ -64,9 +75,7 @@ type CombinedPin =
       kind: 'safety';
     };
 
-type ClusterSource = GeoJSONSource & {
-  getClusterExpansionZoom: (clusterId: number) => Promise<number>;
-};
+type ReportSeverity = keyof typeof REPORT_SEVERITY_STYLES;
 
 const hasValidCoordinates = (longitude: number, latitude: number) =>
   Number.isFinite(longitude) && Number.isFinite(latitude);
@@ -122,10 +131,75 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
       [filteredReportMapPins, filteredSafetyMapPins],
     );
 
-    const combinedPinsGeoJson = useMemo(
+    const reportPinsBySeverity = useMemo(() => {
+      const grouped: Record<ReportSeverity, CombinedPin[]> = {
+        low: [],
+        moderate: [],
+        high: [],
+        critical: [],
+      };
+
+      for (const pin of combinedPins) {
+        if (pin.kind !== 'report') continue;
+        grouped[pin.severity].push(pin);
+      }
+
+      return grouped;
+    }, [combinedPins]);
+
+    const safetyPins = useMemo(
+      () => combinedPins.filter((pin) => pin.kind === 'safety'),
+      [combinedPins],
+    );
+
+    const reportPinsGeoJsonBySeverity = useMemo(
+      () =>
+        Object.fromEntries(
+          (Object.keys(REPORT_SEVERITY_STYLES) as ReportSeverity[]).map(
+            (severity) => [
+              severity,
+              {
+                type: 'FeatureCollection' as const,
+                features: reportPinsBySeverity[severity].map((pin) => ({
+                  type: 'Feature' as const,
+                  geometry: {
+                    type: 'Point' as const,
+                    coordinates: [pin.longitude, pin.latitude] as [
+                      number,
+                      number,
+                    ],
+                  },
+                  properties: {
+                    id: pin.id,
+                    kind: pin.kind,
+                    severity,
+                  },
+                })),
+              },
+            ],
+          ),
+        ) as Record<
+          ReportSeverity,
+          {
+            type: 'FeatureCollection';
+            features: Array<{
+              type: 'Feature';
+              geometry: { type: 'Point'; coordinates: [number, number] };
+              properties: {
+                id: number;
+                kind: 'report';
+                severity: ReportSeverity;
+              };
+            }>;
+          }
+        >,
+      [reportPinsBySeverity],
+    );
+
+    const safetyPinsGeoJson = useMemo(
       () => ({
         type: 'FeatureCollection' as const,
-        features: combinedPins.map((pin) => ({
+        features: safetyPins.map((pin) => ({
           type: 'Feature' as const,
           geometry: {
             type: 'Point' as const,
@@ -137,11 +211,12 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
           },
         })),
       }),
-      [combinedPins],
+      [safetyPins],
     );
 
-    const showClusters = zoom < CLUSTER_ZOOM_THRESHOLD + CLUSTER_TO_PIN_BUFFER;
-    const showPins = zoom >= CLUSTER_ZOOM_THRESHOLD - PIN_SHOW_EARLY_OFFSET;
+    // Clusters are fully hidden slightly before pins appear to avoid remnants
+    const showClusters = zoom < CLUSTER_ZOOM_THRESHOLD - 0.05;
+    const showPins = zoom >= CLUSTER_ZOOM_THRESHOLD;
 
     const {
       activePopup,
@@ -207,13 +282,44 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
         }),
     }));
 
+    const handleMapMouseMove = (event: MapLayerMouseEvent) => {
+      const canvas = mapRef.current?.getMap().getCanvas();
+      if (!canvas) return;
+
+      const hoveringCluster = event.features?.some(
+        (feature) =>
+          feature.layer.id === 'report-low-clusters' ||
+          feature.layer.id === 'report-low-cluster-count' ||
+          feature.layer.id === 'report-moderate-clusters' ||
+          feature.layer.id === 'report-moderate-cluster-count' ||
+          feature.layer.id === 'report-high-clusters' ||
+          feature.layer.id === 'report-high-cluster-count' ||
+          feature.layer.id === 'report-critical-clusters' ||
+          feature.layer.id === 'report-critical-cluster-count' ||
+          feature.layer.id === 'safety-clusters' ||
+          feature.layer.id === 'safety-cluster-count',
+      );
+      canvas.style.cursor = hoveringCluster ? 'pointer' : '';
+    };
+
     const handleMapClick = (event: MapLayerMouseEvent) => {
       const map = mapRef.current?.getMap();
       if (!map) return;
 
       const clickedCluster = map
         .queryRenderedFeatures(event.point, {
-          layers: ['clusters', 'cluster-count'],
+          layers: [
+            'report-low-clusters',
+            'report-low-cluster-count',
+            'report-moderate-clusters',
+            'report-moderate-cluster-count',
+            'report-high-clusters',
+            'report-high-cluster-count',
+            'report-critical-clusters',
+            'report-critical-cluster-count',
+            'safety-clusters',
+            'safety-cluster-count',
+          ],
         })
         .find((feature) => feature.properties?.cluster);
 
@@ -228,9 +334,8 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
       const clusterId = Number(clusterIdRaw);
       if (!Number.isFinite(clusterId)) return;
 
-      const source = map.getSource('all-pins-source') as
-        | ClusterSource
-        | undefined;
+      const sourceId = clickedCluster.source;
+      const source = map.getSource(sourceId) as ClusterSource | undefined;
       if (!source || typeof source.getClusterExpansionZoom !== 'function') {
         return;
       }
@@ -267,19 +372,21 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
         mapStyle='https://tiles.openfreemap.org/styles/bright'
         attributionControl={false}
         dragRotate={false}
-        interactiveLayerIds={['clusters', 'cluster-count']}
+        interactiveLayerIds={[
+          'report-low-clusters',
+          'report-low-cluster-count',
+          'report-moderate-clusters',
+          'report-moderate-cluster-count',
+          'report-high-clusters',
+          'report-high-cluster-count',
+          'report-critical-clusters',
+          'report-critical-cluster-count',
+          'safety-clusters',
+          'safety-cluster-count',
+        ]}
         onZoom={(event) => setZoom(event.viewState.zoom)}
         onClick={handleMapClick}
-        onMouseMove={(event) => {
-          const canvas = mapRef.current?.getMap().getCanvas();
-          if (!canvas) return;
-          const hoveringCluster = event.features?.some(
-            (feature) =>
-              feature.layer.id === 'clusters' ||
-              feature.layer.id === 'cluster-count',
-          );
-          canvas.style.cursor = hoveringCluster ? 'pointer' : '';
-        }}
+        onMouseMove={handleMapMouseMove}
       >
         {/* boundary fill */}
         {caloocanGeoJSON && (
@@ -313,24 +420,186 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
           </Source>
         )}
 
-        {/* Combined cluster source for all map pins */}
-        {combinedPins.length > 0 && showClusters && (
+        {/* Report clusters by severity */}
+        {showClusters &&
+          (Object.keys(REPORT_SEVERITY_STYLES) as ReportSeverity[]).map(
+            (severity) => {
+              const sourceId = `report-${severity}`;
+              const clusterLayerId = `${sourceId}-clusters`;
+              const countLayerId = `${sourceId}-cluster-count`;
+
+              return (
+                <Source
+                  key={sourceId}
+                  id={sourceId}
+                  type='geojson'
+                  data={reportPinsGeoJsonBySeverity[severity]}
+                  cluster={true}
+                  clusterMaxZoom={CLUSTER_ZOOM_THRESHOLD}
+                  clusterRadius={56}
+                >
+                  {/* Outer glow ring layer - static, tight to circle, fades out before pins */}
+                  <Layer
+                    id={`${clusterLayerId}-glow`}
+                    type='circle'
+                    filter={['has', 'point_count']}
+                    paint={{
+                      'circle-color': REPORT_SEVERITY_STYLES[severity],
+                      'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        34,
+                        10,
+                        38,
+                        25,
+                        42,
+                      ],
+                      'circle-opacity': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        13.4,
+                        0.18,
+                        13.95,
+                        0,
+                      ],
+                    }}
+                  />
+                  <Layer
+                    id={clusterLayerId}
+                    type='circle'
+                    filter={['has', 'point_count']}
+                    paint={{
+                      'circle-color': REPORT_SEVERITY_STYLES[severity],
+                      'circle-stroke-color': '#FFFFFF',
+                      'circle-stroke-width': 3,
+                      'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        28,
+                        10,
+                        32,
+                        25,
+                        36,
+                      ],
+                      'circle-opacity': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        13.4,
+                        1,
+                        13.95,
+                        0,
+                      ],
+                    }}
+                  />
+                  {/* Cluster count label */}
+                  <Layer
+                    id={countLayerId}
+                    type='symbol'
+                    filter={['has', 'point_count']}
+                    layout={{
+                      'text-field': [
+                        'format',
+                        ['get', 'point_count_abbreviated'],
+                        {},
+                        '\n',
+                        {},
+                        severity,
+                      ],
+                      'text-anchor': 'center',
+                      'text-justify': 'center',
+                      'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                      'text-size': 12,
+                      'text-max-width': 56,
+                      'text-line-height': 0.9,
+                      'text-allow-overlap': true,
+                    }}
+                    paint={{
+                      'text-color': '#FFFFFF',
+                      'text-halo-color': 'rgba(0, 0, 0, 0.15)',
+                      'text-halo-width': 0.75,
+                      'text-opacity': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        13.4,
+                        1,
+                        13.95,
+                        0,
+                      ],
+                    }}
+                  />
+                </Source>
+              );
+            },
+          )}
+
+        {/* Safety clusters - Pill shaped with animated glow */}
+        {showClusters && safetyPinsGeoJson.features.length > 0 && (
           <Source
-            id='all-pins-source'
+            id='safety-source'
             type='geojson'
-            data={combinedPinsGeoJson}
+            data={safetyPinsGeoJson}
             cluster={true}
             clusterMaxZoom={CLUSTER_ZOOM_THRESHOLD}
             clusterRadius={56}
           >
+            {/* Outer glow ring layer - static, tight to circle, fades out before pins */}
             <Layer
-              id='clusters'
+              id='safety-clusters-glow'
               type='circle'
               filter={['has', 'point_count']}
               paint={{
-                'circle-color': '#156CC2',
+                'circle-color': SAFETY_CLUSTER_COLOR,
+                'circle-radius': [
+                  'step',
+                  ['get', 'point_count'],
+                  34,
+                  10,
+                  38,
+                  25,
+                  42,
+                ],
+                'circle-opacity': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  13.4,
+                  0.18,
+                  13.95,
+                  0,
+                ],
+              }}
+            />
+            {/* Pill shape background layer */}
+            <Layer
+              id='safety-clusters-pill-bg'
+              type='circle'
+              filter={['has', 'point_count']}
+              paint={{
+                'circle-color': SAFETY_CLUSTER_COLOR,
+                'circle-radius': [
+                  'step',
+                  ['get', 'point_count'],
+                  32,
+                  10,
+                  38,
+                  25,
+                  42,
+                ],
+                'circle-opacity': 0.2,
+              }}
+            />
+            {/* Main cluster circle - pill look, fades out before pins */}
+            <Layer
+              id='safety-clusters'
+              type='circle'
+              filter={['has', 'point_count']}
+              paint={{
+                'circle-color': SAFETY_CLUSTER_COLOR,
                 'circle-stroke-color': '#FFFFFF',
-                'circle-stroke-width': 5,
+                'circle-stroke-width': 3,
                 'circle-radius': [
                   'step',
                   ['get', 'point_count'],
@@ -340,19 +609,51 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
                   25,
                   36,
                 ],
+                'circle-opacity': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  13.4,
+                  1,
+                  13.95,
+                  0,
+                ],
               }}
             />
             <Layer
-              id='cluster-count'
+              id='safety-cluster-count'
               type='symbol'
               filter={['has', 'point_count']}
               layout={{
-                'text-field': ['get', 'point_count_abbreviated'],
+                'text-field': [
+                  'format',
+                  ['get', 'point_count_abbreviated'],
+                  {},
+                  '\n',
+                  {},
+                  'safety',
+                ],
+                'text-anchor': 'center',
+                'text-justify': 'center',
                 'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-                'text-size': 22,
+                'text-size': 12,
+                'text-max-width': 56,
+                'text-line-height': 0.9,
+                'text-allow-overlap': true,
               }}
               paint={{
                 'text-color': '#FFFFFF',
+                'text-halo-color': 'rgba(0, 0, 0, 0.15)',
+                'text-halo-width': 0.75,
+                'text-opacity': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  13.4,
+                  1,
+                  13.95,
+                  0,
+                ],
               }}
             />
           </Source>
