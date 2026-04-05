@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Popover,
   PopoverContent,
@@ -18,6 +19,7 @@ import {
   MapFilters,
   SafetyType,
 } from '@/contexts/map-filter-base';
+import { cn } from '@/lib/utils';
 
 type MapFilterPopoverProps = {
   filters: MapFilters;
@@ -32,12 +34,17 @@ export default function MapFilterPopover({
   toggleSafetyType,
   resetFilters,
 }: MapFilterPopoverProps) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div className='flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 pointer-events-auto'>
           <button
-            className='aspect-square hover:bg-gray-200 rounded-md p-1'
+            className={cn(
+              'aspect-square rounded-md p-1',
+              open ? 'bg-[#0066CC] text-white' : 'hover:bg-gray-200',
+            )}
             title='Filter'
           >
             <IconAdjustmentsHorizontal
