@@ -15,17 +15,8 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
-
-export const description = 'A bar chart with a label';
-
-const chartData = [
-  { month: 'January', reports: 186 },
-  { month: 'February', reports: 305 },
-  { month: 'March', reports: 237 },
-  { month: 'April', reports: 73 },
-  { month: 'May', reports: 209 },
-  { month: 'June', reports: 214 },
-];
+import { useMonthlyReports } from '@/hooks/use-dashboard';
+import MonthlyReportsCardSkeleton from './skeleton/monthly-reports-card-skeleton';
 
 const chartConfig = {
   reports: {
@@ -35,6 +26,10 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function MonthlyReportsCard() {
+  const { monthlyReports, isLoading } = useMonthlyReports();
+
+  if (isLoading) return <MonthlyReportsCardSkeleton />;
+
   return (
     <div className='h-full flex flex-col rounded-2xl border shadow-xs p-4 gap-4'>
       {/*header*/}
@@ -49,7 +44,7 @@ export default function MonthlyReportsCard() {
         <ChartContainer config={chartConfig} className='h-[250px] w-full'>
           <BarChart
             accessibilityLayer
-            data={chartData}
+            data={monthlyReports}
             margin={{
               top: 20,
             }}
@@ -57,11 +52,11 @@ export default function MonthlyReportsCard() {
             <CartesianGrid vertical={false} />
             <YAxis tickLine={false} axisLine={false} tickMargin={8} />
             <XAxis
-              dataKey='month'
+              dataKey='monthName'
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
+              // tickFormatter={(value) => value.slice(0, 3)}
             />
             <ChartTooltip
               cursor={false}

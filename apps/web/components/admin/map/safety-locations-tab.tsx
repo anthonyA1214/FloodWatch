@@ -102,28 +102,37 @@ export default function SafetyLocationsTab() {
         </Select>
 
         <div className='flex-1 overflow-hidden min-h-0'>
-          <div className='space-y-4 p-4 overflow-y-auto h-full'>
+          <div className='flex flex-col p-4 overflow-y-auto h-full'>
             {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <SafetyLocationsCardSkeleton key={i} />
-              ))
-            ) : !safetyList || safetyList?.length === 0 ? (
-              <LocationsListEmpty />
+              <div className='space-y-4'>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <SafetyLocationsCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : safetyList && safetyList.length > 0 ? (
+              <div className='space-y-4'>
+                {safetyList?.map((safety: SafetyLocationListItemInput) => (
+                  <SafetyLocationsCard
+                    key={safety.id}
+                    isActive={
+                      activePin?.type === 'safety' &&
+                      activePin.safety.id === safety.id
+                    }
+                    type={safety.type}
+                    location={safety.location}
+                    address={safety.address}
+                    availability={safety.availability}
+                    onClick={() => handleCardClick(safety.id)}
+                  />
+                ))}
+              </div>
             ) : (
-              safetyList?.map((safety: SafetyLocationListItemInput) => (
-                <SafetyLocationsCard
-                  key={safety.id}
-                  isActive={
-                    activePin?.type === 'safety' &&
-                    activePin.safety.id === safety.id
-                  }
-                  type={safety.type}
-                  location={safety.location}
-                  address={safety.address}
-                  availability={safety.availability}
-                  onClick={() => handleCardClick(safety.id)}
+              <div className='flex items-center justify-center h-full'>
+                <LocationsListEmpty
+                  title='No safety locations found'
+                  description='Try adjusting your filters or check back later for updates.'
                 />
-              ))
+              </div>
             )}
           </div>
         </div>

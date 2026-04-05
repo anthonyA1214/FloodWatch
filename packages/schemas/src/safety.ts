@@ -74,6 +74,8 @@ export const updateSafetyLocationSchema = createSafetyLocationSchema.extend({
     .optional(),
 });
 
+export const recentSafetyLocationsSchema = safetyLocationListItemSchema;
+
 export class CreateSafetyLocationDto extends createZodDto(
   createSafetyLocationSchema,
 ) {}
@@ -95,6 +97,9 @@ export class SafetyLocationListQueryDto extends createZodDto(
 ) {}
 export class UpdateSafetyLocationDto extends createZodDto(
   updateSafetyLocationSchema,
+) {}
+export class RecentSafetyLocationsDto extends createZodDto(
+  recentSafetyLocationsSchema,
 ) {}
 
 export type CreateSafetyLocationInput = z.infer<
@@ -118,4 +123,7 @@ export type SafetyLocationListQueryInput = z.infer<
 >;
 export type UpdateSafetyLocationInput = z.infer<
   typeof updateSafetyLocationSchema
+>;
+export type RecentSafetyLocationsInput = z.infer<
+  typeof recentSafetyLocationsSchema
 >;

@@ -20,6 +20,7 @@ import { useBoundary } from '@/hooks/use-boundary';
 import { useSafetyLocationMapPins } from '@/hooks/use-safety-location-map-pins';
 import { SafetyMarker } from '@/components/shared/markers/safety-marker';
 import { useMapHighlight } from '@/contexts/map-highlight-context';
+import { useMapFilterAdmin } from '@/contexts/map-filter-admin-context';
 
 export type InteractiveMapHandle = {
   zoomIn: () => void;
@@ -39,6 +40,14 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
     const { safetyMapPins } = useSafetyLocationMapPins();
 
     const { flyToRef, activePin, setActivePin } = useMapHighlight();
+
+    const { filters } = useMapFilterAdmin();
+    const filteredReportMapPins = reportMapPins?.filter((r) =>
+      filters.severities.has(r.severity),
+    );
+    const filteredSafetyMapPins = safetyMapPins?.filter((r) =>
+      filters.safetyTypes.has(r.type),
+    );
 
     useEffect(() => {
       flyToRef.current = (loc) => {
@@ -118,7 +127,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
         )}
 
         {/* Flood report pins */}
-        {reportMapPins?.map((report) => (
+        {filteredReportMapPins?.map((report) => (
           <Fragment key={report.id}>
             <Marker
               key={report.id}
@@ -150,7 +159,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
         ))}
 
         {/* safety locations pin */}
-        {safetyMapPins?.map((location) => (
+        {filteredSafetyMapPins?.map((location) => (
           <Marker
             key={location.id}
             longitude={location.longitude}

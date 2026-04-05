@@ -100,29 +100,38 @@ export default function AffectedLocationsTab() {
           </SelectContent>
         </Select>
 
-        <div className='flex-1 overflow-hidden min-h-0'>
-          <div className='space-y-4 p-4 overflow-y-auto h-full'>
+        <div className='flex-1 overflow-hidden min-h-0 h-full'>
+          <div className='flex flex-col p-4 overflow-y-auto h-full'>
             {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <AffectedLocationsCardSkeleton key={i} />
-              ))
-            ) : !reportList || reportList.length === 0 ? (
-              <LocationsListEmpty />
+              <div className='space-y-4'>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <AffectedLocationsCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : reportList && reportList.length > 0 ? (
+              <div className='space-y-4'>
+                {reportList?.map((report: ReportListItemInput) => (
+                  <AffectedLocationsCard
+                    key={report.id}
+                    isActive={
+                      activePin?.type === 'report' &&
+                      activePin?.report?.id === report.id
+                    }
+                    severity={report.severity}
+                    location={report?.location}
+                    description={report?.description}
+                    reportedAt={report?.reportedAt}
+                    onClick={() => handleCardClick(report.id)}
+                  />
+                ))}
+              </div>
             ) : (
-              reportList?.map((report: ReportListItemInput) => (
-                <AffectedLocationsCard
-                  key={report.id}
-                  isActive={
-                    activePin?.type === 'report' &&
-                    activePin?.report?.id === report.id
-                  }
-                  severity={report.severity}
-                  location={report?.location}
-                  description={report?.description}
-                  reportedAt={report?.reportedAt}
-                  onClick={() => handleCardClick(report.id)}
+              <div className='flex items-center justify-center h-full'>
+                <LocationsListEmpty
+                  title='No affected locations found'
+                  description='Try adjusting your filters or check back later for updates.'
                 />
-              ))
+              </div>
             )}
           </div>
         </div>

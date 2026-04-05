@@ -23,4 +23,11 @@ export const SWR_KEYS = {
 
   weather: (lat: number, lon: number) =>
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&current=weather_code,temperature_2m,is_day,relative_humidity_2m,wind_speed_10m&timezone=auto`,
+
+  dashboardStats: '/dashboard/stats',
+  recentReports: '/reports/recent',
+  recentSafetyLocations: '/safety/recent',
+  reportsNeedingAttention: '/reports/needs-attention',
+  monthlyReports: '/reports/monthly',
+  reportDistribution: '/reports/distribution',
 };

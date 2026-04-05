@@ -81,7 +81,7 @@ export const reportDetailSchema = reportSchema.extend({
 export const reportListItemSchema = z.object({
   id: z.number(),
   location: z.string(),
-  description: z.string().nullable(),
+  description: z.string().optional(),
   severity: severityEnum,
   reportedAt: z.date(),
 });
@@ -103,6 +103,24 @@ export const reportListQuerySchema = z.object({
   q: z.string().optional(),
 });
 
+export const recentReportsSchema = reportListItemSchema;
+
+export const reportNeedingAttentionSchema = reportListItemSchema
+  .pick({
+    id: true,
+    location: true,
+    description: true,
+    reportedAt: true,
+  })
+  .extend({
+    confirms: z.number(),
+  });
+
+export const ReportDistributionSchema = z.object({
+  severity: severityEnum,
+  reports: z.number(),
+});
+
 export class ReportFloodAlertDto extends createZodDto(reportFloodAlertSchema) {}
 export class CreateFloodAlertDto extends createZodDto(createFloodAlertSchema) {}
 export class ReportMapPinDto extends createZodDto(reportMapPinSchema) {}
@@ -111,6 +129,13 @@ export class ReportDetailDto extends createZodDto(reportDetailSchema) {}
 export class ReportListItemDto extends createZodDto(reportListItemSchema) {}
 export class ReportQueryDto extends createZodDto(reportQuerySchema) {}
 export class ReportListQueryDto extends createZodDto(reportListQuerySchema) {}
+export class ReportDistributionDto extends createZodDto(
+  ReportDistributionSchema,
+) {}
+export class RecentReportDto extends createZodDto(recentReportsSchema) {}
+export class ReportNeedingAttentionDto extends createZodDto(
+  reportNeedingAttentionSchema,
+) {}
 
 export type ReportFloodAlertInput = z.infer<typeof reportFloodAlertSchema>;
 export type CreateFloodAlertInput = z.infer<typeof createFloodAlertSchema>;
@@ -120,3 +145,8 @@ export type ReportDetailInput = z.infer<typeof reportDetailSchema>;
 export type ReportListItemInput = z.infer<typeof reportListItemSchema>;
 export type ReportQueryInput = z.infer<typeof reportQuerySchema>;
 export type ReportListQueryInput = z.infer<typeof reportListQuerySchema>;
+export type ReportDistributionInput = z.infer<typeof ReportDistributionSchema>;
+export type RecentReportInput = z.infer<typeof recentReportsSchema>;
+export type ReportNeedingAttentionInput = z.infer<
+  typeof reportNeedingAttentionSchema
+>;

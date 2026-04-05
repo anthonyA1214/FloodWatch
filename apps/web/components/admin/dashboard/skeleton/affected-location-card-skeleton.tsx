@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function ActiveFloodAlertsCardSkeleton() {
+export default function AffectedLocationCardSkeleton() {
   return (
     <div className='grid border-l-4 border-gray-200 rounded-lg p-4 gap-4 bg-gray-50'>
       <div className='flex justify-between gap-8 items-center'>

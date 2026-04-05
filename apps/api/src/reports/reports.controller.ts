@@ -70,6 +70,34 @@ export class ReportsController {
     return await this.reportsService.getReportList(reportListQuery);
   }
 
+  @Roles('admin')
+  @Get('recent')
+  @HttpCode(HttpStatus.OK)
+  async getRecentReports() {
+    return await this.reportsService.getRecentReports();
+  }
+
+  @Roles('admin')
+  @Get('needs-attention')
+  @HttpCode(HttpStatus.OK)
+  async getreportsNeedingAttention() {
+    return await this.reportsService.getReportsNeedingAttention();
+  }
+
+  @Roles('admin')
+  @Get('monthly')
+  @HttpCode(HttpStatus.OK)
+  async getMonthlyReport() {
+    return await this.reportsService.getMonthlyReport();
+  }
+
+  @Roles('admin')
+  @Get('distribution')
+  @HttpCode(HttpStatus.OK)
+  async getReportDistribution() {
+    return await this.reportsService.getReportDistribution();
+  }
+
   @Public()
   @Get(':id')
   @HttpCode(HttpStatus.OK)

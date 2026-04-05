@@ -5,11 +5,7 @@ export async function getWeather(lat: number | null, lon: number | null) {
 
   const res = await fetch(SWR_KEYS.weather(lat, lon));
 
-  if (!res.ok) {
-    console.error('WEATHER ERROR:', res.status);
-    return null;
-  }
+  if (!res.ok) throw new Error('Failed to fetch weather data');
 
-  const data = await res.json();
-  return data;
+  return res.json();
 }

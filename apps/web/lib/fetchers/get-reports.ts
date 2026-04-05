@@ -29,8 +29,7 @@ export async function getReports(params: ReportQueryInput) {
     );
 
     return res.json();
-  } catch (error) {
-    console.error('Error fetching reports data:', error);
-    throw new Error('Failed to fetch reports data');
+  } catch {
+    throw new Error('Failed to fetch reports');
   }
 }

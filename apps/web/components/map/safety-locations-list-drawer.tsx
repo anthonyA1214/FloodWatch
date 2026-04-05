@@ -149,7 +149,10 @@ export default function SafetyLocationsListDrawer() {
                   <SafetyLocationsCardSkeleton key={i} />
                 ))
               ) : !safetyList || safetyList?.length === 0 ? (
-                <LocationsListEmpty />
+                <LocationsListEmpty
+                  title='No safety locations found'
+                  description='Try adjusting your filters or check back later for updates.'
+                />
               ) : (
                 safetyList?.map((safety: SafetyLocationListItemInput) => (
                   <SafetyLocationsCard

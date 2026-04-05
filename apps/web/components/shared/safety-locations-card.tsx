@@ -3,10 +3,10 @@ import { IconCircleCheck, IconMapPin } from '@tabler/icons-react';
 import { Badge } from '../ui/badge';
 
 export default function SafetyLocationsCard({
-  type = 'hospital',
-  isActive = false,
-  location = 'Community Safe Haven',
-  address = '123 Safety St, Safeville',
+  type,
+  isActive,
+  location,
+  address,
   availability,
   onClick,
 }: {
@@ -32,7 +32,7 @@ export default function SafetyLocationsCard({
         {/* Location */}
         <div className='font-poppins flex items-start gap-2 text-sm font-semibold'>
           <IconMapPin
-            className='w-[1.5em]! h-[1.5em]! shrink-0!'
+            className='size-[1.5em]! shrink-0!'
             style={{ color: color }}
           />
           {location}
@@ -48,12 +48,12 @@ export default function SafetyLocationsCard({
       </div>
 
       {/* address */}
-      <p className='text-sm'>{address}</p>
+      <p className='text-sm line-clamp-2'>{address}</p>
 
       {/* availability */}
       {availability && (
         <div className='flex items-center text-xs gap-2 text-gray-600'>
-          <IconCircleCheck className='w-[1.5em]! h-[1.5em]!' />
+          <IconCircleCheck className='size-[1.5em]! shrink-0' />
           {availability}
         </div>
       )}

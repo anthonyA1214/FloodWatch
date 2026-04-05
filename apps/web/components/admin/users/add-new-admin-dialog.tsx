@@ -11,12 +11,18 @@ import {
 } from '@/components/ui/dialog';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group';
 import { Spinner } from '@/components/ui/spinner';
 import { apiFetchClient } from '@/lib/api-fetch-client';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { cn } from '@/lib/utils';
 import { createAdminSchema } from '@repo/schemas';
-import { IconUserPlus } from '@tabler/icons-react';
+import { IconEye, IconEyeOff, IconUserPlus } from '@tabler/icons-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useSWRConfig } from 'swr';
@@ -34,6 +40,9 @@ export default function AddNewAdminDialog() {
   });
 
   const [isPending, setIsPending] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // form data
   const [formData, setFormData] = useState({
@@ -276,15 +285,31 @@ export default function AddNewAdminDialog() {
               >
                 PASSWORD
               </FieldLabel>
-              <Input
-                id='password'
-                name='password'
-                type='password'
-                placeholder='Enter password'
-                value={formData.password}
-                onChange={handleChange}
-                aria-invalid={!!state.errors?.password?.length}
-              />
+              <InputGroup>
+                <InputGroupInput
+                  id='password'
+                  name='password'
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder='Enter password'
+                  value={formData.password}
+                  onChange={handleChange}
+                  aria-invalid={!!state.errors?.password?.length}
+                />
+                {formData.password.length > 0 && (
+                  <InputGroupAddon align='inline-end'>
+                    <InputGroupButton
+                      className='bg-transparent! hover:bg-transparent!'
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? (
+                        <IconEyeOff className='size-[1.5em]! shrink-0' />
+                      ) : (
+                        <IconEye className='size-[1.5em]! shrink-0' />
+                      )}
+                    </InputGroupButton>
+                  </InputGroupAddon>
+                )}
+              </InputGroup>
 
               {state.errors?.password && (
                 <FieldError>{state.errors.password[0]}</FieldError>
@@ -299,15 +324,31 @@ export default function AddNewAdminDialog() {
               >
                 CONFIRM PASSWORD
               </FieldLabel>
-              <Input
-                id='confirm_password'
-                name='confirm_password'
-                type='password'
-                placeholder='Enter password'
-                value={formData.confirm_password}
-                onChange={handleChange}
-                aria-invalid={!!state.errors?.confirm_password?.length}
-              />
+              <InputGroup>
+                <InputGroupInput
+                  id='confirm_password'
+                  name='confirm_password'
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder='Enter confirm password'
+                  value={formData.confirm_password}
+                  onChange={handleChange}
+                  aria-invalid={!!state.errors?.confirm_password?.length}
+                />
+                {formData.confirm_password.length > 0 && (
+                  <InputGroupAddon align='inline-end'>
+                    <InputGroupButton
+                      className='bg-transparent! hover:bg-transparent!'
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    >
+                      {showConfirmPassword ? (
+                        <IconEyeOff className='size-[1.5em]! shrink-0' />
+                      ) : (
+                        <IconEye className='size-[1.5em]! shrink-0' />
+                      )}
+                    </InputGroupButton>
+                  </InputGroupAddon>
+                )}
+              </InputGroup>
 
               {state.errors?.confirm_password && (
                 <FieldError>{state.errors.confirm_password[0]}</FieldError>

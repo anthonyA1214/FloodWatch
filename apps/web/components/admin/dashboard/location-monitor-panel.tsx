@@ -10,8 +10,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
-import AffectedLocationCard from './affected-location-card';
-import SafetyLocationCard from './safety-location-card';
+import LocationMonitorAffectedLocationsTab from './location-monitor-affected-locations-tab';
+import LocationMonitorSafetyLocationsTab from './location-monitor-safety-locations-tab';
 
 export default function LocationMonitorPanel() {
   const [activeTab, setActiveTab] = useState('affected');
@@ -68,47 +68,13 @@ export default function LocationMonitorPanel() {
           value='affected'
           className='flex-1 flex flex-col min-h-0 space-y-4 mt-4 overflow-y-auto'
         >
-          <AffectedLocationCard
-            severity='critical'
-            location='Barangay 176'
-            description='Water level exceeded critical threshold. Immediate evacuation required for Zone A and B.'
-            reportedAt='2026-01-28T10:30:00Z'
-          />
-          <AffectedLocationCard
-            severity='critical'
-            location='Barangay 176'
-            description='Water level exceeded critical threshold. Immediate evacuation required for Zone A and B.'
-            reportedAt='2026-01-28T10:30:00Z'
-          />
-          <AffectedLocationCard
-            severity='critical'
-            location='Barangay 176'
-            description='Water level exceeded critical threshold. Immediate evacuation required for Zone A and B.'
-            reportedAt='2026-01-28T10:30:00Z'
-          />
+          <LocationMonitorAffectedLocationsTab />
         </TabsContent>
         <TabsContent
           value='safety'
           className='flex-1 flex flex-col min-h-0 space-y-4 mt-4 overflow-y-auto'
         >
-          <SafetyLocationCard
-            type='hospital'
-            name='dito'
-            address='Doon'
-            availability='pwede'
-          />
-          <SafetyLocationCard
-            type='hospital'
-            name='dito'
-            address='Doon'
-            availability='pwede'
-          />
-          <SafetyLocationCard
-            type='hospital'
-            name='dito'
-            address='Doon'
-            availability='pwede'
-          />
+          <LocationMonitorSafetyLocationsTab />
         </TabsContent>
       </Tabs>
     </div>

@@ -4,12 +4,12 @@ import { IconClock, IconMapPin } from '@tabler/icons-react';
 
 export default function SafetyLocationCard({
   type = 'hospital',
-  name = 'Community Safe Haven',
+  location = 'Community Safe Haven',
   address = '123 Safety St, Safeville',
   availability = 'Open 24/7',
 }: {
   type: 'hospital' | 'shelter';
-  name: string;
+  location: string;
   address: string;
   availability: string;
 }) {
@@ -22,17 +22,17 @@ export default function SafetyLocationCard({
     >
       <div className='flex justify-between items-center gap-8'>
         {/* Location */}
-        <div className='font-poppins flex items-center gap-2 text-base font-semibold'>
+        <div className='font-poppins flex items-start gap-2 text-base font-semibold'>
           <IconMapPin
-            className='w-[1.5em]! h-[1.5em]!'
+            className='size-[1.5em]! shrink-0'
             style={{ color: color }}
           />
-          {name}
+          {location}
         </div>
 
         {/* Badge */}
         <Badge
-          className='text-sm'
+          className='text-sm self-start'
           style={{ color: color, backgroundColor: `${color}25` }}
         >
           {type?.toUpperCase()}
@@ -40,13 +40,15 @@ export default function SafetyLocationCard({
       </div>
 
       {/* address */}
-      <p>{address}</p>
+      {address && <p className='text-sm line-clamp-2'>{address}</p>}
 
       {/* availability */}
-      <div className='flex items-center text-sm gap-2 text-gray-600'>
-        <IconClock className='w-[1.5em]! h-[1.5em]!' />
-        {availability}
-      </div>
+      {availability && (
+        <div className='flex items-center text-sm gap-2 text-gray-600'>
+          <IconClock className='size-[1.5em]! shrink-0' />
+          {availability}
+        </div>
+      )}
     </div>
   );
 }
