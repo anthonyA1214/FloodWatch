@@ -46,13 +46,13 @@ const CLUSTER_ZOOM_THRESHOLD = 14;
 const CLUSTER_CLICK_EXTRA_ZOOM = 0.8;
 
 const REPORT_SEVERITY_STYLES = {
-  low: '#14B8A6',
+  low: '#156CC2',
   moderate: '#F59E0B',
   high: '#F97316',
   critical: '#EF4444',
 } as const;
 
-const SAFETY_CLUSTER_COLOR = '#156CC2';
+const SAFETY_CLUSTER_COLOR = '#14B8A6';
 
 type ClusterSource = GeoJSONSource & {
   getClusterExpansionZoom: (clusterId: number) => Promise<number>;
@@ -472,7 +472,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
                     paint={{
                       'circle-color': REPORT_SEVERITY_STYLES[severity],
                       'circle-stroke-color': '#FFFFFF',
-                      'circle-stroke-width': 3,
+                      'circle-stroke-width': 0,
                       'circle-radius': [
                         'step',
                         ['get', 'point_count'],
@@ -505,7 +505,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
                         {},
                         '\n',
                         {},
-                        severity,
+                        'report',
                       ],
                       'text-anchor': 'center',
                       'text-justify': 'center',
@@ -599,7 +599,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
               paint={{
                 'circle-color': SAFETY_CLUSTER_COLOR,
                 'circle-stroke-color': '#FFFFFF',
-                'circle-stroke-width': 3,
+                'circle-stroke-width': 0,
                 'circle-radius': [
                   'step',
                   ['get', 'point_count'],
