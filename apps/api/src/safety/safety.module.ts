@@ -9,5 +9,6 @@ import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
   imports: [DrizzleModule, ImagesModule, CloudinaryModule],
   controllers: [SafetyController],
   providers: [SafetyService],
+  exports: [SafetyService],
 })
 export class SafetyModule {}

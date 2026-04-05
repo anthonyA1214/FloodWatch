@@ -4,17 +4,17 @@ import { SEVERITY_COLOR_MAP } from '@/lib/utils/get-color-map';
 import { Badge } from '../ui/badge';
 
 export default function AffectedLocationsCard({
-  severity = 'high',
-  isActive = false,
-  location = 'Barangay 176',
-  description = 'Floodwaters reaching waist level, residents advised to evacuate immediately.',
-  reportedAt = new Date(),
+  severity,
+  isActive,
+  location,
+  description,
+  reportedAt,
   onClick,
 }: {
   severity: 'critical' | 'high' | 'moderate' | 'low';
   isActive?: boolean;
   location: string;
-  description: string | null;
+  description?: string | null;
   reportedAt: Date;
   onClick?: () => void;
 }) {
@@ -49,7 +49,7 @@ export default function AffectedLocationsCard({
       </div>
 
       {/* description */}
-      <p className='text-sm'>{description}</p>
+      {description && <p className='text-sm line-clamp-2'>{description}</p>}
 
       {/* reported at */}
       <div className='flex items-center text-xs gap-2 text-gray-600'>

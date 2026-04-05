@@ -6,12 +6,7 @@ export async function getReportDetail(reportId: number) {
     method: 'GET',
   });
 
-  if (!res.ok) {
-    console.error('REPORT DETAIL ERROR:', res.status);
-    return null;
-  }
+  if (!res.ok) throw new Error('Failed to fetch report detail');
 
-  const data = await res.json();
-  console.log(data);
-  return data;
+  return res.json();
 }

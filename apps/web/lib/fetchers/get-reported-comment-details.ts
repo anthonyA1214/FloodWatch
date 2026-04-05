@@ -6,11 +6,7 @@ export async function getReportedCommentDetail(commentId: number) {
     method: 'GET',
   });
 
-  if (!res.ok) {
-    console.error('REPORTED COMMENT DETAIL ERROR:', res.status);
-    return null;
-  }
+  if (!res.ok) throw new Error('Failed to fetch reported comment detail');
 
-  const data = await res.json();
-  return data;
+  return res.json();
 }

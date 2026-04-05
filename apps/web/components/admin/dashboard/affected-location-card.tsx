@@ -4,15 +4,15 @@ import { SEVERITY_COLOR_MAP } from '@/lib/utils/get-color-map';
 import { Badge } from '@/components/ui/badge';
 
 export default function AffectedLocationCard({
-  severity = 'high',
-  location = 'Barangay 176',
-  description = 'Floodwaters reaching waist level, residents advised to evacuate immediately.',
-  reportedAt = '2026-01-28T10:30:00Z',
+  severity,
+  location,
+  description,
+  reportedAt,
 }: {
   severity: 'critical' | 'high' | 'moderate' | 'low';
   location: string;
-  description: string;
-  reportedAt: string;
+  description?: string;
+  reportedAt: Date;
 }) {
   const color = SEVERITY_COLOR_MAP[severity];
 
@@ -23,9 +23,9 @@ export default function AffectedLocationCard({
     >
       <div className='flex justify-between gap-8 items-center'>
         {/* Location */}
-        <div className='font-poppins flex items-center gap-2 text-base font-semibold'>
+        <div className='font-poppins flex items-start gap-2 text-base font-semibold'>
           <IconMapPin
-            className='w-[1.5em]! h-[1.5em]!'
+            className='size-[1.5em]! shrink-0'
             style={{ color: color }}
           />
           {location}
@@ -33,7 +33,7 @@ export default function AffectedLocationCard({
 
         {/* Badge */}
         <Badge
-          className='text-sm'
+          className='text-sm self-start'
           style={{ color: color, backgroundColor: `${color}25` }}
         >
           {severity?.toUpperCase()}
@@ -41,11 +41,11 @@ export default function AffectedLocationCard({
       </div>
 
       {/* description */}
-      <p>{description}</p>
+      {description && <p className='text-sm line-clamp-2'>{description}</p>}
 
       {/* reported at */}
       <div className='flex items-center text-sm gap-2 text-gray-600'>
-        <IconClock className='w-[1.5em]! h-[1.5em]!' />
+        <IconClock className='size-[1.5em]! shrink-0' />
         {formatDistanceToNow(new Date(reportedAt), { addSuffix: true })}
       </div>
     </div>

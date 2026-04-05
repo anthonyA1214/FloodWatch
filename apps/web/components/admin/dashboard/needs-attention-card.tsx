@@ -18,11 +18,12 @@ export default function NeedsAttentionCard({
 }: {
   id: number;
   location: string;
-  description: string;
-  reportedAt: string;
+  description?: string;
+  reportedAt: Date;
   confirms: number;
 }) {
   const { openDialog } = useReportDialog();
+
   const color = '#F97316';
 
   return (
@@ -55,7 +56,7 @@ export default function NeedsAttentionCard({
       </div>
 
       {/* description */}
-      <p>{description}</p>
+      {description && <p className='text-sm line-clamp-2'>{description}</p>}
 
       <div className='flex items-center justify-between'>
         {/* reported at */}

@@ -1,7 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   CreateFloodAlertInput,
-  ReportFloodAlertInput,
   ReportListQueryInput,
   ReportQueryInput,
 } from '@repo/schemas';
@@ -460,5 +459,128 @@ export class ReportsService {
     });
 
     return { action: vote?.action ?? null };
+  }
+
+  async countActiveAlerts() {
+    const [activeAlerts] = await this.db
+      .select({
+        count: count(),
+      })
+      .from(reports)
+      .where(and(eq(reports.status, 'verified')));
+
+    return activeAlerts.count;
+  }
+
+  async countTotalReports() {
+    const [totalReports] = await this.db
+      .select({
+        count: count(),
+      })
+      .from(reports);
+
+    return totalReports.count;
+  }
+
+  async countPendingReview() {
+    const [pendingReview] = await this.db
+      .select({
+        count: count(),
+      })
+      .from(reports)
+      .where(eq(reports.status, 'unverified'));
+
+    return pendingReview.count;
+  }
+
+  async getMonthlyReport() {
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+    const monthlyData = await this.db.execute(sql`
+        SELECT
+          TO_CHAR(months.month, 'YYYY-MM') AS month,
+          TO_CHAR(months.month, 'Mon YYYY') AS month_name,
+          COUNT(r.id) AS reports
+        FROM generate_series(
+          ${sixMonthsAgo}::timestamp,
+          DATE_TRUNC('month', ${now}::timestamp),
+          '1 month'::interval
+        ) AS months(month)
+        LEFT JOIN ${reports} r
+          ON TO_CHAR(r.created_at, 'YYYY-MM') = TO_CHAR(months.month, 'YYYY-MM')
+          AND r.status = 'verified'
+        GROUP BY months.month
+        ORDER BY months.month
+      `);
+
+    return monthlyData.rows.map((item) => ({
+      month: item.month as string,
+      monthName: item.month_name as string,
+      reports: Number(item.reports),
+    }));
+  }
+
+  async getReportDistribution() {
+    const distribution = await this.db
+      .select({
+        severity: reports.severity,
+        reports: count(),
+      })
+      .from(reports)
+      .where(eq(reports.status, 'verified'))
+      .groupBy(reports.severity);
+
+    return distribution.map((item) => ({
+      severity: item.severity,
+      reports: Number(item.reports),
+    }));
+  }
+
+  async getRecentReports() {
+    const recentReports = await this.db
+      .select({
+        id: reports.id,
+        location: reports.location,
+        description: reports.description,
+        severity: reports.severity,
+        reportedAt: reports.createdAt,
+      })
+      .from(reports)
+      .limit(5);
+
+    return recentReports;
+  }
+
+  async getReportsNeedingAttention() {
+    const reportsNeedingAttention = await this.db
+      .select({
+        id: reports.id,
+        location: reports.location,
+        description: reports.description,
+        reportedAt: reports.createdAt,
+        confirms: this.db.$count(
+          reportConfirmations,
+          and(
+            eq(reportConfirmations.action, 'confirm'),
+            eq(reportConfirmations.reportId, reports.id),
+          ),
+        ),
+      })
+      .from(reports)
+      .where(
+        and(
+          eq(reports.status, 'unverified'),
+          sql`${this.db.$count(
+            reportConfirmations,
+            and(
+              eq(reportConfirmations.action, 'confirm'),
+              eq(reportConfirmations.reportId, reports.id),
+            ),
+          )} >= 10`, // Threshold of 10 confirmations
+        ),
+      );
+
+    return reportsNeedingAttention;
   }
 }

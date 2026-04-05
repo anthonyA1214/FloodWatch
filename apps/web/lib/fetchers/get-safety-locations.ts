@@ -32,8 +32,7 @@ export async function getSafetyLocations(params: SafetyLocationQueryInput) {
     );
 
     return res.json();
-  } catch (error) {
-    console.error('Error fetching safety locations data:', error);
-    throw new Error('Failed to fetch safety locations data');
+  } catch {
+    throw new Error('Failed to fetch safety locations');
   }
 }

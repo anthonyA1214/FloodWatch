@@ -56,6 +56,13 @@ export class SafetyController {
     return await this.safetyService.getSafetyList(safetyLocationListQueryDto);
   }
 
+  @Roles('admin')
+  @Get('recent')
+  @HttpCode(HttpStatus.OK)
+  async getRecentSafetyLocations() {
+    return await this.safetyService.getRecentSafetyLocations();
+  }
+
   @Public()
   @Get(':id')
   @HttpCode(HttpStatus.OK)

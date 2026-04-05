@@ -25,8 +25,7 @@ export async function getUsersData(params: UserQueryInput) {
     });
 
     return res.json();
-  } catch (error) {
-    console.error('Error fetching users data:', error);
+  } catch {
     throw new Error('Failed to fetch users data');
   }
 }

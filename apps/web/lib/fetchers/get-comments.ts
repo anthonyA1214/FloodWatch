@@ -20,10 +20,7 @@ export async function getComments(
     { method: 'GET' },
   );
 
-  if (!res.ok) {
-    console.error('COMMENTS ERROR:', res.status);
-    return null;
-  }
+  if (!res.ok) throw new Error('Failed to fetch comments');
 
   return res.json();
 }

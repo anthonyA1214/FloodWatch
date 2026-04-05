@@ -1,6 +1,6 @@
 import { Icon } from '@tabler/icons-react';
 
-export default function StatCard({
+export default function DashboardStatCard({
   icon: Icon,
   color,
   label,

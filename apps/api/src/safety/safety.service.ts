@@ -342,4 +342,28 @@ export class SafetyService {
 
     return updatedSafetyLocation;
   }
+
+  async countSafetyLocations() {
+    const [safetyLocations] = await this.db
+      .select({ count: count() })
+      .from(safety);
+
+    return safetyLocations.count;
+  }
+
+  async getRecentSafetyLocations() {
+    const recentLocations = await this.db
+      .select({
+        id: safety.id,
+        location: safety.location,
+        address: safety.address,
+        type: safety.type,
+        availability: safety.availability,
+      })
+      .from(safety)
+      .orderBy(desc(safety.createdAt))
+      .limit(5);
+
+    return recentLocations;
+  }
 }

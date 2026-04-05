@@ -158,7 +158,10 @@ export default function AffectedLocationsListDrawer() {
                   <AffectedLocationsCardSkeleton key={i} />
                 ))
               ) : !reportList || reportList.length === 0 ? (
-                <LocationsListEmpty />
+                <LocationsListEmpty
+                  title='No affected locations found'
+                  description='Try adjusting your filters or check back later for updates.'
+                />
               ) : (
                 reportList?.map((report: ReportListItemInput) => (
                   <AffectedLocationsCard

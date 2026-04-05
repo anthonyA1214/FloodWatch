@@ -6,11 +6,7 @@ export async function getReportMapPins() {
     method: 'GET',
   });
 
-  if (!res.ok) {
-    console.error('REPORT MAP PINS ERROR:', res.status);
-    return null;
-  }
+  if (!res.ok) throw new Error('Failed to fetch report map pins');
 
-  const data = await res.json();
-  return data;
+  return res.json();
 }
