@@ -119,7 +119,7 @@ export default function NotificationOverlay() {
   );
 
   return (
-    <div className='pointer-events-auto flex h-[80vh] w-screen flex-col overflow-hidden rounded-xl border border-[#C7CFDA] bg-white shadow-2xl md:w-[420px]'>
+    <div className='pointer-events-auto flex h-full w-full flex-col overflow-hidden border border-[#C7CFDA] bg-white shadow-2xl rounded-none md:h-[80vh] md:max-w-[420px] md:rounded-xl'>
       <header className='space-y-1 b px-5 pt-5 pb-3'>
         <div className='flex items-center justify-between gap-3'>
           <h3 className='text-2xl leading-none font-semibold text-[#111827]'>
