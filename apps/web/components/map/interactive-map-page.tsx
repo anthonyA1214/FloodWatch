@@ -18,6 +18,7 @@ import SafetyLocationOverlay from './safety-location-overlay';
 import MapLegendPopover from '../shared/map-legend-popover';
 import MapFilterPopover from '../shared/map-filter-popover';
 import { useMapFilter } from '@/contexts/map-filter-context';
+import HotlinesPill from './hotlines-pill';
 
 export default function InteractiveMapPage() {
   const { activeOverlay } = useMapOverlay();
@@ -29,6 +30,13 @@ export default function InteractiveMapPage() {
   return (
     <div className='relative w-full h-full'>
       <InteractiveMap ref={interactiveMapRef} />
+
+      {/* static hotlines pill (only when no overlay is active) */}
+      {!activeOverlay && (
+        <div className='absolute right-4 z-10 bottom-20 md:bottom-4'>
+          <HotlinesPill />
+        </div>
+      )}
 
       {/* Top bar: search + controls in one row */}
       <div className='absolute top-0 left-0 right-0 flex items-start gap-4 pointer-events-none h-full'>
