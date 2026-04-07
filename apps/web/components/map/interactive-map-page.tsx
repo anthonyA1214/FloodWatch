@@ -24,9 +24,11 @@ import { getUserLocation } from '@/lib/utils/get-user-location';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Spinner } from '../ui/spinner';
+import { useMapRouting } from '@/contexts/map-routing-context';
 
 export default function InteractiveMapPage() {
   const { activeOverlay } = useMapOverlay();
+  const { clearRoute } = useMapRouting();
   const interactiveMapRef = useRef<InteractiveMapHandle>(null);
   const [location, setLocation] = useState<{
     latitude: number;
@@ -65,7 +67,9 @@ export default function InteractiveMapPage() {
         <div
           className={cn(
             'absolute right-4 z-10 ',
-            isError ? 'bottom-4 md:bottom-4' : 'bottom-20 md:bottom-4',
+            isError || !location
+              ? 'bottom-4 md:bottom-4'
+              : 'bottom-20 md:bottom-4',
           )}
         >
           <HotlinesAccordion />
@@ -132,6 +136,7 @@ export default function InteractiveMapPage() {
               onClick={async () => {
                 if (!interactiveMapRef.current || isGeolocating) return;
                 setIsGeolocating(true);
+                clearRoute();
                 try {
                   await interactiveMapRef.current.geolocate();
                 } finally {

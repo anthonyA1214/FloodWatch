@@ -126,6 +126,7 @@ const InteractiveMapCurrentLocation = forwardRef<InteractiveMapHandle, Props>(
             setIsLocating(true);
             handleGeolocate();
           }}
+          attributionControl={false}
         >
           {/* boundary fill */}
           {caloocanGeoJSON && (
