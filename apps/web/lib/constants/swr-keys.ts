@@ -30,4 +30,6 @@ export const SWR_KEYS = {
   reportsNeedingAttention: '/reports/needs-attention',
   monthlyReports: '/reports/monthly',
   reportDistribution: '/reports/distribution',
+
+  search: `/search`,
 };

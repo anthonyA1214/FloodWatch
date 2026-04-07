@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
-const severityEnum = z.enum(['low', 'moderate', 'high', 'critical']);
+export const severityEnum = z.enum(['low', 'moderate', 'high', 'critical']);
 
 export const reportFloodAlertSchema = z.object({
   latitude: z.coerce.number(),

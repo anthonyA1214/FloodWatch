@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
-const typeEnum = z.enum(['shelter', 'hospital']);
+export const typeEnum = z.enum(['shelter', 'hospital']);
 
 export const createSafetyLocationSchema = z.object({
   latitude: z.coerce.number(),

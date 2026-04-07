@@ -21,6 +21,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles/roles.guard';
 import { AppController } from './app.controller';
 import { EventsModule } from './events/events.module';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { EventsModule } from './events/events.module';
     EventsModule,
   ],
   providers: [
+    AppService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
