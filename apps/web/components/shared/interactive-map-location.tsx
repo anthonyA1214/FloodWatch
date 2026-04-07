@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { useBoundary } from '@/hooks/use-boundary';
 import { FloodMarker } from './markers/flood-marker';
 import { SafetyMarker } from './markers/safety-marker';
+import { useEffect } from 'react';
 
 type BaseProps = {
   longitude: number | null;
@@ -54,8 +55,6 @@ export default function InteractiveMapLocation(
         zoom: 13.5,
       }}
       mapStyle='https://tiles.openfreemap.org/styles/bright'
-      attributionControl={false}
-      dragRotate={false}
     >
       {/* boundary fill */}
       {caloocanGeoJSON && (
