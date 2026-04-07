@@ -17,9 +17,10 @@ import { getUserLocation } from '@/lib/utils/get-user-location';
 import { UserLocationMarker } from '@/components/shared/markers/user-location-marker';
 import { useReportMapPins } from '@/hooks/use-report-map-pins';
 import { useBoundary } from '@/hooks/use-boundary';
-import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
+import { useSafetyLocationMapPins } from '@/hooks/use-safety-location-map-pins';
 import { SafetyMarker } from '@/components/shared/markers/safety-marker';
 import { useMapHighlight } from '@/contexts/map-highlight-context';
+import { useMapFilterAdmin } from '@/contexts/map-filter-admin-context';
 
 export type InteractiveMapHandle = {
   zoomIn: () => void;
@@ -36,9 +37,17 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
       latitude: number;
     } | null>(null);
     const { reportMapPins } = useReportMapPins();
-    const { safetyMapPins } = useSafetyMapPins();
+    const { safetyMapPins } = useSafetyLocationMapPins();
 
     const { flyToRef, activePin, setActivePin } = useMapHighlight();
+
+    const { filters } = useMapFilterAdmin();
+    const filteredReportMapPins = reportMapPins?.filter((r) =>
+      filters.severities.has(r.severity),
+    );
+    const filteredSafetyMapPins = safetyMapPins?.filter((r) =>
+      filters.safetyTypes.has(r.type),
+    );
 
     useEffect(() => {
       flyToRef.current = (loc) => {
@@ -81,8 +90,6 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
           zoom: 11.5,
         }}
         mapStyle='https://tiles.openfreemap.org/styles/bright'
-        attributionControl={false}
-        dragRotate={false}
         onClick={() => setActivePin(null)} // Deselect pins when clicking on the map
       >
         {/* boundary fill */}
@@ -118,7 +125,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
         )}
 
         {/* Flood report pins */}
-        {reportMapPins?.map((report) => (
+        {filteredReportMapPins?.map((report) => (
           <Fragment key={report.id}>
             <Marker
               key={report.id}
@@ -150,7 +157,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
         ))}
 
         {/* safety locations pin */}
-        {safetyMapPins?.map((location) => (
+        {filteredSafetyMapPins?.map((location) => (
           <Marker
             key={location.id}
             longitude={location.longitude}

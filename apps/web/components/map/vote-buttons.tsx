@@ -54,8 +54,8 @@ export default function VoteButtons({ reportId }: { reportId: number }) {
           !me
             ? 'opacity-50 cursor-not-allowed'
             : isConfirmed || pendingAction === 'confirm'
-              ? 'text-[#15803D] bg-[#bbf7d0] ring-2 ring-inset ring-[#15803D]/30 font-semibold'
-              : 'text-[#15803D] bg-[#f0fdf4] hover:bg-[#d1fae5] active:bg-[#bbf7d0]',
+              ? 'text-[#16a34a] bg-[#bbf7d0] ring-2 ring-inset ring-[#16a34a]/30 font-semibold'
+              : 'text-[#16a34a] bg-[#f0fdf4] hover:bg-[#d1fae5] active:bg-[#bbf7d0]',
         )}
       >
         <div

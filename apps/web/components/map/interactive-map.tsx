@@ -23,7 +23,7 @@ import { getUserLocation } from '@/lib/utils/get-user-location';
 import { UserLocationMarker } from '../shared/markers/user-location-marker';
 import { useReportMapPins } from '@/hooks/use-report-map-pins';
 import { useBoundary } from '@/hooks/use-boundary';
-import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
+import { useSafetyLocationMapPins } from '@/hooks/use-safety-location-map-pins';
 import { SafetyMarker } from '../shared/markers/safety-marker';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
@@ -39,41 +39,6 @@ export type InteractiveMapHandle = {
   geolocate: () => void;
 };
 
-// ── Pulsing blue dot — shown at the user's position when a route is active ──
-function RouteUserDot() {
-  return (
-    <div style={{ position: 'relative', width: 18, height: 18 }}>
-      {/* Outer pulse ring */}
-      <span
-        style={{
-          position: 'absolute',
-          inset: -7,
-          borderRadius: '50%',
-          background: 'rgba(0, 102, 204, 0.22)',
-          animation: 'route-dot-pulse 1.8s ease-out infinite',
-        }}
-      />
-      {/* Inner solid dot */}
-      <div
-        style={{
-          width: 18,
-          height: 18,
-          borderRadius: '50%',
-          background: '#0066CC',
-          border: '3px solid #ffffff',
-          boxShadow: '0 1px 5px rgba(0,0,0,0.4)',
-        }}
-      />
-      <style>{`
-        @keyframes route-dot-pulse {
-          0%   { transform: scale(0.6); opacity: 0.9; }
-          100% { transform: scale(2.4); opacity: 0;   }
-        }
-      `}</style>
-    </div>
-  );
-}
-
 const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
   (props, ref) => {
     const mapRef = useRef<MapRef | null>(null);
@@ -83,7 +48,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
       latitude: number;
     } | null>(null);
     const { reportMapPins } = useReportMapPins();
-    const { safetyMapPins } = useSafetyMapPins();
+    const { safetyMapPins } = useSafetyLocationMapPins();
     const { activeOverlay, openReport, openSafety } = useMapOverlay();
     const isMobile = useIsMobile();
 
@@ -206,8 +171,6 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
           zoom: 11.5,
         }}
         mapStyle='https://tiles.openfreemap.org/styles/bright'
-        attributionControl={false}
-        dragRotate={false}
         onClick={() => closePopup()}
       >
         {/* Boundary fill */}
@@ -334,7 +297,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
             anchor='center'
             style={{ pointerEvents: 'none', zIndex: 20 }}
           >
-            <RouteUserDot />
+            <UserLocationMarker />
           </Marker>
         )}
 

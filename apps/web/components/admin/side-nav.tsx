@@ -18,7 +18,6 @@ import {
 import Avatar from 'boring-avatars';
 import { NavItems } from './nav-items';
 import LogoutButton from './logout-button';
-import { ScrollArea } from '../ui/scroll-area';
 import { useMe } from '@/hooks/use-me';
 import { Skeleton } from '../ui/skeleton';
 
@@ -79,13 +78,13 @@ export default function SideNav() {
             </SidebarGroupContent>
           </SidebarGroup>
           {/* Nav items - scrollable */}
-          <ScrollArea className='flex-1 min-h-0 h-0'>
+          <div className='flex-1 min-h-0 h-0 overflow-y-auto'>
             <SidebarGroup>
               <SidebarGroupContent className='space-y-2'>
                 <NavItems />
               </SidebarGroupContent>
             </SidebarGroup>
-          </ScrollArea>
+          </div>
         </SidebarContent>
         <SidebarFooter className='border-t py-4 w-full'>
           <SidebarGroup>

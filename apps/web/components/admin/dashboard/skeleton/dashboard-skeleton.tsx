@@ -1,53 +1,85 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import StatCardSkeleton from '@/components/admin/dashboard/skeleton/stat-card-skeleton';
-import ActiveFloodAlertsCardSkeleton from './active-flood-alerts-card-skeleton';
-import SafetyLocationsCardSkeleton from './safety-locations-card-skeleton';
+import DashboardStatCardSkeleton from './dashboard-stat-card-skeleton';
+import AffectedLocationCardSkeleton from './affected-location-card-skeleton';
+import NeedsAttentionCardSkeleton from './needs-attention-card-skeleton';
+import WeatherHorizontalCardSkeleton from './weather-horizontal-card-skeleton';
+import ReportDistributionCardSkeleton from './report-distribution-card-skeleton';
+import MonthlyReportsCardSkeleton from './monthly-reports-card-skeleton';
 
 export default function DashboardSkeleton() {
   return (
-    <div className='flex-1 flex flex-col bg-white p-8 rounded-2xl gap-8 min-h-0'>
+    <div className='flex-1 flex flex-col bg-white p-8 rounded-2xl gap-8 min-h-0 overflow-y-auto overflow-x-auto'>
       {/* Header */}
       <div className='space-y-2'>
         <Skeleton className='h-9 w-64' />
-        <Skeleton className='h-4 w-80' />
+        <Skeleton className='h-5 w-80' />
       </div>
 
-      <div className='flex-1 h-0 overflow-hidden'>
-        <div className='space-y-8 pr-4'>
-          {/* Stat Cards */}
-          <div className='grid grid-cols-2 gap-8'>
-            {Array.from({ length: 2 }).map((_, i) => (
-              <StatCardSkeleton key={i} />
-            ))}
-          </div>
+      <div className='flex-1 flex flex-col gap-4'>
+        {/* Stat Cards */}
+        <div className='grid grid-cols-4 gap-4'>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <DashboardStatCardSkeleton key={i} />
+          ))}
+        </div>
 
-          {/* Active Flood Alerts */}
-          <div className='grid rounded-2xl border shadow-md p-6 gap-6'>
-            {/* Section header */}
-            <div className='flex gap-2 items-center'>
-              <Skeleton className='size-7 rounded' />
+        {/* Weather Row */}
+        <WeatherHorizontalCardSkeleton />
+
+        {/* Grid */}
+        <div className='grid grid-cols-2 gap-4'>
+          {/* Location Monitor Panel */}
+          <div className='min-h-[500px] max-h-[500px] flex flex-col rounded-2xl border shadow-xs p-4 gap-4'>
+            {/* Header */}
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center gap-2'>
+                <Skeleton
+                  className='size-6'
+                  style={{ borderRadius: '9999px' }}
+                />
+                <Skeleton className='h-6 w-44' />
+              </div>
+              <Skeleton className='h-8 w-24 rounded-md' />
+            </div>
+            {/* Tabs */}
+            <div className='flex gap-4 border-b pb-2'>
+              <Skeleton className='h-5 w-40' />
               <Skeleton className='h-5 w-40' />
             </div>
-            <div className='grid gap-4'>
+            {/* Cards */}
+            <div className='flex flex-col gap-4 overflow-hidden'>
               {Array.from({ length: 3 }).map((_, i) => (
-                <ActiveFloodAlertsCardSkeleton key={i} />
+                <AffectedLocationCardSkeleton key={i} />
               ))}
             </div>
           </div>
 
-          {/* Safety Locations */}
-          <div className='grid rounded-2xl border shadow-md p-6 gap-6'>
-            {/* Section header */}
-            <div className='flex gap-2 items-center'>
-              <Skeleton className='size-7 rounded' />
-              <Skeleton className='h-5 w-36' />
+          {/* Needs Attention Panel */}
+          <div className='min-h-[500px] max-h-[500px] flex flex-col rounded-2xl border shadow-xs p-4 gap-4'>
+            {/* Header */}
+            <div className='flex flex-col gap-1.5'>
+              <div className='flex items-center gap-2'>
+                <Skeleton
+                  className='size-2'
+                  style={{ borderRadius: '9999px' }}
+                />
+                <Skeleton className='h-6 w-44' />
+              </div>
+              <Skeleton className='h-4 w-72' />
             </div>
-            <div className='grid gap-4'>
+            {/* Cards */}
+            <div className='flex flex-col gap-4 overflow-hidden'>
               {Array.from({ length: 3 }).map((_, i) => (
-                <SafetyLocationsCardSkeleton key={i} />
+                <NeedsAttentionCardSkeleton key={i} />
               ))}
             </div>
           </div>
+
+          {/* Monthly Reports */}
+          <MonthlyReportsCardSkeleton />
+
+          {/* Report Distribution */}
+          <ReportDistributionCardSkeleton />
         </div>
       </div>
     </div>

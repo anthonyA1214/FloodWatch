@@ -5,7 +5,6 @@ import {
   IconCalendarPlus,
   IconCircleCheck,
   IconInfoCircle,
-  IconLoader2,
   IconPhone,
   IconRoad,
   IconSend,
@@ -21,11 +20,12 @@ import NoPhotoEmpty from '../shared/no-photo-empty';
 import { Button } from '../ui/button';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
-import { useSafetyDetail } from '@/hooks/use-safety-detail';
+import { useSafetyLocationDetail } from '@/hooks/use-safety-location-detail';
 import { SafetyLocationDrawerSkeleton } from './skeletons/safety-location-drawer-skeleton';
-import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
+import { useSafetyLocationMapPins } from '@/hooks/use-safety-location-map-pins';
 import { useDirections } from '@/hooks/use-directions';
 import { useMapRouting } from '@/contexts/map-routing-context';
+import { Spinner } from '../ui/spinner';
 
 const snapPoints = ['0px', '355px', 1];
 
@@ -43,9 +43,9 @@ export default function SafetyLocationDrawer({
     if (!isOpen) close?.();
   };
 
-  const { safetyDetail, isLoading } = useSafetyDetail(safetyId);
+  const { safetyDetail, isLoading } = useSafetyLocationDetail(safetyId);
 
-  const { safetyMapPins } = useSafetyMapPins();
+  const { safetyMapPins } = useSafetyLocationMapPins();
   const { getDirections } = useDirections();
   const { isLoadingRoute } = useMapRouting();
 
@@ -245,7 +245,7 @@ export default function SafetyLocationDrawer({
                 onClick={() => destination && getDirections(destination)}
               >
                 {isLoadingRoute ? (
-                  <IconLoader2 className='w-[1.5em]! h-[1.5em]! animate-spin' />
+                  <Spinner />
                 ) : (
                   <IconSend className='w-[1.5em]! h-[1.5em]!' />
                 )}

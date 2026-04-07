@@ -10,7 +10,6 @@ import {
   IconExclamationCircle,
   IconHelpCircle,
   IconInfoCircle,
-  IconLoader2,
   IconSend,
   IconShield,
   IconShieldCheck,
@@ -42,6 +41,7 @@ import { useMapOverlay } from '@/contexts/map-overlay-context';
 import { useReportMapPins } from '@/hooks/use-report-map-pins';
 import { useDirections } from '@/hooks/use-directions';
 import { useMapRouting } from '@/contexts/map-routing-context';
+import { Spinner } from '../ui/spinner';
 
 const snapPoints = ['0px', '355px', 1];
 
@@ -350,7 +350,7 @@ export default function AffectedLocationDrawer({
                 onClick={() => destination && getDirections(destination)}
               >
                 {isLoadingRoute ? (
-                  <IconLoader2 className='w-[1.5em]! h-[1.5em]! animate-spin' />
+                  <Spinner />
                 ) : (
                   <IconSend className='w-[1.5em]! h-[1.5em]!' />
                 )}

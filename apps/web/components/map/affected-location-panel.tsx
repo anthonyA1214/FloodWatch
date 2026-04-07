@@ -7,7 +7,6 @@ import {
   IconExclamationCircle,
   IconHelpCircle,
   IconInfoCircle,
-  IconLoader2,
   IconSend,
   IconShield,
   IconShieldCheck,
@@ -19,7 +18,7 @@ import {
   REPORT_STATUS_COLOR_MAP,
   SEVERITY_COLOR_MAP,
 } from '@/lib/utils/get-color-map';
-import PostComposer from '@/components/shared/comment-composer';
+import CommentComposer from '@/components/shared/comment-composer';
 import { useReportDetail } from '@/hooks/use-report-detail';
 import { Separator } from '../ui/separator';
 import {
@@ -39,6 +38,7 @@ import { useMapOverlay } from '@/contexts/map-overlay-context';
 import { useReportMapPins } from '@/hooks/use-report-map-pins';
 import { useDirections } from '@/hooks/use-directions';
 import { useMapRouting } from '@/contexts/map-routing-context';
+import { Spinner } from '../ui/spinner';
 
 export default function AffectedLocationPanel({
   reportId,
@@ -73,7 +73,6 @@ export default function AffectedLocationPanel({
 
   const confirms = reportDetail?.confirms;
   const denies = reportDetail?.denies;
-
   const credibility =
     confirms !== undefined && denies !== undefined
       ? confirms + denies === 0
@@ -292,7 +291,19 @@ export default function AffectedLocationPanel({
                     </span>
                   </div>
 
-                  <span className='font-poppins font-bold'>{credibility}%</span>
+                  <span
+                    className='font-poppins font-medium'
+                    style={{
+                      color:
+                        credibility >= 70
+                          ? '#16a34a'
+                          : credibility >= 40
+                            ? '#d97706'
+                            : '#dc2626',
+                    }}
+                  >
+                    {credibility !== undefined ? `${credibility}%` : 'N/A'}
+                  </span>
                 </div>
 
                 <VoteButtons reportId={reportId} />
@@ -305,7 +316,7 @@ export default function AffectedLocationPanel({
               onClick={() => destination && getDirections(destination)}
             >
               {isLoadingRoute ? (
-                <IconLoader2 className='w-[1.5em]! h-[1.5em]! animate-spin' />
+                <Spinner />
               ) : (
                 <IconSend className='w-[1.5em]! h-[1.5em]!' />
               )}
@@ -329,7 +340,7 @@ export default function AffectedLocationPanel({
 
           {/* comments */}
           <div className='flex flex-col gap-4 p-3 lg:p-4'>
-            <PostComposer reportId={reportId} />
+            <CommentComposer reportId={reportId} />
 
             <CommentsList
               reportId={reportId}

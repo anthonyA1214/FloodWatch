@@ -164,21 +164,19 @@ export default function ReportFloodAlertDialog() {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <button
-          className='font-poppins flex justify-center items-center gap-2 bg-white 
-            text-[#FB2C36] hover:text-white hover:bg-[#FB2C36] border border-[#FB2C36] 
+          className='font-poppins flex justify-center items-center gap-2 bg-white
+            text-[#FB2C36] hover:text-white hover:bg-[#FB2C36] border border-[#FB2C36]
               rounded-md transition-colors px-2 2xl:px-4 py-1.5 text-xs md:text-sm whitespace-nowrap'
         >
           <span className='font-poppins font-medium'>REPORT FLOOD</span>
         </button>
       </DialogTrigger>
       <DialogContent
-        className='flex flex-col min-w-[750px] p-0 overflow-hidden gap-0 border-0 
+        className='flex flex-col min-w-[750px] p-0 overflow-hidden gap-0 border-0
       [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-70 [&>button]:hover:opacity-100'
         onCloseAutoFocus={() => {
           mutate(SWR_KEYS.reportMapPins);
-          mutate(
-            (key) => Array.isArray(key) && key[0] === SWR_KEYS.reportsAdmin,
-          );
+          mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reports);
         }}
         onAnimationEnd={(e) => {
           if (e.target !== e.currentTarget) return; // ignore bubbled events

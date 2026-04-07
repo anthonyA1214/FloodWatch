@@ -5,7 +5,6 @@ import {
   IconChevronLeft,
   IconCircleCheck,
   IconInfoCircle,
-  IconLoader2,
   IconPhone,
   IconRoad,
   IconSend,
@@ -16,12 +15,13 @@ import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
 import NoPhotoEmpty from '../shared/no-photo-empty';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
-import { useSafetyDetail } from '@/hooks/use-safety-detail';
+import { useSafetyLocationDetail } from '@/hooks/use-safety-location-detail';
 import { format } from 'date-fns';
 import { SafetyLocationPanelSkeleton } from './skeletons/safety-location-panel-skeleton';
-import { useSafetyMapPins } from '@/hooks/use-safety-map-pins';
+import { useSafetyLocationMapPins } from '@/hooks/use-safety-location-map-pins';
 import { useDirections } from '@/hooks/use-directions';
 import { useMapRouting } from '@/contexts/map-routing-context';
+import { Spinner } from '../ui/spinner';
 
 export default function SafetyLocationPanel({
   safetyId,
@@ -29,9 +29,9 @@ export default function SafetyLocationPanel({
   safetyId: number;
 }) {
   const { close } = useMapOverlay();
-  const { safetyDetail, isLoading } = useSafetyDetail(safetyId);
+  const { safetyDetail, isLoading } = useSafetyLocationDetail(safetyId);
 
-  const { safetyMapPins } = useSafetyMapPins();
+  const { safetyMapPins } = useSafetyLocationMapPins();
   const { getDirections } = useDirections();
   const { isLoadingRoute } = useMapRouting();
 
@@ -205,7 +205,7 @@ export default function SafetyLocationPanel({
               onClick={() => destination && getDirections(destination)}
             >
               {isLoadingRoute ? (
-                <IconLoader2 className='w-[1.5em]! h-[1.5em]! animate-spin' />
+                <Spinner />
               ) : (
                 <IconSend className='w-[1.5em]! h-[1.5em]!' />
               )}

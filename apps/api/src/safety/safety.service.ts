@@ -1,8 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   CreateSafetyLocationInput,
   SafetyLocationListQueryInput,
   SafetyLocationQueryDto,
+  UpdateSafetyLocationInput,
 } from '@repo/schemas';
 import { ilike, inArray } from 'drizzle-orm';
 import { desc } from 'drizzle-orm';
@@ -232,5 +233,137 @@ export class SafetyService {
       availability,
       contactNumber,
     });
+  }
+
+  async deleteSafetyLocation(safetyId: number) {
+    const [safetyLocation] = await this.db
+      .select({ imagePublicId: safety.imagePublicId })
+      .from(safety)
+      .where(eq(safety.id, safetyId))
+      .limit(1);
+
+    if (!safetyLocation) {
+      throw new NotFoundException('Safety location not found');
+    }
+
+    // Delete image from Cloudinary if exists
+    if (safetyLocation.imagePublicId) {
+      await this.cloudinaryService.deleteImage(safetyLocation.imagePublicId);
+    }
+
+    await this.db.delete(safety).where(eq(safety.id, safetyId));
+
+    return { message: 'Safety location deleted successfully' };
+  }
+
+  async updateSafetyLocation(
+    safetyLocationId: number,
+    safetyLocationDto: UpdateSafetyLocationInput,
+    image?: Express.Multer.File,
+  ) {
+    const [safetyLocation] = await this.db
+      .select({ image: safety.image, imagePublicId: safety.imagePublicId })
+      .from(safety)
+      .where(eq(safety.id, safetyLocationId))
+      .limit(1);
+
+    if (!safetyLocation) {
+      throw new NotFoundException('Safety location not found');
+    }
+
+    const {
+      latitude,
+      longitude,
+      type,
+      description,
+      address,
+      locationName,
+      availability,
+      contactNumber,
+      removeImage,
+    } = safetyLocationDto;
+
+    let imageUrl = safetyLocation.image;
+    let imagePublicId = safetyLocation.imagePublicId;
+
+    if (removeImage && !image) {
+      // if the user wants to remove the image
+      if (imagePublicId) {
+        await this.cloudinaryService.deleteImage(imagePublicId);
+      }
+      imageUrl = null;
+      imagePublicId = null;
+    } else if (image) {
+      // if the user wants to update the image, delete the old one first
+      if (imagePublicId) {
+        await this.cloudinaryService.deleteImage(imagePublicId);
+      }
+
+      const { buffer, mimetype } = await this.imagesService.normalizeImage(
+        image.buffer,
+      );
+
+      const normalizedFile: Express.Multer.File = {
+        ...image,
+        buffer,
+        mimetype,
+        originalname: image.originalname.replace(
+          /\.(jpe?g|png|jfif|webp)$/i,
+          '.webp',
+        ),
+      };
+
+      const uploaded = await this.cloudinaryService.uploadImage(
+        normalizedFile,
+        'safety',
+      );
+
+      imageUrl = uploaded.secure_url as string;
+      imagePublicId = uploaded.public_id as string;
+    }
+
+    const [updatedSafetyLocation] = await this.db
+      .update(safety)
+      .set({
+        latitude,
+        longitude,
+        type,
+        description,
+        image: imageUrl,
+        imagePublicId,
+        location: locationName,
+        address,
+        availability,
+        contactNumber,
+        updatedAt: new Date(),
+      })
+      .where(eq(safety.id, safetyLocationId))
+      .returning();
+
+    return updatedSafetyLocation;
+  }
+
+  async countSafetyLocations() {
+    const [safetyLocations] = await this.db
+      .select({ count: count() })
+      .from(safety);
+
+    return safetyLocations.count;
+  }
+
+  async getRecentSafetyLocations() {
+    const recentLocations = await this.db
+      .select({
+        id: safety.id,
+        location: safety.location,
+        address: safety.address,
+        type: safety.type,
+        availability: safety.availability,
+      })
+      .from(safety)
+      .orderBy(desc(safety.createdAt))
+      .limit(5);
+
+    return recentLocations;
   }
 }

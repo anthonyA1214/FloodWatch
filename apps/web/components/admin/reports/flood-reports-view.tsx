@@ -5,7 +5,7 @@ import SearchBar from '@/components/shared/search-bar';
 import { DataTable } from '@/components/shared/data-table';
 import { columns } from './columns';
 import PagePagination from '@/components/shared/page-pagination';
-import { useReportsAdmin } from '@/hooks/use-reports-admin';
+import { useReports } from '@/hooks/use-reports';
 import { useSearchParams } from 'next/navigation';
 import StatCardSkeleton from '@/components/shared/admin/skeleton/stat-card-skeleton';
 import { useState } from 'react';
@@ -31,17 +31,16 @@ export default function FloodReportsView() {
     q: q || undefined,
   };
 
-  const { reports, meta, stats, isLoading, isValidating } =
-    useReportsAdmin(params);
+  const { reports, meta, stats, isLoading, isValidating } = useReports(params);
 
   const isFirstLoad = !reports;
 
   if (isLoading && isFirstLoad) return <FloodReportsPageSkeleton />;
 
   return (
-    <div className='flex-1 flex flex-col bg-white p-8 rounded-2xl gap-8 min-h-0'>
+    <div className='flex-1 flex flex-col bg-white px-8 pt-8 rounded-2xl gap-8 min-h-0 overflow-y-auto'>
       {/* Header */}
-      <h1 className='font-poppins text-3xl font-bold'>Flood Reports</h1>
+      <h1 className='font-poppins text-3xl font-bold'>FLOOD REPORTS</h1>
 
       <div className='flex justify-between gap-4'>
         <div className='flex-1'>
@@ -86,28 +85,31 @@ export default function FloodReportsView() {
           </>
         )}
 
-        {isFirstLoad ? (
-          <div className='flex items-center justify-between'>
-            <Skeleton className='h-4 w-40' />
-            <PaginationSkeleton />
-          </div>
-        ) : (
-          <div className='flex items-center justify-between'>
-            <span className='text-sm text-gray-600'>
-              Showing {reports?.length ?? 0} of {stats?.totalCount ?? 0} reports
-            </span>
+        <div className='flex items-center justify-between pb-8'>
+          {isFirstLoad ? (
+            <>
+              <Skeleton className='h-4 w-40' />
+              <PaginationSkeleton />
+            </>
+          ) : (
+            <>
+              <span className='text-sm text-gray-600'>
+                Showing {reports?.length ?? 0} of {stats?.totalCount ?? 0}{' '}
+                reports
+              </span>
 
-            <div>
-              <PagePagination
-                currentPage={meta?.page ?? 1}
-                totalPages={meta?.totalPages ?? 1}
-                hasNextPage={meta?.hasNextPage ?? false}
-                hasPrevPage={meta?.hasPrevPage ?? false}
-                onPageChange={setPage}
-              />
-            </div>
-          </div>
-        )}
+              <div>
+                <PagePagination
+                  currentPage={meta?.page ?? 1}
+                  totalPages={meta?.totalPages ?? 1}
+                  hasNextPage={meta?.hasNextPage ?? false}
+                  hasPrevPage={meta?.hasPrevPage ?? false}
+                  onPageChange={setPage}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

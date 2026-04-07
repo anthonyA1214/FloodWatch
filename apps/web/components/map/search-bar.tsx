@@ -12,16 +12,28 @@ import { useDebouncedCallback } from 'use-debounce';
 
 export default function SearchBar() {
   const { activeOverlay, close } = useMapOverlay();
-  const { setQ } = useMapFilter();
+  const { setQ, inputValue, setInputValue } = useMapFilter();
 
   const handleSearch = useDebouncedCallback((term: string) => {
     setQ(term);
   }, 300);
 
+  const handleClose = () => {
+    if (
+      activeOverlay?.type === 'affected-list' ||
+      activeOverlay?.type === 'safety-list'
+    ) {
+      setInputValue('');
+      setQ('');
+    }
+    close();
+  };
+
   return (
     <div className='flex flex-col z-50 w-full h-fit pointer-events-auto'>
       <InputGroup className='h-12 rounded-xl bg-white shadow-md'>
         <InputGroupInput
+          value={inputValue}
           placeholder={
             activeOverlay?.type === 'affected-list'
               ? 'Search affected locations...'
@@ -29,12 +41,10 @@ export default function SearchBar() {
                 ? 'Search safety locations...'
                 : 'Search locations...'
           }
-          onChange={
-            activeOverlay?.type === 'affected-list' ||
-            activeOverlay?.type === 'safety-list'
-              ? (e) => handleSearch(e.currentTarget.value)
-              : undefined
-          }
+          onChange={(e) => {
+            setInputValue(e.currentTarget.value);
+            handleSearch(e.currentTarget.value);
+          }}
         />
 
         <InputGroupAddon>
@@ -45,9 +55,9 @@ export default function SearchBar() {
           <InputGroupAddon align='inline-end'>
             <button
               className='mr-2 opacity-70 hover:opacity-100 transition'
-              onClick={close}
+              onClick={handleClose}
             >
-              <IconX className='w-[1.5em]! h-[1.5em]!' />
+              <IconX className='size-[1.5em]! shrink-0' />
             </button>
           </InputGroupAddon>
         )}

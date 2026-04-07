@@ -1,5 +1,4 @@
 import {
-  IconLoader2,
   IconMapPin,
   IconPhone,
   IconRoad,
@@ -11,10 +10,11 @@ import {
 } from '@tabler/icons-react';
 import { Separator } from '../ui/separator';
 import { SAFETY_TYPE_COLOR_MAP } from '@/lib/utils/get-color-map';
-import { useSafetyDetail } from '@/hooks/use-safety-detail';
+import { useSafetyLocationDetail } from '@/hooks/use-safety-location-detail';
 import SafetyLocationPopupSkeleton from './skeletons/safety-location-popup-skeleton';
 import { useDirections } from '@/hooks/use-directions';
 import { useMapRouting } from '@/contexts/map-routing-context';
+import { Spinner } from '../ui/spinner';
 
 export default function SafetyLocationPopup({
   onClose,
@@ -29,7 +29,7 @@ export default function SafetyLocationPopup({
   longitude: number;
   onSelectSafety?: () => void;
 }) {
-  const { safetyDetail, isLoading } = useSafetyDetail(safetyId);
+  const { safetyDetail, isLoading } = useSafetyLocationDetail(safetyId);
   const { getDirections } = useDirections();
   const { isLoadingRoute } = useMapRouting();
 
@@ -143,7 +143,7 @@ export default function SafetyLocationPopup({
             onClick={() => getDirections({ latitude, longitude })}
           >
             {isLoadingRoute ? (
-              <IconLoader2 className='w-[1.5em]! h-[1.5em]! animate-spin' />
+              <Spinner />
             ) : (
               <IconSend className='w-[1.5em]! h-[1.5em]!' />
             )}

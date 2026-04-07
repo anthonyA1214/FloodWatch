@@ -2,30 +2,14 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import WeatherAccordion from './weather-accordion';
 import WeatherDrawer from './weather-drawer';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
-import { useEffect, useState } from 'react';
-import { getUserLocation } from '@/lib/utils/get-user-location';
-import { toast } from 'sonner';
 
-export default function WeatherOverlay() {
+export default function WeatherOverlay({
+  location,
+}: {
+  location: { latitude: number; longitude: number } | null;
+}) {
   const isMobile = useIsMobile();
   const { activeOverlay } = useMapOverlay();
-  const [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-
-  useEffect(() => {
-    const fetchLocation = async () => {
-      try {
-        const pos = await getUserLocation();
-        setLocation(pos);
-      } catch {
-        toast.error('Unable to retrieve your location.');
-      }
-    };
-
-    fetchLocation();
-  }, []);
 
   if (activeOverlay) return null; // Don't show weather if any other overlay is active
 

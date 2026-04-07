@@ -4,7 +4,6 @@ import {
   IconClock,
   IconExclamationCircle,
   IconHelpCircle,
-  IconLoader2,
   IconMapPin,
   IconSend,
   IconShield,
@@ -25,6 +24,7 @@ import { useMyVote } from '@/hooks/use-my-vote';
 import { cn } from '@/lib/utils';
 import { useDirections } from '@/hooks/use-directions';
 import { useMapRouting } from '@/contexts/map-routing-context';
+import { Spinner } from '../ui/spinner';
 
 export default function AffectedLocationPopup({
   onClose,
@@ -199,7 +199,19 @@ export default function AffectedLocationPopup({
               </div>
 
               <div className='flex items-center gap-2'>
-                <span className='font-poppins font-bold'>{credibility}%</span>
+                <span
+                  className='font-poppins font-medium'
+                  style={{
+                    color:
+                      credibility >= 70
+                        ? '#16a34a'
+                        : credibility >= 40
+                          ? '#d97706'
+                          : '#dc2626',
+                  }}
+                >
+                  {credibility !== undefined ? `${credibility}%` : 'N/A'}
+                </span>
               </div>
             </div>
 
@@ -222,7 +234,7 @@ export default function AffectedLocationPopup({
             onClick={() => getDirections({ latitude, longitude })}
           >
             {isLoadingRoute ? (
-              <IconLoader2 className='w-[1.5em]! h-[1.5em]! animate-spin' />
+              <Spinner />
             ) : (
               <IconSend className='w-[1.5em]! h-[1.5em]!' />
             )}

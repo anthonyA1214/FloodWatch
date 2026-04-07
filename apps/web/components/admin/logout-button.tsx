@@ -27,7 +27,7 @@ export default function LogoutButton() {
     <SidebarMenuItem>
       <SidebarMenuButton
         asChild
-        className='text-base cursor-pointer'
+        className='text-base cursor-pointer transition-colors duration-200 hover:bg-[#0066CC]/5 active:bg-[#0066CC]/10'
         disabled={isPending}
         onClick={handleLogout}
       >
