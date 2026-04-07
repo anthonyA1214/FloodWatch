@@ -1,7 +1,12 @@
 'use client';
 
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -13,6 +18,8 @@ import { Spinner } from '@/components/ui/spinner';
 import { useRouter } from 'next/navigation';
 import { useMe } from '@/hooks/use-me';
 import { apiFetchClient } from '@/lib/api-fetch-client';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 export default function LoginForm() {
   const { mutateMe } = useMe();
@@ -23,16 +30,29 @@ export default function LoginForm() {
   });
   const router = useRouter();
 
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setState((prev) => ({
+      ...prev,
+      errors: prev.errors ? { ...prev.errors, [name]: [] } : null,
+    }));
+  };
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsPending(true);
 
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-
     const parsed = logInSchema.safeParse({
-      email: formData.get('email'),
-      password: formData.get('password'),
+      email: formData.email,
+      password: formData.password,
     });
 
     if (!parsed.success) {
@@ -40,9 +60,7 @@ export default function LoginForm() {
         errors: z.flattenError(parsed.error).fieldErrors,
         status: 'error',
       });
-
-      (form.elements.namedItem('password') as HTMLInputElement).value = '';
-
+      setFormData((prev) => ({ ...prev, password: '' }));
       setIsPending(false);
       return;
     }
@@ -58,12 +76,8 @@ export default function LoginForm() {
 
       const { user } = await res.json();
 
-      setState({
-        errors: {},
-        status: 'success',
-      });
-
-      form.reset();
+      setState({ errors: {}, status: 'success' });
+      setFormData({ email: '', password: '' });
       await mutateMe();
 
       if (user?.role === 'admin') router.replace('/admin');
@@ -73,8 +87,7 @@ export default function LoginForm() {
         errors: (await mapLoginAuthError(err)).errors,
         status: 'error',
       });
-
-      (form.elements.namedItem('password') as HTMLInputElement).value = '';
+      setFormData((prev) => ({ ...prev, password: '' }));
     } finally {
       setIsPending(false);
     }
@@ -82,41 +95,73 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className='space-y-6'>
-      <div className='space-y-2'>
-        <Label htmlFor='email'>Email</Label>
+      {/* email */}
+      <Field data-invalid={!!state.errors?.email?.length}>
+        <FieldLabel
+          htmlFor='email'
+          className='font-poppins text-sm font-medium'
+        >
+          Email
+        </FieldLabel>
         <Input
           id='email'
           name='email'
           type='email'
           placeholder='Enter your email'
           className='rounded-full'
+          value={formData.email}
+          onChange={handleChange}
+          aria-invalid={!!state.errors?.email?.length}
         />
-        {state?.errors && 'email' in state.errors && state.errors.email && (
-          <p className='text-red-500 text-sm'>{state.errors.email}</p>
+        {!!state.errors?.email?.length && (
+          <FieldError>{state.errors.email}</FieldError>
         )}
-      </div>
+      </Field>
 
-      <div className='space-y-2'>
-        <Label htmlFor='password'>Password</Label>
-        <Input
-          id='password'
-          name='password'
-          type='password'
-          placeholder='Enter your password'
-          className='rounded-full'
-        />
-        {state?.errors &&
-          'password' in state.errors &&
-          state.errors.password && (
-            <p className='text-red-500 text-sm'>{state.errors.password}</p>
+      {/* password */}
+      <Field data-invalid={!!state.errors?.password?.length}>
+        <FieldLabel
+          htmlFor='password'
+          className='font-poppins text-sm font-medium'
+        >
+          Password
+        </FieldLabel>
+        <InputGroup className='rounded-full'>
+          <InputGroupInput
+            id='password'
+            name='password'
+            type={showPassword ? 'text' : 'password'}
+            placeholder='Enter your password'
+            className='rounded-full'
+            value={formData.password}
+            onChange={handleChange}
+            aria-invalid={!!state.errors?.password?.length}
+          />
+          {formData.password.length > 0 && (
+            <InputGroupAddon align='inline-end'>
+              <InputGroupButton
+                className='bg-transparent! hover:bg-transparent!'
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? (
+                  <IconEyeOff className='size-[1.5em]! shrink-0' />
+                ) : (
+                  <IconEye className='size-[1.5em]! shrink-0' />
+                )}
+              </InputGroupButton>
+            </InputGroupAddon>
           )}
-        {state?.errors && '_form' in state.errors && state.errors._form && (
-          <p className='text-red-500 text-sm'>{state.errors._form}</p>
+        </InputGroup>
+        {!!state.errors?.password?.length && (
+          <FieldError>{state.errors.password}</FieldError>
+        )}
+        {state.errors && '_form' in state.errors && state.errors._form && (
+          <FieldError>{state.errors._form}</FieldError>
         )}
         <div className='text-right text-sm text-gray-500 hover:underline cursor-pointer'>
-          <Link href='/auth/forgot-password'> Forgot password? </Link>
+          <Link href='/auth/forgot-password'>Forgot password?</Link>
         </div>
-      </div>
+      </Field>
 
       <Button
         disabled={isPending}
