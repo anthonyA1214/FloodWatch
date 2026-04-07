@@ -5,7 +5,14 @@ import { Spinner } from '@/components/ui/spinner';
 import { useMe } from '@/hooks/use-me';
 import { setPassword } from '@/lib/actions/password-actions';
 import { ActionState } from '@/lib/types/action-state';
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useState } from 'react';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group';
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 export default function SetPasswordForm({
   onSuccess,
@@ -24,6 +31,13 @@ export default function SetPasswordForm({
     initialState,
   );
 
+  const [clearedFields, setClearedFields] = useState<Record<string, boolean>>(
+    {},
+  );
+
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   useEffect(() => {
     async function handleSuccess() {
       if (state.status === 'success') {
@@ -37,34 +51,98 @@ export default function SetPasswordForm({
   }, [state, onSuccess, mutateMe]);
 
   return (
-    <form action={formAction} className='space-y-6 text-sm'>
+    <form
+      action={async (formData: FormData) => {
+        setClearedFields({});
+        return formAction(formData);
+      }}
+      className='space-y-6 text-sm'
+    >
       {/* include resetSessionId as hidden input */}
-      <div className='space-y-2'>
+      <div
+        className='space-y-2'
+        data-invalid={
+          !!state.errors?.new_password && !clearedFields.new_password
+        }
+      >
         <Label htmlFor='new_password'>New Password</Label>
-        <Input
-          id='new_password'
-          name='new_password'
-          type='password'
-          placeholder='Enter your new password'
-          className='rounded-full'
-        />
-        {state.errors?.new_password && (
+        <InputGroup className='rounded-full'>
+          <InputGroupInput
+            id='new_password'
+            name='new_password'
+            type={showNewPassword ? 'text' : 'password'}
+            placeholder='Enter your new password'
+            className='rounded-full'
+            aria-invalid={
+              !!state.errors?.new_password && !clearedFields.new_password
+            }
+            onChange={(e) =>
+              setClearedFields((prev) => ({ ...prev, new_password: true }))
+            }
+          />
+          <InputGroupAddon align='inline-end'>
+            <InputGroupButton
+              className='bg-transparent! hover:bg-transparent!'
+              type='button'
+              onClick={() => setShowNewPassword((prev) => !prev)}
+            >
+              {showNewPassword ? (
+                <IconEyeOff className='size-[1.5em]! shrink-0' />
+              ) : (
+                <IconEye className='size-[1.5em]! shrink-0' />
+              )}
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
+        {state.errors?.new_password && !clearedFields.new_password && (
           <p className='text-red-500'>{state.errors.new_password}</p>
         )}
       </div>
 
-      <div className='space-y-2'>
+      <div
+        className='space-y-2'
+        data-invalid={
+          !!state.errors?.confirm_new_password &&
+          !clearedFields.confirm_new_password
+        }
+      >
         <Label htmlFor='confirm_new_password'>Confirm Password</Label>
-        <Input
-          id='confirm_new_password'
-          name='confirm_new_password'
-          type='password'
-          placeholder='Enter your confirm password'
-          className='rounded-full'
-        />
-        {state.errors?.confirm_new_password && (
-          <p className='text-red-500'>{state.errors.confirm_new_password}</p>
-        )}
+        <InputGroup className='rounded-full'>
+          <InputGroupInput
+            id='confirm_new_password'
+            name='confirm_new_password'
+            type={showConfirmPassword ? 'text' : 'password'}
+            placeholder='Enter your confirm password'
+            className='rounded-full'
+            aria-invalid={
+              !!state.errors?.confirm_new_password &&
+              !clearedFields.confirm_new_password
+            }
+            onChange={(e) =>
+              setClearedFields((prev) => ({
+                ...prev,
+                confirm_new_password: true,
+              }))
+            }
+          />
+          <InputGroupAddon align='inline-end'>
+            <InputGroupButton
+              className='bg-transparent! hover:bg-transparent!'
+              type='button'
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+            >
+              {showConfirmPassword ? (
+                <IconEyeOff className='size-[1.5em]! shrink-0' />
+              ) : (
+                <IconEye className='size-[1.5em]! shrink-0' />
+              )}
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
+        {state.errors?.confirm_new_password &&
+          !clearedFields.confirm_new_password && (
+            <p className='text-red-500'>{state.errors.confirm_new_password}</p>
+          )}
         {state?.errors && '_form' in state.errors && state.errors._form && (
           <p className='text-red-500 text-sm'>{state.errors._form}</p>
         )}
