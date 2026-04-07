@@ -56,7 +56,7 @@ export default function MapFilterPopover({
       </PopoverTrigger>
       <PopoverContent
         side='left'
-        className='flex flex-col bg-white rounded-xl shadow-md p-4 min-w-[200px] gap-4 h-fit'
+        className='flex flex-col bg-white rounded-xl shadow-md p-4 gap-4 h-fit w-[260px] sm:w-[320px] max-w-[calc(100vw-4rem)]'
       >
         <div className='flex items-center justify-between text-sm'>
           <span className='font-poppins font-medium'>MAP FILTERS</span>
