@@ -8,7 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { IconCheck, IconMapPin, IconPointFilled } from '@tabler/icons-react';
+import {
+  IconCheck,
+  IconMapPin,
+  IconPointFilled,
+  IconShield,
+} from '@tabler/icons-react';
 import {
   Avatar as UIAvatar,
   AvatarFallback,
@@ -33,6 +38,7 @@ import { Badge } from '@/components/ui/badge';
 import { useReportDetail } from '@/hooks/use-report-detail';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import ViewReportDialogSkeleton from './skeleton/view-report-dialog-skeleton';
+import { cn } from '@/lib/utils';
 
 export default function ViewReportDialog() {
   const { reportId, isOpen, closeDialog } = useReportDialog();
@@ -85,12 +91,33 @@ export default function ViewReportDialog() {
           reportDetail && (
             <>
               {/* ── Blue Header ── */}
-              <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl p-4 shrink-0 text-white'>
-                {/* Text */}
-                <DialogTitle className='flex items-center gap-3 sm:gap-4 font-poppins text-sm sm:text-base font-medium'>
-                  FLOOD REPORT
-                </DialogTitle>
-              </DialogHeader>
+              <div
+                className={cn(reportDetail?.isAdmin ? 'bg-[#9B32E4]/10' : '')}
+              >
+                <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-b-2xl p-4 shrink-0 text-white'>
+                  {/* Text */}
+                  <DialogTitle className='flex items-center gap-3 sm:gap-4 font-poppins text-sm sm:text-base font-medium'>
+                    FLOOD REPORT
+                  </DialogTitle>
+                </DialogHeader>
+              </div>
+
+              {reportDetail?.isAdmin && (
+                <>
+                  <div className='flex w-full gap-1.5 p-3 bg-[#9B32E4]/10 text-[#9B32E4] text-xs items-center'>
+                    <IconShield className='w-[1.5em]! h-[1.5em]!' />
+                    <span className='font-poppins font-medium'>
+                      OFFICIAL INFORMATION
+                    </span>
+                  </div>
+
+                  <Separator
+                    className={cn(
+                      reportDetail?.isAdmin ? 'bg-[#9B32E4]/30' : '',
+                    )}
+                  />
+                </>
+              )}
 
               {/* ── Content Area ── */}
               <div className='flex-1 min-h-0 overflow-y-auto'>
@@ -113,7 +140,7 @@ export default function ViewReportDialog() {
                       {/* right column details */}
                       <div className='flex-1 flex items-center'>
                         <div className='flex-1 flex flex-col gap-4 bg-accent border rounded-2xl py-4 h-fit'>
-                          {/*status*/}
+                          {/*reporter*/}
                           <div className='flex flex-col gap-2 px-4'>
                             <span className='font-poppins font-medium text-gray-600 text-sm'>
                               REPORTER
@@ -349,40 +376,43 @@ export default function ViewReportDialog() {
                   </div>
                 </DialogFooter>
               ) : (
-                <DialogFooter className='flex items-center bg-[#F9F9F9] rounded-t-2xl p-4 shrink-0'>
-                  <div className='flex flex-col gap-2 items-end'>
-                    <span className='font-poppins font-semibold text-gray-600 text-sm'>
-                      VERIFIED BY
-                    </span>
-                    <div className='flex items-center gap-2 w-auto text-end'>
-                      <div className='flex flex-col'>
-                        <span className='text-sm font-medium'>
-                          {reportDetail?.verifier?.name}
-                        </span>
-                        {reportDetail?.verifiedAt && (
-                          <span className='text-xs text-gray-600'>
-                            {format(reportDetail?.verifiedAt, 'PPP p')}
+                !reportDetail?.isAdmin && (
+                  <DialogFooter className='flex items-center bg-[#F9F9F9] rounded-t-2xl p-4 shrink-0'>
+                    <div className='flex flex-col gap-2 items-end'>
+                      <span className='font-poppins font-semibold text-gray-600 text-sm'>
+                        VERIFIED BY
+                      </span>
+                      <div className='flex items-center gap-2 w-auto text-end'>
+                        <div className='flex flex-col'>
+                          <span className='text-sm font-medium'>
+                            {reportDetail?.verifier?.name}
                           </span>
-                        )}
-                      </div>
+                          {reportDetail?.verifiedAt && (
+                            <span className='text-xs text-gray-600'>
+                              {format(reportDetail?.verifiedAt, 'PPP p')}
+                            </span>
+                          )}
+                        </div>
 
-                      <UIAvatar className='size-8'>
-                        <AvatarImage
-                          src={
-                            reportDetail?.verifier?.profilePicture || undefined
-                          }
-                        />
-                        <AvatarFallback>
-                          <Avatar
-                            name={`${reportDetail?.verifier?.name} ${reportDetail?.verifier?.id}`}
-                            variant='beam'
-                            className='size-8'
+                        <UIAvatar className='size-8'>
+                          <AvatarImage
+                            src={
+                              reportDetail?.verifier?.profilePicture ||
+                              undefined
+                            }
                           />
-                        </AvatarFallback>
-                      </UIAvatar>
+                          <AvatarFallback>
+                            <Avatar
+                              name={`${reportDetail?.verifier?.name} ${reportDetail?.verifier?.id}`}
+                              variant='beam'
+                              className='size-8'
+                            />
+                          </AvatarFallback>
+                        </UIAvatar>
+                      </div>
                     </div>
-                  </div>
-                </DialogFooter>
+                  </DialogFooter>
+                )
               )}
             </>
           )

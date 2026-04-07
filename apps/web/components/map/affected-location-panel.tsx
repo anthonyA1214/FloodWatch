@@ -18,7 +18,7 @@ import {
   REPORT_STATUS_COLOR_MAP,
   SEVERITY_COLOR_MAP,
 } from '@/lib/utils/get-color-map';
-import PostComposer from '@/components/shared/comment-composer';
+import CommentComposer from '@/components/shared/comment-composer';
 import { useReportDetail } from '@/hooks/use-report-detail';
 import { Separator } from '../ui/separator';
 import {
@@ -332,7 +332,7 @@ export default function AffectedLocationPanel({
 
           {/* comments */}
           <div className='flex flex-col gap-4 p-3 lg:p-4'>
-            <PostComposer reportId={reportId} />
+            <CommentComposer reportId={reportId} />
 
             <CommentsList
               reportId={reportId}
