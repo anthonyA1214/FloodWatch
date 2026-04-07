@@ -95,10 +95,12 @@ export default function InteractiveMapPage() {
             )}
           </div>
 
-          <WeatherOverlay
-            latitude={location?.latitude ?? null}
-            longitude={location?.longitude ?? null}
-          />
+          {!isError && location && (
+            <WeatherOverlay
+              latitude={location?.latitude ?? null}
+              longitude={location?.longitude ?? null}
+            />
+          )}
         </div>
 
         {/* Map controls — fixed to right */}
