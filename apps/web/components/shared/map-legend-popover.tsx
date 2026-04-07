@@ -5,6 +5,11 @@ import {
 } from '@/components/ui/popover';
 import { IconInfoCircle, IconStack2 } from '@tabler/icons-react';
 import LegendItem from '../map/legend-item';
+import {
+  SAFETY_TYPE_COLOR_MAP,
+  SEVERITY_COLOR_MAP,
+} from '@/lib/utils/get-color-map';
+import { Separator } from '../ui/separator';
 
 export default function MapLegendPopover() {
   return (
@@ -21,18 +26,49 @@ export default function MapLegendPopover() {
       </PopoverTrigger>
       <PopoverContent
         side='left'
-        className='flex flex-col bg-white rounded-xl shadow-md p-4 min-w-[200px] gap-3 h-fit'
+        className='flex flex-col bg-white rounded-xl shadow-md p-4 gap-3 h-fit w-[220px] sm:w-[260px] max-w-[calc(100vw-4rem)]'
       >
-        <h3 className='text-sm font-semibold text-gray-600 flex items-center gap-2'>
-          <IconInfoCircle className='w-[1.5em]! h-[1.5em]!' />{' '}
-          <span>Flood Severity Level</span>
-        </h3>
+        <span className='font-poppins font-medium text-sm'>MAP LEGEND</span>
 
-        <div className='space-y-2'>
-          <LegendItem color='bg-[#FB2C36]' label='Critical' />
-          <LegendItem color='bg-[#FF6900]' label='High' />
-          <LegendItem color='bg-[#F0B204]' label='Moderate' />
-          <LegendItem color='bg-[#2B7FFF]' label='Low' />
+        <Separator />
+
+        <div className='flex flex-col gap-2 text-xs'>
+          <span className='font-poppins font-medium opacity-50'>
+            FLOOD SEVERITY
+          </span>
+
+          {(['critical', 'high', 'moderate', 'low'] as const).map(
+            (severity) => (
+              <div key={severity}>
+                <div className='font-poppins font-normal gap-2 flex items-center text-sm'>
+                  <span
+                    className=' inline-block w-3 h-3 rounded-full'
+                    style={{ backgroundColor: SEVERITY_COLOR_MAP[severity] }}
+                  />
+                  {severity.toUpperCase()}
+                </div>
+              </div>
+            ),
+          )}
+        </div>
+
+        <Separator />
+        <div className='flex flex-col gap-2 text-xs'>
+          <span className='font-poppins font-medium opacity-50 '>
+            SAFETY LOCATIONS
+          </span>
+
+          {(['shelter', 'hospital'] as const).map((type) => (
+            <div key={type}>
+              <div className='font-poppins font-normal gap-2 flex items-center text-sm'>
+                <span
+                  className=' inline-block w-3 h-3 rounded-sm'
+                  style={{ backgroundColor: SAFETY_TYPE_COLOR_MAP[type] }}
+                />
+                {type.toUpperCase()}
+              </div>
+            </div>
+          ))}
         </div>
       </PopoverContent>
     </Popover>
