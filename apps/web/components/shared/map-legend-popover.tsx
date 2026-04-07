@@ -6,13 +6,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { IconInfoCircle, IconStack2 } from '@tabler/icons-react';
-import LegendItem from '../map/legend-item';
+import { IconStack2 } from '@tabler/icons-react';
 import {
   SAFETY_TYPE_COLOR_MAP,
   SEVERITY_COLOR_MAP,
 } from '@/lib/utils/get-color-map';
 import { Separator } from '../ui/separator';
+import { cn } from '@/lib/utils';
 
 export default function MapLegendPopover() {
   const [open, setOpen] = useState(false);
