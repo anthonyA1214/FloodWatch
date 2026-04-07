@@ -1,7 +1,5 @@
 'use client';
 
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ActionState } from '@/lib/types/action-state';
 import React, { useState } from 'react';
@@ -13,6 +11,15 @@ import { useRouter } from 'next/navigation';
 import { mutate } from 'swr';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { apiFetchClient } from '@/lib/api-fetch-client';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group';
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -23,20 +30,40 @@ export default function SignUpForm() {
     errors: null,
   });
 
+  const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
+    home_address: '',
+    email: '',
+    password: '',
+    confirm_password: '',
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setState((prev) => ({
+      ...prev,
+      errors: prev.errors ? { ...prev.errors, [name]: [] } : null,
+    }));
+  };
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsPending(true);
 
     const form = e.currentTarget;
-    const formData = new FormData(form);
 
     const parsed = signUpSchema.safeParse({
-      first_name: formData.get('first_name'),
-      last_name: formData.get('last_name'),
-      home_address: formData.get('home_address'),
-      email: formData.get('email'),
-      password: formData.get('password'),
-      confirm_password: formData.get('confirm_password'),
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      home_address: formData.home_address,
+      email: formData.email,
+      password: formData.password,
+      confirm_password: formData.confirm_password,
     });
 
     if (!parsed.success) {
@@ -44,11 +71,7 @@ export default function SignUpForm() {
         status: 'error',
         errors: z.flattenError(parsed.error).fieldErrors,
       });
-
-      (form.elements.namedItem('password') as HTMLInputElement).value = '';
-      (form.elements.namedItem('confirm_password') as HTMLInputElement).value =
-        '';
-
+      setFormData((prev) => ({ ...prev, password: '', confirm_password: '' }));
       setIsPending(false);
       return;
     }
@@ -96,10 +119,7 @@ export default function SignUpForm() {
         errors: (await mapSignupAuthError(err)).errors,
         status: 'error',
       });
-
-      (form.elements.namedItem('password') as HTMLInputElement).value = '';
-      (form.elements.namedItem('confirm_password') as HTMLInputElement).value =
-        '';
+      setFormData((prev) => ({ ...prev, password: '', confirm_password: '' }));
     } finally {
       setIsPending(false);
     }
@@ -107,102 +127,178 @@ export default function SignUpForm() {
 
   return (
     <form onSubmit={handleSubmit} className='space-y-6'>
+      {/* Full name */}
       <div className='space-y-2'>
-        <Label htmlFor='first_name'>Full name</Label>
+        <FieldLabel
+          className={`font-poppins text-sm font-medium ${
+            !!state.errors?.first_name?.length ||
+            !!state.errors?.last_name?.length
+              ? 'text-destructive'
+              : ''
+          }`}
+        >
+          Full name
+        </FieldLabel>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <div>
+          <Field data-invalid={!!state.errors?.first_name?.length}>
             <Input
               id='first_name'
               name='first_name'
               placeholder='First name'
               className='rounded-full px-4 shadow-sm'
+              value={formData.first_name}
+              onChange={handleChange}
+              aria-invalid={!!state.errors?.first_name?.length}
             />
-            {state?.errors &&
-              'first_name' in state.errors &&
-              state.errors.first_name && (
-                <p className='text-red-500 text-sm'>
-                  {state.errors.first_name}
-                </p>
-              )}
-          </div>
-          <div>
+            {!!state.errors?.first_name?.length && (
+              <FieldError>{state.errors.first_name[0]}</FieldError>
+            )}
+          </Field>
+          <Field data-invalid={!!state.errors?.last_name?.length}>
             <Input
               id='last_name'
               name='last_name'
               placeholder='Last name'
               className='rounded-full px-4 shadow-sm'
+              value={formData.last_name}
+              onChange={handleChange}
+              aria-invalid={!!state.errors?.last_name?.length}
             />
-            {state?.errors &&
-              'last_name' in state.errors &&
-              state.errors.last_name && (
-                <p className='text-red-500 text-sm'>{state.errors.last_name}</p>
-              )}
-          </div>
+            {!!state.errors?.last_name?.length && (
+              <FieldError>{state.errors.last_name[0]}</FieldError>
+            )}
+          </Field>
         </div>
       </div>
 
-      <div className='space-y-2'>
-        <Label htmlFor='email'>Email</Label>
+      {/* Email */}
+      <Field data-invalid={!!state.errors?.email?.length}>
+        <FieldLabel
+          htmlFor='email'
+          className='font-poppins text-sm font-medium'
+        >
+          Email
+        </FieldLabel>
         <Input
           id='email'
           name='email'
           type='email'
           placeholder='Enter your email'
           className='rounded-full px-4 shadow-sm'
+          value={formData.email}
+          onChange={handleChange}
+          aria-invalid={!!state.errors?.email?.length}
         />
-        {state?.errors && 'email' in state.errors && state.errors.email && (
-          <p className='text-red-500 text-sm'>{state.errors.email}</p>
+        {!!state.errors?.email?.length && (
+          <FieldError>{state.errors.email[0]}</FieldError>
         )}
-      </div>
+      </Field>
 
-      <div className='space-y-2'>
-        <Label htmlFor='home_address'>Home Address</Label>
+      {/* Home Address */}
+      <Field data-invalid={!!state.errors?.home_address?.length}>
+        <FieldLabel
+          htmlFor='home_address'
+          className='font-poppins text-sm font-medium'
+        >
+          Home Address
+        </FieldLabel>
         <Input
           id='home_address'
           name='home_address'
           placeholder='Enter your home address'
           className='rounded-full px-4 shadow-sm'
+          value={formData.home_address}
+          onChange={handleChange}
+          aria-invalid={!!state.errors?.home_address?.length}
         />
-        {state?.errors &&
-          'home_address' in state.errors &&
-          state.errors.home_address && (
-            <p className='text-red-500 text-sm'>{state.errors.home_address}</p>
-          )}
-      </div>
+        {!!state.errors?.home_address?.length && (
+          <FieldError>{state.errors.home_address[0]}</FieldError>
+        )}
+      </Field>
 
-      <div className='space-y-2'>
-        <Label htmlFor='password'>Password</Label>
-        <Input
-          id='password'
-          name='password'
-          type='password'
-          placeholder='Enter your password'
-          className='rounded-full px-4 shadow-sm'
-        />
-        {state?.errors &&
-          'password' in state.errors &&
-          state.errors.password && (
-            <p className='text-red-500 text-sm'>{state.errors.password}</p>
+      {/* Password */}
+      <Field
+        data-invalid={!!state.errors?.password?.length}
+        className='rounded-full'
+      >
+        <FieldLabel
+          htmlFor='password'
+          className='font-poppins text-sm font-medium'
+        >
+          Password
+        </FieldLabel>
+        <InputGroup className='rounded-full'>
+          <InputGroupInput
+            id='password'
+            name='password'
+            type={showPassword ? 'text' : 'password'}
+            placeholder='Enter your password'
+            className='rounded-full'
+            value={formData.password}
+            onChange={handleChange}
+            aria-invalid={!!state.errors?.password?.length}
+          />
+          {formData.password.length > 0 && (
+            <InputGroupAddon align='inline-end'>
+              <InputGroupButton
+                className='bg-transparent! hover:bg-transparent!'
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? (
+                  <IconEyeOff className='size-[1.5em]! shrink-0' />
+                ) : (
+                  <IconEye className='size-[1.5em]! shrink-0' />
+                )}
+              </InputGroupButton>
+            </InputGroupAddon>
           )}
-      </div>
+        </InputGroup>
+        {!!state.errors?.password?.length && (
+          <FieldError>{state.errors.password[0]}</FieldError>
+        )}
+      </Field>
 
-      <div className='space-y-2'>
-        <Label htmlFor='confirm_password'>Confirm Password</Label>
-        <Input
-          id='confirm_password'
-          name='confirm_password'
-          type='password'
-          placeholder='Re-enter your password'
-          className='rounded-full px-4 shadow-sm'
-        />
-        {state?.errors &&
-          'confirm_password' in state.errors &&
-          state.errors.confirm_password && (
-            <p className='text-red-500 text-sm'>
-              {state.errors.confirm_password}
-            </p>
+      {/* Confirm Password */}
+      <Field
+        data-invalid={!!state.errors?.confirm_password?.length}
+        className='rounded-full'
+      >
+        <FieldLabel
+          htmlFor='confirm_password'
+          className='font-poppins text-sm font-medium'
+        >
+          Confirm Password
+        </FieldLabel>
+        <InputGroup className='rounded-full'>
+          <InputGroupInput
+            id='confirm_password'
+            name='confirm_password'
+            type={showConfirmPassword ? 'text' : 'password'}
+            placeholder='Re-enter your password'
+            className='rounded-full'
+            value={formData.confirm_password}
+            onChange={handleChange}
+            aria-invalid={!!state.errors?.confirm_password?.length}
+          />
+          {formData.confirm_password.length > 0 && (
+            <InputGroupAddon align='inline-end'>
+              <InputGroupButton
+                className='bg-transparent! hover:bg-transparent!'
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+              >
+                {showConfirmPassword ? (
+                  <IconEyeOff className='size-[1.5em]! shrink-0' />
+                ) : (
+                  <IconEye className='size-[1.5em]! shrink-0' />
+                )}
+              </InputGroupButton>
+            </InputGroupAddon>
           )}
-      </div>
+        </InputGroup>
+        {!!state.errors?.confirm_password?.length && (
+          <FieldError>{state.errors.confirm_password[0]}</FieldError>
+        )}
+      </Field>
 
       <Button disabled={isPending} className='w-full rounded-full'>
         {isPending ? (
