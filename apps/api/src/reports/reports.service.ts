@@ -1,6 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   CreateFloodAlertInput,
+  ReportFloodAlertInput,
   ReportListQueryInput,
   ReportQueryInput,
 } from '@repo/schemas';
@@ -245,11 +246,11 @@ export class ReportsService {
 
   async createReport(
     userId: number,
-    createFloodAlertDto: CreateFloodAlertInput,
+    reportFloodAlertDto: ReportFloodAlertInput,
     image: Express.Multer.File,
   ) {
     const { latitude, longitude, severity, description, range } =
-      createFloodAlertDto;
+      reportFloodAlertDto;
 
     let imageUrl: string | null = null;
     let imagePublicId: string | null = null;

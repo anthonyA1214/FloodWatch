@@ -165,72 +165,61 @@ export default function AffectedLocationPanel({
 
             {/* details */}
             <div className='flex flex-col border rounded-lg text-xs lg:text-sm'>
-              {!reportDetail?.isAdmin && (
-                <>
-                  <div className='flex justify-between items-center p-3 lg:p-4'>
-                    <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
-                      <IconUser className='w-[1.5em]! h-[1.5em]!' />
-                      <span className='font-poppins font-medium'>
-                        REPORTED BY
-                      </span>
-                    </div>
+              <div className='flex justify-between items-center p-3 lg:p-4'>
+                <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
+                  <IconUser className='w-[1.5em]! h-[1.5em]!' />
+                  <span className='font-poppins font-medium'>REPORTED BY</span>
+                </div>
 
-                    <div className='flex items-center gap-2'>
-                      <UIAvatar className='size-5'>
-                        <AvatarImage
-                          src={
-                            reportDetail?.reporter?.profilePicture || undefined
-                          }
+                <div className='flex items-center gap-2'>
+                  <UIAvatar className='size-5'>
+                    <AvatarImage
+                      src={reportDetail?.reporter?.profilePicture || undefined}
+                    />
+                    <AvatarFallback>
+                      <Avatar
+                        name={`${reportDetail?.reporter?.name} ${reportDetail?.reporter?.id}`}
+                        variant='beam'
+                      />
+                    </AvatarFallback>
+                  </UIAvatar>
+                  <span>{reportDetail?.reporter?.name}</span>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className='flex justify-between items-center p-3 lg:p-4'>
+                <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
+                  <IconShield className='w-[1.5em]! h-[1.5em]!' />
+                  <span className='font-poppins font-medium'>VERIFIED BY</span>
+                </div>
+
+                {reportDetail?.status === 'verified' ? (
+                  <div className='flex items-center gap-2'>
+                    <UIAvatar className='size-5'>
+                      <AvatarImage
+                        src={
+                          reportDetail?.verifier?.profilePicture || undefined
+                        }
+                      />
+                      <AvatarFallback>
+                        <Avatar
+                          name={`${reportDetail?.verifier?.name} ${reportDetail?.verifier?.id}`}
+                          variant='beam'
                         />
-                        <AvatarFallback>
-                          <Avatar
-                            name={`${reportDetail?.reporter?.name} ${reportDetail?.reporter?.id}`}
-                            variant='beam'
-                          />
-                        </AvatarFallback>
-                      </UIAvatar>
-                      <span>{reportDetail?.reporter?.name}</span>
-                    </div>
+                      </AvatarFallback>
+                    </UIAvatar>
+                    <span>{reportDetail?.verifier?.name}</span>
                   </div>
+                ) : (
+                  <span className='font-poppins opacity-50 italic font-medium'>
+                    PENDING
+                  </span>
+                )}
+              </div>
 
-                  <Separator />
-
-                  <div className='flex justify-between items-center p-3 lg:p-4'>
-                    <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
-                      <IconShield className='w-[1.5em]! h-[1.5em]!' />
-                      <span className='font-poppins font-medium'>
-                        VERIFIED BY
-                      </span>
-                    </div>
-
-                    {reportDetail?.status === 'verified' ? (
-                      <div className='flex items-center gap-2'>
-                        <UIAvatar className='size-5'>
-                          <AvatarImage
-                            src={
-                              reportDetail?.verifier?.profilePicture ||
-                              undefined
-                            }
-                          />
-                          <AvatarFallback>
-                            <Avatar
-                              name={`${reportDetail?.verifier?.name} ${reportDetail?.verifier?.id}`}
-                              variant='beam'
-                            />
-                          </AvatarFallback>
-                        </UIAvatar>
-                        <span>{reportDetail?.verifier?.name}</span>
-                      </div>
-                    ) : (
-                      <span className='font-poppins opacity-50 italic font-medium'>
-                        PENDING
-                      </span>
-                    )}
-                  </div>
-
-                  <Separator />
-                </>
-              )}
+              <Separator />
 
               <div className='flex justify-between items-start p-3 lg:p-4'>
                 <div className='flex items-center gap-1.5 lg:gap-2 opacity-50 shrink-0'>

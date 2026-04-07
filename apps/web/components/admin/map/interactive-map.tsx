@@ -91,6 +91,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
         }}
         mapStyle='https://tiles.openfreemap.org/styles/bright'
         onClick={() => setActivePin(null)} // Deselect pins when clicking on the map
+        attributionControl={false}
       >
         {/* boundary fill */}
         {caloocanGeoJSON && (

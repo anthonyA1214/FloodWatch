@@ -24,6 +24,7 @@ import {
   CreateCommentDto,
   CreateFloodAlertDto,
   createFloodAlertSchema,
+  ReportFloodAlertDto,
   ReportListQueryDto,
   ReportQueryDto,
   VoteDto,
@@ -126,12 +127,12 @@ export class ReportsController {
   @ApiBody({ type: ReportFloodAlertWithImageDto })
   async createReport(
     @Request() req: AuthRequest,
-    @Body() createFloodAlertDto: CreateFloodAlertDto,
+    @Body() reportFloodAlertDto: ReportFloodAlertDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
     return await this.reportsService.createReport(
       req.user.id,
-      createFloodAlertDto,
+      reportFloodAlertDto,
       image,
     );
   }

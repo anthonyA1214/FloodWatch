@@ -6,8 +6,20 @@ const severityEnum = z.enum(['low', 'moderate', 'high', 'critical']);
 export const reportFloodAlertSchema = z.object({
   latitude: z.coerce.number(),
   longitude: z.coerce.number(),
-  range: z.coerce.number(),
-  description: z.string().optional(),
+  range: z.coerce
+    .number('Affected range is required.')
+    .refine((val) => val > 0, {
+      error: 'Affected range must be at least 1 meter.',
+      abort: true,
+    })
+    .refine((val) => val <= 1000, {
+      error: 'Affected range cannot exceed 1,000 meters.',
+      abort: true,
+    }),
+  description: z
+    .string()
+    .max(300, 'Description cannot exceed 300 characters.')
+    .optional(),
   severity: severityEnum,
 });
 

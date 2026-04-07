@@ -144,11 +144,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
       zoomOut: () => mapRef.current?.zoomOut(),
       geolocate: () =>
         getUserLocation().then((pos) => {
-          if (
-            pos &&
-            mapRef.current &&
-            (mapRef.current as unknown as { _loaded: boolean })._loaded
-          ) {
+          if (pos && mapRef.current) {
             const { longitude, latitude } = pos;
             setUserLocation({ longitude, latitude });
             mapRef.current!.flyTo({
@@ -172,6 +168,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
         }}
         mapStyle='https://tiles.openfreemap.org/styles/bright'
         onClick={() => closePopup()}
+        attributionControl={false}
       >
         {/* Boundary fill */}
         {caloocanGeoJSON && (
