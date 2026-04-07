@@ -43,7 +43,7 @@ export default function MapFilterPopover({
           <button
             className={cn(
               'aspect-square rounded-md p-1',
-              open ? 'bg-[#0066CC] text-white' : 'hover:bg-gray-200',
+              open ? 'bg-gray-200' : 'hover:bg-gray-200',
             )}
             title='Filter'
           >
