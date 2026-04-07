@@ -4,7 +4,7 @@ import SearchBar from '@/components/map/search-bar';
 import InteractiveMap, {
   InteractiveMapHandle,
 } from '@/components/map/interactive-map';
-import { Suspense, useRef } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
 import { GoogleLinkToastHandler } from '@/components/shared/google-link-toast-handler';
 import { IconCurrentLocation, IconMinus, IconPlus } from '@tabler/icons-react';
@@ -18,11 +18,37 @@ import SafetyLocationOverlay from './safety-location-overlay';
 import MapLegendPopover from '../shared/map-legend-popover';
 import MapFilterPopover from '../shared/map-filter-popover';
 import { useMapFilter } from '@/contexts/map-filter-context';
-import HotlinesPill from './hotlines-pill';
+import HotlinesAccordion from './hotlines-accordion';
+import { useWeather } from '@/hooks/use-weather';
+import { getUserLocation } from '@/lib/utils/get-user-location';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 export default function InteractiveMapPage() {
   const { activeOverlay } = useMapOverlay();
   const interactiveMapRef = useRef<InteractiveMapHandle>(null);
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      try {
+        const pos = await getUserLocation();
+        setLocation(pos);
+      } catch {
+        toast.error('Unable to retrieve your location.');
+      }
+    };
+
+    fetchLocation();
+  }, []);
+
+  const { isError } = useWeather(
+    location?.latitude ?? null,
+    location?.longitude ?? null,
+  );
 
   const { filters, toggleSeverity, toggleSafetyType, resetFilters } =
     useMapFilter();
@@ -33,8 +59,13 @@ export default function InteractiveMapPage() {
 
       {/* static hotlines pill (only when no overlay is active) */}
       {!activeOverlay && (
-        <div className='absolute right-4 z-10 bottom-20 md:bottom-4'>
-          <HotlinesPill />
+        <div
+          className={cn(
+            'absolute right-4 z-10 ',
+            isError ? 'bottom-4 md:bottom-4' : 'bottom-20 md:bottom-4',
+          )}
+        >
+          <HotlinesAccordion />
         </div>
       )}
 
@@ -64,7 +95,10 @@ export default function InteractiveMapPage() {
             )}
           </div>
 
-          <WeatherOverlay />
+          <WeatherOverlay
+            latitude={location?.latitude ?? null}
+            longitude={location?.longitude ?? null}
+          />
         </div>
 
         {/* Map controls — fixed to right */}
