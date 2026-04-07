@@ -2,14 +2,25 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import WeatherAccordion from './weather-accordion';
 import WeatherDrawer from './weather-drawer';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
+import { toast } from 'sonner';
+import { useWeather } from '@/hooks/use-weather';
 
 export default function WeatherOverlay({
-  location,
+  latitude,
+  longitude,
 }: {
-  location: { latitude: number; longitude: number } | null;
+  latitude: number | null;
+  longitude: number | null;
 }) {
   const isMobile = useIsMobile();
   const { activeOverlay } = useMapOverlay();
+
+  const { isError } = useWeather(latitude, longitude);
+
+  if (isError) {
+    toast.error('Unable to fetch weather data for your location.');
+    return null;
+  }
 
   if (activeOverlay) return null; // Don't show weather if any other overlay is active
 
@@ -17,8 +28,8 @@ export default function WeatherOverlay({
     return (
       <div className='absolute inset-0 flex flex-col h-full w-full'>
         <WeatherDrawer
-          latitude={location?.latitude ?? null}
-          longitude={location?.longitude ?? null}
+          latitude={latitude ?? null}
+          longitude={longitude ?? null}
         />
       </div>
     );
@@ -27,8 +38,8 @@ export default function WeatherOverlay({
   return (
     <div className='absolute bottom-4 left-4 max-w-xs w-full z-10 flex flex-col'>
       <WeatherAccordion
-        latitude={location?.latitude ?? null}
-        longitude={location?.longitude ?? null}
+        latitude={latitude ?? null}
+        longitude={longitude ?? null}
       />
     </div>
   );
