@@ -90,8 +90,6 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
           zoom: 11.5,
         }}
         mapStyle='https://tiles.openfreemap.org/styles/bright'
-        attributionControl={false}
-        dragRotate={false}
         onClick={() => setActivePin(null)} // Deselect pins when clicking on the map
       >
         {/* boundary fill */}

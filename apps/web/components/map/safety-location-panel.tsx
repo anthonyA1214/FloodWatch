@@ -18,6 +18,10 @@ import { useMapOverlay } from '@/contexts/map-overlay-context';
 import { useSafetyLocationDetail } from '@/hooks/use-safety-location-detail';
 import { format } from 'date-fns';
 import { SafetyLocationPanelSkeleton } from './skeletons/safety-location-panel-skeleton';
+import { useSafetyLocationMapPins } from '@/hooks/use-safety-location-map-pins';
+import { useDirections } from '@/hooks/use-directions';
+import { useMapRouting } from '@/contexts/map-routing-context';
+import { Spinner } from '../ui/spinner';
 
 export default function SafetyLocationPanel({
   safetyId,
@@ -27,9 +31,15 @@ export default function SafetyLocationPanel({
   const { close } = useMapOverlay();
   const { safetyDetail, isLoading } = useSafetyLocationDetail(safetyId);
 
+  const { safetyMapPins } = useSafetyLocationMapPins();
+  const { getDirections } = useDirections();
+  const { isLoadingRoute } = useMapRouting();
+
+  const destination = safetyMapPins?.find((p) => p.id === safetyId);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // scroll to top when report changes
+  // scroll to top when safety location changes
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
@@ -62,11 +72,11 @@ export default function SafetyLocationPanel({
           className='flex-1 min-h-0 overflow-y-auto'
         >
           {/* image */}
-          <div className='aspect-video w-full relative bg-muted shrink-0 '>
+          <div className='aspect-video w-full relative bg-muted shrink-0'>
             {safetyDetail?.image ? (
               <Image
                 src={safetyDetail.image}
-                alt='Affected location'
+                alt='Safety location'
                 fill
                 className='object-cover'
               />
@@ -90,7 +100,6 @@ export default function SafetyLocationPanel({
               </span>
             </div>
 
-            {/* location name */}
             <h3 className='font-poppins text-base font-semibold'>
               {safetyDetail?.location}
             </h3>
@@ -99,7 +108,6 @@ export default function SafetyLocationPanel({
 
             {/* details */}
             <div className='flex flex-col border rounded-lg text-xs lg:text-sm'>
-              {/* safety type */}
               <div className='flex justify-between items-center p-3 lg:p-4'>
                 <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
                   <IconShield className='w-[1.5em]! h-[1.5em]!' />
@@ -132,7 +140,6 @@ export default function SafetyLocationPanel({
 
               <Separator />
 
-              {/* added on */}
               <div className='flex justify-between items-start p-3 lg:p-4'>
                 <div className='flex items-center gap-1.5 lg:gap-2 opacity-50 shrink-0'>
                   <IconCalendarPlus className='w-[1.5em]! h-[1.5em]!' />
@@ -178,8 +185,6 @@ export default function SafetyLocationPanel({
                   </div>
                 </>
               )}
-
-              {/**/}
             </div>
 
             {/* description */}
@@ -194,9 +199,19 @@ export default function SafetyLocationPanel({
               </div>
             )}
 
-            <Button className='rounded-lg h-12'>
-              <IconSend className='w-[1.5em]! h-[1.5em]!' />
-              <span className='font-poppins font-medium'>GET DIRECTIONS</span>
+            <Button
+              className='rounded-lg h-12'
+              disabled={!destination || isLoadingRoute}
+              onClick={() => destination && getDirections(destination)}
+            >
+              {isLoadingRoute ? (
+                <Spinner />
+              ) : (
+                <IconSend className='w-[1.5em]! h-[1.5em]!' />
+              )}
+              <span className='font-poppins font-medium'>
+                {isLoadingRoute ? 'GETTING DIRECTIONS...' : 'GET DIRECTIONS'}
+              </span>
             </Button>
           </div>
         </div>
