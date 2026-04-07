@@ -294,8 +294,8 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
           <Marker
             longitude={routeOrigin[0]}
             latitude={routeOrigin[1]}
-            anchor='center'
-            style={{ pointerEvents: 'none', zIndex: 20 }}
+            anchor='bottom'
+            style={{ pointerEvents: 'none' }}
           >
             <UserLocationMarker />
           </Marker>

@@ -85,7 +85,7 @@ export default function AffectedLocationPanel({
       <button
         className='absolute bg-white top-1/2 translate-x-full right-0 h-16 -translate-y-1/2
         rounded-r-2xl ps-1 py-1 pr-1.5 text-xs z-30 shadow-[4px_0px_6px_-1px_rgba(0,0,0,0.1)]'
-        onClick={close}
+        onClick={() => close()}
       >
         <IconChevronLeft className='w-[1.5em]! h-[1.5em]!' />
       </button>
