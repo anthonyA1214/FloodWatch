@@ -21,7 +21,7 @@ export async function mapLoginAuthError(err: unknown): Promise<ActionState> {
     if (status === 401) {
       return {
         status: 'error',
-        errors: { _form: ['Invalid email or password'] },
+        errors: { _form: ['Invalid email or password.'] },
       };
     }
 
@@ -54,6 +54,6 @@ export async function mapLoginAuthError(err: unknown): Promise<ActionState> {
   console.error(err);
   return {
     status: 'error',
-    errors: { _form: ['An unexpected error occurred'] },
+    errors: { _form: ['An unexpected error occurred.'] },
   };
 }

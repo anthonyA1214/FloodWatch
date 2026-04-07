@@ -2,11 +2,13 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   Patch,
   Post,
+  Query,
   Request,
   UploadedFile,
   UseGuards,
@@ -17,7 +19,13 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { UserStatusGuard } from 'src/common/guards/user-status/user-status.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { type AuthRequest } from 'src/auth/types/auth-request.type';
-import { ReportCommentDto, UpdateCommentDto } from '@repo/schemas';
+import {
+  ReportCommentDto,
+  ReportedCommentActionDto,
+  ReportedCommentQueryDto,
+  UpdateCommentDto,
+} from '@repo/schemas';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller('comments')
 export class CommentsController {
@@ -61,5 +69,47 @@ export class CommentsController {
       req.user.id,
       reportCommentDto,
     );
+  }
+
+  @Roles('admin')
+  @Get('reports')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  async getReportedComments(
+    @Query() reportedCommentQuery: ReportedCommentQueryDto,
+  ) {
+    return await this.commentsService.getReportedComments(reportedCommentQuery);
+  }
+
+  @Roles('admin')
+  @Get('reports/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  async getReportedCommentDetails(@Param('id') id: number) {
+    return await this.commentsService.getReportedCommentDetails(id);
+  }
+
+  @Roles('admin')
+  @Patch('reports/:id/action')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  async handleReportedCommentAction(
+    @Param('id') id: number,
+    @Body() actionDto: ReportedCommentActionDto,
+    @Request() req: AuthRequest,
+  ) {
+    return await this.commentsService.handleReportedCommentAction(
+      id,
+      actionDto,
+      req.user.id,
+    );
+  }
+
+  @Roles('admin')
+  @Delete('reports/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  async deleteReportedComment(@Param('id') id: number) {
+    return await this.commentsService.deleteReportedComment(id);
   }
 }

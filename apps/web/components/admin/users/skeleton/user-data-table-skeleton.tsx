@@ -56,7 +56,6 @@ export function UserDataTableSkeleton() {
           {/* ACTIONS: two icon buttons */}
           <div className='flex-1 flex justify-center gap-2'>
             <Skeleton className='h-8 w-8 rounded-lg' />
-            <Skeleton className='h-8 w-8 rounded-lg' />
           </div>
         </div>
       ))}

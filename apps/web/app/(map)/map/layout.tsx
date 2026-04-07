@@ -9,6 +9,7 @@ export default function MapLayout({
   return (
     <MapFilterProvider>
       <MapOverlayProvider>
+        {/*\/\/need to be  a children of map filter provider \/\/*/}
         <MapPopupProvider>
           <div className='flex flex-col h-dvh overscroll-none overflow-hidden'>
             <TopNav />

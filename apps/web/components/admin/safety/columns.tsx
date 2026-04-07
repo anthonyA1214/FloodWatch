@@ -1,8 +1,8 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { SafetyDetailInput } from '@repo/schemas';
-import { IconEye, IconTrash } from '@tabler/icons-react';
+import { SafetyLocationInput } from '@repo/schemas';
+import { IconEdit, IconEye, IconTrash } from '@tabler/icons-react';
 import {
   Tooltip,
   TooltipContent,
@@ -10,9 +10,9 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { SAFETY_TYPE_COLOR_MAP } from '@/lib/utils/get-color-map';
-import { useSafetyLocationsDialog } from '@/contexts/safety-locations-dialog-context';
+import { useSafetyLocationDialog } from '@/contexts/safety-location-dialog-context';
 
-export const columns: ColumnDef<SafetyDetailInput>[] = [
+export const columns: ColumnDef<SafetyLocationInput>[] = [
   {
     accessorKey: 'location',
     header: 'LOCATION',
@@ -63,15 +63,20 @@ export const columns: ColumnDef<SafetyDetailInput>[] = [
   },
 ];
 
-function ActionCell({ safetyLocation }: { safetyLocation: SafetyDetailInput }) {
-  const { openDialog } = useSafetyLocationsDialog();
+function ActionCell({
+  safetyLocation,
+}: {
+  safetyLocation: SafetyLocationInput;
+}) {
+  const { openDialog } = useSafetyLocationDialog();
 
   return (
     <div className='flex justify-center gap-2'>
+      {/*view*/}
       <Tooltip>
         <TooltipTrigger
           className='text-[#0066CC] bg-[#0066CC]/10 rounded-lg p-1.5 hover:bg-[#0066CC]/20 transition'
-          onClick={() => openDialog('view', safetyLocation)}
+          onClick={() => openDialog('view', safetyLocation.id)}
         >
           <IconEye className='w-[1.5em]! h-[1.5em]!' />
         </TooltipTrigger>
@@ -80,12 +85,27 @@ function ActionCell({ safetyLocation }: { safetyLocation: SafetyDetailInput }) {
         </TooltipContent>
       </Tooltip>
 
+      {/*edit*/}
+      <Tooltip>
+        <TooltipTrigger
+          className='text-[#7C3AED] bg-[#7C3AED]/10 rounded-lg p-1.5 hover:bg-[#7C3AED]/20 transition'
+          onClick={() => openDialog('edit', safetyLocation.id)}
+        >
+          <IconEdit className='w-[1.5em]! h-[1.5em]!' />
+        </TooltipTrigger>
+
+        <TooltipContent>
+          <p>Edit safety location</p>
+        </TooltipContent>
+      </Tooltip>
+
+      {/*delete*/}
       <Tooltip>
         <TooltipTrigger
           className={cn(
             `text-[#FB323B] bg-[#FB323B]/10 rounded-lg p-1.5 hover:bg-[#FB323B]/20 transition`,
           )}
-          onClick={() => openDialog('delete', safetyLocation)}
+          onClick={() => openDialog('delete', safetyLocation.id)}
         >
           <IconTrash className='w-[1.5em]! h-[1.5em]!' />
         </TooltipTrigger>

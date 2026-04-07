@@ -3,6 +3,7 @@
 import { Spinner } from '@/components/ui/spinner';
 import dynamic from 'next/dynamic';
 import { MapProvider } from 'react-map-gl/maplibre';
+import { MapRoutingProvider } from '@/contexts/map-routing-context';
 
 const InteractiveMapPage = dynamic(
   () => import('@/components/map/interactive-map-page'),
@@ -20,7 +21,9 @@ const InteractiveMapPage = dynamic(
 export default function InteractiveMapPageWrapper() {
   return (
     <MapProvider>
-      <InteractiveMapPage />
+      <MapRoutingProvider>
+        <InteractiveMapPage />
+      </MapRoutingProvider>
     </MapProvider>
   );
 }

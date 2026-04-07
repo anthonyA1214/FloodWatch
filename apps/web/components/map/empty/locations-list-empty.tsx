@@ -7,17 +7,20 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 
-export default function LocationsListEmpty() {
+type Props = {
+  title?: string;
+  description?: string;
+};
+
+export default function LocationsListEmpty({ title, description }: Props) {
   return (
     <Empty>
       <EmptyHeader>
         <EmptyMedia variant='icon'>
           <IconMapPinX />
         </EmptyMedia>
-        <EmptyTitle>No locations found</EmptyTitle>
-        <EmptyDescription>
-          Try adjusting the filter or check back later.
-        </EmptyDescription>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription>{description}</EmptyDescription>
       </EmptyHeader>
     </Empty>
   );

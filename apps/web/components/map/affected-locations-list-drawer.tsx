@@ -33,7 +33,7 @@ export default function AffectedLocationsListDrawer() {
     'all-levels' | 'critical' | 'high' | 'moderate' | 'low'
   >('all-levels');
   const [page, setPage] = useState(1);
-  const { q, filters } = useMapFilter();
+  const { q, setQ, setInputValue, filters } = useMapFilter();
 
   const activeSeverities =
     severity !== 'all-levels'
@@ -66,7 +66,11 @@ export default function AffectedLocationsListDrawer() {
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
-    if (!isOpen) close?.();
+    if (!isOpen) {
+      setQ('');
+      setInputValue('');
+      close?.();
+    }
   };
 
   return (
@@ -154,7 +158,10 @@ export default function AffectedLocationsListDrawer() {
                   <AffectedLocationsCardSkeleton key={i} />
                 ))
               ) : !reportList || reportList.length === 0 ? (
-                <LocationsListEmpty />
+                <LocationsListEmpty
+                  title='No affected locations found'
+                  description='Try adjusting your filters or check back later for updates.'
+                />
               ) : (
                 reportList?.map((report: ReportListItemInput) => (
                   <AffectedLocationsCard

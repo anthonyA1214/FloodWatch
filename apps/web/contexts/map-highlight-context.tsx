@@ -1,11 +1,11 @@
 'use client';
 
-import { ReportMapPinInput, SafetyMapPinInput } from '@repo/schemas';
+import { ReportMapPinInput, SafetyLocationMapPinInput } from '@repo/schemas';
 import { createContext, RefObject, useContext, useRef, useState } from 'react';
 
 type ActivePin =
   | { type: 'report'; report: ReportMapPinInput }
-  | { type: 'safety'; safety: SafetyMapPinInput }
+  | { type: 'safety'; safety: SafetyLocationMapPinInput }
   | null;
 
 type MapHighlightContextType = {

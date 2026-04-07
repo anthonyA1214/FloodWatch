@@ -6,15 +6,7 @@ export async function getMyVote(reportId: number) {
     method: 'GET',
   });
 
-  if (res.status === 401) {
-    return null;
-  }
+  if (!res.ok) throw new Error('Failed to fetch my vote');
 
-  if (!res.ok) {
-    console.error('MY VOTES ERROR:', res.status);
-    return null;
-  }
-
-  const data = await res.json();
-  return data;
+  return res.json();
 }

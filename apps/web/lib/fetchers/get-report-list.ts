@@ -44,8 +44,7 @@ export async function getReportList(params: ReportListQueryInput) {
     );
 
     return res.json();
-  } catch (error) {
-    console.error('Error fetching affected locations list data:', error);
-    throw new Error('Failed to fetch affected locations list data');
+  } catch {
+    throw new Error('Failed to fetch report list');
   }
 }

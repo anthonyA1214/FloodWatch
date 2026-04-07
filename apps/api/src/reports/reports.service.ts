@@ -1,7 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   CreateFloodAlertInput,
-  ReportFloodAlertInput,
   ReportListQueryInput,
   ReportQueryInput,
 } from '@repo/schemas';
@@ -84,6 +83,7 @@ export class ReportsService {
           name: sql<string>`CONCAT(${verifierProfile.firstName}, ' ', ${verifierProfile.lastName})`,
           profilePicture: verifierProfile.profilePicture,
         },
+        verifiedAt: reports.verifiedAt,
       })
       .from(reports)
       .leftJoin(users, eq(reports.userId, users.id))
@@ -154,7 +154,6 @@ export class ReportsService {
     // Build search condition once, reused across all queries
     const searchCondition = q
       ? or(
-          like(reports.location, `%${q}%`),
           like(users.email, `%${q}%`),
           like(profileInfo.firstName, `%${q}%`),
           like(profileInfo.lastName, `%${q}%`),
@@ -173,7 +172,16 @@ export class ReportsService {
     const [data, counts, statsResult] = await Promise.all([
       // Main paginated query
       this.db
-        .select()
+        .select({
+          id: reports.id,
+          reporterId: users.id,
+          reporterEmail: users.email,
+          reporterFirstName: profileInfo.firstName,
+          reporterLastName: profileInfo.lastName,
+          reporterProfilePicture: profileInfo.profilePicture,
+          reportedAt: reports.createdAt,
+          status: reports.status,
+        })
         .from(reports)
         .leftJoin(users, eq(reports.userId, users.id))
         .leftJoin(profileInfo, eq(users.id, profileInfo.userId))
@@ -206,26 +214,15 @@ export class ReportsService {
     const { totalCount, verifiedCount, unverifiedCount } = statsResult[0];
 
     const formattedData = data.map((item) => ({
-      id: item.reports.id,
-      location: item.reports.location,
-      description: item.reports.description,
-      image: item.reports.image,
-      severity: item.reports.severity,
-      status: item.reports.status,
-      latitude: item.reports.latitude,
-      longitude: item.reports.longitude,
-      range: item.reports.range,
-      reportedAt: item.reports.createdAt,
-      reporter: item.users
-        ? {
-            id: item.users.id,
-            email: item.users.email,
-            name: item.profile_info
-              ? `${item.profile_info.firstName} ${item.profile_info.lastName}`.trim()
-              : '',
-            profilePicture: item.profile_info?.profilePicture || '',
-          }
-        : null,
+      id: item.id,
+      reporter: {
+        id: item.reporterId,
+        email: item.reporterEmail,
+        name: `${item.reporterFirstName} ${item.reporterLastName}`,
+        profilePicture: item.reporterProfilePicture,
+      },
+      reportedAt: item.reportedAt,
+      status: item.status,
     }));
 
     return {
@@ -248,10 +245,11 @@ export class ReportsService {
 
   async createReport(
     userId: number,
-    floodAlertDto: ReportFloodAlertInput,
+    createFloodAlertDto: CreateFloodAlertInput,
     image: Express.Multer.File,
   ) {
-    const { latitude, longitude, severity, description, range } = floodAlertDto;
+    const { latitude, longitude, severity, description, range } =
+      createFloodAlertDto;
 
     let imageUrl: string | null = null;
     let imagePublicId: string | null = null;
@@ -348,6 +346,7 @@ export class ReportsService {
       status: 'verified', // Admin-created reports are auto-verified
       isAdmin: true,
       verifierId: userId, // Set the admin as the verifier
+      verifiedAt: new Date(),
     });
 
     return { message: 'Report created and verified successfully' };
@@ -366,7 +365,12 @@ export class ReportsService {
 
     await this.db
       .update(reports)
-      .set({ verifierId: userId, status: 'verified', updatedAt: new Date() })
+      .set({
+        verifierId: userId,
+        status: 'verified',
+        verifiedAt: new Date(),
+        updatedAt: new Date(),
+      })
       .where(eq(reports.id, reportId));
 
     return { message: 'Report verified successfully' };
@@ -455,5 +459,130 @@ export class ReportsService {
     });
 
     return { action: vote?.action ?? null };
+  }
+
+  async countActiveAlerts() {
+    const [activeAlerts] = await this.db
+      .select({
+        count: count(),
+      })
+      .from(reports)
+      .where(and(eq(reports.status, 'verified')));
+
+    return activeAlerts.count;
+  }
+
+  async countTotalReports() {
+    const [totalReports] = await this.db
+      .select({
+        count: count(),
+      })
+      .from(reports);
+
+    return totalReports.count;
+  }
+
+  async countPendingReview() {
+    const [pendingReview] = await this.db
+      .select({
+        count: count(),
+      })
+      .from(reports)
+      .where(eq(reports.status, 'unverified'));
+
+    return pendingReview.count;
+  }
+
+  async getMonthlyReport() {
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+    const monthlyData = await this.db.execute(sql`
+        SELECT
+          TO_CHAR(months.month, 'YYYY-MM') AS month,
+          TO_CHAR(months.month, 'Mon YYYY') AS month_name,
+          COUNT(r.id) AS reports
+        FROM generate_series(
+          ${sixMonthsAgo}::timestamp,
+          DATE_TRUNC('month', ${now}::timestamp),
+          '1 month'::interval
+        ) AS months(month)
+        LEFT JOIN ${reports} r
+          ON TO_CHAR(r.created_at, 'YYYY-MM') = TO_CHAR(months.month, 'YYYY-MM')
+          AND r.status = 'verified'
+        GROUP BY months.month
+        ORDER BY months.month
+      `);
+
+    return monthlyData.rows.map((item) => ({
+      month: item.month as string,
+      monthName: item.month_name as string,
+      reports: Number(item.reports),
+    }));
+  }
+
+  async getReportDistribution() {
+    const distribution = await this.db
+      .select({
+        severity: reports.severity,
+        reports: count(),
+      })
+      .from(reports)
+      .where(eq(reports.status, 'verified'))
+      .groupBy(reports.severity);
+
+    return distribution.map((item) => ({
+      severity: item.severity,
+      reports: Number(item.reports),
+    }));
+  }
+
+  async getRecentReports() {
+    const recentReports = await this.db
+      .select({
+        id: reports.id,
+        location: reports.location,
+        description: reports.description,
+        severity: reports.severity,
+        reportedAt: reports.createdAt,
+      })
+      .from(reports)
+      .where(eq(reports.status, 'verified'))
+      .orderBy(desc(reports.createdAt))
+      .limit(5);
+
+    return recentReports;
+  }
+
+  async getReportsNeedingAttention() {
+    const reportsNeedingAttention = await this.db
+      .select({
+        id: reports.id,
+        location: reports.location,
+        description: reports.description,
+        reportedAt: reports.createdAt,
+        confirms: this.db.$count(
+          reportConfirmations,
+          and(
+            eq(reportConfirmations.action, 'confirm'),
+            eq(reportConfirmations.reportId, reports.id),
+          ),
+        ),
+      })
+      .from(reports)
+      .where(
+        and(
+          eq(reports.status, 'unverified'),
+          sql`${this.db.$count(
+            reportConfirmations,
+            and(
+              eq(reportConfirmations.action, 'confirm'),
+              eq(reportConfirmations.reportId, reports.id),
+            ),
+          )} >= 10`, // Threshold of 10 confirmations
+        ),
+      );
+
+    return reportsNeedingAttention;
   }
 }

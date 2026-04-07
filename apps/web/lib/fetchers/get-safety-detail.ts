@@ -24,7 +24,7 @@ export async function getSafetyDetail(safetyId: number) {
     };
   }
 
-  const res = await apiFetchClient(SWR_KEYS.safetyDetail(safetyId), {
+  const res = await apiFetchClient(SWR_KEYS.safetyLocationDetail(safetyId), {
     method: 'GET',
   });
 

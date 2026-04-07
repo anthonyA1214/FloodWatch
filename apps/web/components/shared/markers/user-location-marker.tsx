@@ -11,7 +11,6 @@ export const UserLocationMarker = () => {
         alignItems: 'center',
         position: 'relative',
         pointerEvents: 'none',
-        opacity: 0.8,
       }}
     >
       {/* Gradient circle head */}

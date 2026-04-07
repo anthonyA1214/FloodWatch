@@ -6,7 +6,7 @@ export const usersSchema = z.object({
   email: z.email(),
   role: z.enum(['admin', 'user']),
   status: z.enum(['active', 'blocked']),
-  name: z.string().min(1),
+  name: z.string(),
   profilePicture: z.string().optional(),
   homeAddress: z.string().optional(),
   joinDate: z.string(),
@@ -44,44 +44,59 @@ export const createAdminSchema = z
     first_name: z
       .string()
       .refine((val) => val.length > 0, {
-        error: 'First name is required',
+        error: 'First name is required.',
         abort: true,
       })
-      .max(50, 'First name cannot exceed 50 characters'),
+      .max(50, 'First name cannot exceed 50 characters.'),
     last_name: z
       .string()
       .refine((val) => val.length > 0, {
-        error: 'Last name is required',
+        error: 'Last name is required.',
         abort: true,
       })
-      .max(50, 'Last name cannot exceed 50 characters'),
+      .max(50, 'Last name cannot exceed 50 characters.'),
     home_address: z
       .string()
       .refine((val) => val.length > 0, {
-        error: 'Home address is required',
+        error: 'Home address is required.',
         abort: true,
       })
       .refine((val) => val.length >= 6, {
-        error: 'Home address must be at least 5 characters long',
+        error: 'Home address must be at least 5 characters long.',
         abort: true,
       }),
-    email: z.email('Please enter a valid email address'),
+    email: z.email('Please enter a valid email address.'),
     password: z
       .string()
       .refine((val) => val.length > 0, {
-        error: 'Password is required',
+        error: 'Password is required.',
         abort: true,
       })
       .refine((val) => val.length >= 6, {
-        error: 'Password must be at least 6 characters long',
+        error: 'Password must be at least 6 characters long.',
         abort: true,
       }),
-    confirm_password: z.string('Please confirm your password'),
+    confirm_password: z.string(),
   })
-  .refine((data) => data.password === data.confirm_password, {
-    error: 'Passwords do not match',
-    path: ['confirm_password'],
-  });
+  .refine(
+    (data) => {
+      return data.confirm_password.length > 0;
+    },
+    {
+      error: 'Confirm password is required.',
+      path: ['confirm_password'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (!data.confirm_password) return true; // skip if empty
+      return data.password === data.confirm_password;
+    },
+    {
+      error: 'Passwords do not match.',
+      path: ['confirm_password'],
+    },
+  );
 
 export class UsersDto extends createZodDto(usersSchema) {}
 export class GetMeDto extends createZodDto(getMeSchema) {}

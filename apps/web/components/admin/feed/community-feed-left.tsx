@@ -1,51 +1,43 @@
-import { ScrollArea } from '@/components/ui/scroll-area';
-import PostComposer from '@/components/shared/comment-composer';
-import PostCard from '@/components/shared/comment-card';
-import { IconMapPin } from '@tabler/icons-react';
+'use client';
+
+import CommentComposer from '@/components/shared/comment-composer';
+import { useCommunityFeed } from '@/contexts/community-feed-context';
+import { useReportDetail } from '@/hooks/use-report-detail';
+import CommunityFeedEmpty from './community-feed-empty';
+import CommentsList from '@/components/shared/comments-list';
+import CommentCardsSkeleton from '@/components/shared/skeletons/comment-cards-skeleton';
 
 export default function CommunityFeedLeft() {
+  const { reportId } = useCommunityFeed();
+  const { reportDetail, isLoading, isValidating } = useReportDetail(reportId);
+
   return (
     <div className='flex-3 flex flex-col gap-6 min-h-0'>
-      {/* location */}
-      <div className='flex items-center gap-2 bg-[#0066CC] text-white rounded-xl p-4 font-medium'>
-        <IconMapPin className='w-[1.5em]! h-[1.5em]!' />
-        <span className='w-0 flex-1 truncate'>
-          Location: Kai Mall Zabarte, Camarin Road, Barangay 174, Zone 15,
-          Camarin, District 1, Caloocan, Northern Manila District, Metro Manila,
-          1422, Philippines
-        </span>
-      </div>
+      {!reportId || !reportDetail ? (
+        <CommunityFeedEmpty />
+      ) : isLoading || isValidating ? (
+        <>
+          <CommentCardsSkeleton />
+        </>
+      ) : (
+        reportDetail && (
+          <div className='flex flex-col gap-6 overflow-y-auto pr-4'>
+            <div className='flex gap-4 text-xs items-center px-2 lg:px-0'>
+              <div className='h-px flex-1 bg-gray-200' />
+              <span className='font-poppins font-bold opacity-50'>
+                COMMUNITY UPDATES
+              </span>
+              <div className='h-px flex-1 bg-gray-200' />
+            </div>
 
-      <ScrollArea className='flex-1 min-h-0'>
-        <div className='flex flex-col gap-6 pr-4'>
-          {/* post composer */}
-          <PostComposer reportId={90999999} />
+            {/* comment composer */}
+            <CommentComposer reportId={reportId} />
 
-          {/* feed items
-          <PostCard
-            author={{ name: 'Pedro Santos' }}
-            content="Volunteers are needed to help with sandbagging efforts in flood-prone areas. Please contact the local barangay office if you can assist."
-            timestamp="1 day ago"
-            reportCount={2}
-          />
-
-          <PostCard
-            author={{ name: 'Juan Dela Cruz' }}
-            content="Heavy rainfall in Zapote area, its starting to accumulate water. Please be careful if you're heading this way! #Flood"
-            imageUrl="/images/before_flood_image.jpg"
-            timestamp="2 hrs ago"
-            reportCount={3}
-          />
-
-          <PostCard
-            author={{ name: 'Maria Clara' }}
-            content="The flood levels are rising quickly. Evacuation centers are being set up. Stay safe everyone!"
-            imageUrl="/images/after_flood_image.jpg"
-            timestamp="24 hrs ago"
-            reportCount={5}
-          /> */}
-        </div>
-      </ScrollArea>
+            {/*comment list*/}
+            <CommentsList reportId={reportId} />
+          </div>
+        )
+      )}
     </div>
   );
 }

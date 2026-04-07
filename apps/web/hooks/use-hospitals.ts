@@ -1,7 +1,7 @@
 'use client';
 
 import useSWR from 'swr';
-import { SafetyDetailInput } from '@repo/schemas';
+import { SafetyLocationDetailInput } from '@repo/schemas';
 
 /**
  * Hospital detail shape saved in /public/data/hospitals-caloocan.json.
@@ -34,7 +34,7 @@ export type HospitalSafetyDetail = {
  */
 export function useHospitals() {
   const { data, error, isLoading, isValidating, mutate } = useSWR<
-    SafetyDetailInput[]
+    SafetyLocationDetailInput[]
   >(
     'hospitals-caloocan',
     async () => {
@@ -52,7 +52,6 @@ export function useHospitals() {
         createdAt: new Date(hospital.createdAt),
       }));
 
-      console.log(`Loaded ${mapped.length} hospitals from Caloocan`);
       return mapped;
     },
     { revalidateOnFocus: false },

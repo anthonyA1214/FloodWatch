@@ -33,7 +33,6 @@ export class GoogleController {
 
   @Public()
   @Get('callback')
-  @Public()
   @UseGuards(GoogleAuthGuard)
   async googleCallback(
     @Request() req: GoogleRequest,
@@ -43,7 +42,7 @@ export class GoogleController {
       await this.googleService.handleGoogleLogin(req.user);
 
     if (user.status === 'blocked')
-      res.redirect(
+      return res.redirect(
         this.configService.getOrThrow('FRONTEND_URL') + '/auth/login',
       );
 
