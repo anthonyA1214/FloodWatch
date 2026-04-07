@@ -547,6 +547,8 @@ export class ReportsService {
         reportedAt: reports.createdAt,
       })
       .from(reports)
+      .where(eq(reports.status, 'verified'))
+      .orderBy(desc(reports.createdAt))
       .limit(5);
 
     return recentReports;
