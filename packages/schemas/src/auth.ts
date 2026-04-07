@@ -92,9 +92,25 @@ export const resetPasswordSchema = z
       }),
     confirm_new_password: z.string('Please confirm your new password'),
   })
-  .refine((data) => data.new_password === data.confirm_new_password, {
-    error: 'Passwords do not match',
-  });
+  .refine(
+    (data) => {
+      return data.confirm_new_password.length > 0;
+    },
+    {
+      error: 'Confirm password is required.',
+      path: ['confirm_new_password'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (!data.confirm_new_password) return true; // skip if empty
+      return data.new_password === data.confirm_new_password;
+    },
+    {
+      error: 'Passwords do not match.',
+      path: ['confirm_new_password'],
+    },
+  );
 
 export const resendOtpSchema = z.object({
   email: z.email('Please enter a valid email address'),

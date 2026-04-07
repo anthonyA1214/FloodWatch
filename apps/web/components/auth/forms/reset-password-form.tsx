@@ -1,6 +1,5 @@
 'use client';
 
-import { Input } from '@/components/ui/input';
 import {
   InputGroup,
   InputGroupAddon,
@@ -63,6 +62,10 @@ export default function ResetPasswordForm() {
     });
 
     if (!parsed.success) {
+      console.log(
+        'Validation errors:',
+        z.flattenError(parsed.error).fieldErrors,
+      );
       setState({
         errors: z.flattenError(parsed.error).fieldErrors,
         status: 'error',
