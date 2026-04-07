@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import {
   Popover,
   PopoverContent,
@@ -12,12 +15,17 @@ import {
 import { Separator } from '../ui/separator';
 
 export default function MapLegendPopover() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div className='relative flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 pointer-events-auto'>
           <button
-            className='aspect-square hover:bg-gray-200 rounded-md p-1'
+            className={cn(
+              'aspect-square rounded-md p-1',
+              open ? 'bg-gray-200 ' : 'hover:bg-gray-200',
+            )}
             title='Toggle Legend'
           >
             <IconStack2 className='w-[1.5em]! h-[1.5em]!' strokeWidth={1.5} />

@@ -12,17 +12,26 @@ import { Separator } from '../ui/separator';
 import { SAFETY_TYPE_COLOR_MAP } from '@/lib/utils/get-color-map';
 import { useSafetyLocationDetail } from '@/hooks/use-safety-location-detail';
 import SafetyLocationPopupSkeleton from './skeletons/safety-location-popup-skeleton';
+import { useDirections } from '@/hooks/use-directions';
+import { useMapRouting } from '@/contexts/map-routing-context';
+import { Spinner } from '../ui/spinner';
 
 export default function SafetyLocationPopup({
   onClose,
   safetyId,
+  latitude,
+  longitude,
   onSelectSafety,
 }: {
   onClose: () => void;
   safetyId: number;
+  latitude: number;
+  longitude: number;
   onSelectSafety?: () => void;
 }) {
   const { safetyDetail, isLoading } = useSafetyLocationDetail(safetyId);
+  const { getDirections } = useDirections();
+  const { isLoadingRoute } = useMapRouting();
 
   if (isLoading || !safetyDetail) return <SafetyLocationPopupSkeleton />;
 
@@ -51,9 +60,7 @@ export default function SafetyLocationPopup({
       <Separator className='bg-[#9B32E4]/30' />
 
       <div className='flex flex-col'>
-        {/* report details */}
         <div className='flex flex-col gap-2 p-3'>
-          {/* severity level */}
           <div className='flex justify-between gap-2'>
             <div className='flex items-center gap-1.5 opacity-50'>
               <IconTag className='w-[1.5em]! h-[1.5em]!' />
@@ -75,7 +82,6 @@ export default function SafetyLocationPopup({
 
           <Separator />
 
-          {/* location */}
           <div className='flex justify-between gap-2'>
             <div className='flex items-center gap-1.5 opacity-50 h-fit shrink-0'>
               <IconMapPin className='w-[1.5em]! h-[1.5em]!' />
@@ -89,7 +95,6 @@ export default function SafetyLocationPopup({
 
           <Separator />
 
-          {/* address */}
           <div className='flex justify-between gap-2'>
             <div className='flex items-center gap-1.5 opacity-50 h-fit shrink-0'>
               <IconRoad className='w-[1.5em]! h-[1.5em]!' />
@@ -105,7 +110,6 @@ export default function SafetyLocationPopup({
             <>
               <Separator />
 
-              {/* contact number */}
               <div className='flex justify-between gap-2'>
                 <div className='flex items-center gap-1.5 opacity-50 h-fit shrink-0'>
                   <IconPhone className='w-[1.5em]! h-[1.5em]!' />
@@ -133,9 +137,19 @@ export default function SafetyLocationPopup({
             <span className='font-poppins font-medium'>OVERVIEW</span>
           </button>
 
-          <button className='flex items-center gap-1.5 w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 duration-200 px-4 py-2.5 rounded-lg justify-center'>
-            <IconSend className='w-[1.5em]! h-[1.5em]!' />
-            <span className='font-poppins font-medium'>DIRECTIONS</span>
+          <button
+            className='flex items-center gap-1.5 w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 duration-200 px-4 py-2.5 rounded-lg justify-center disabled:opacity-50 disabled:cursor-not-allowed'
+            disabled={isLoadingRoute}
+            onClick={() => getDirections({ latitude, longitude })}
+          >
+            {isLoadingRoute ? (
+              <Spinner />
+            ) : (
+              <IconSend className='w-[1.5em]! h-[1.5em]!' />
+            )}
+            <span className='font-poppins font-medium'>
+              {isLoadingRoute ? 'LOADING...' : 'DIRECTIONS'}
+            </span>
           </button>
         </div>
       </div>

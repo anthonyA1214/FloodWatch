@@ -23,6 +23,7 @@ import { useWeather } from '@/hooks/use-weather';
 import { getUserLocation } from '@/lib/utils/get-user-location';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { Spinner } from '../ui/spinner';
 
 export default function InteractiveMapPage() {
   const { activeOverlay } = useMapOverlay();
@@ -49,6 +50,8 @@ export default function InteractiveMapPage() {
     location?.latitude ?? null,
     location?.longitude ?? null,
   );
+
+  const [isGeolocating, setIsGeolocating] = useState(false);
 
   const { filters, toggleSeverity, toggleSafetyType, resetFilters } =
     useMapFilter();
@@ -95,10 +98,12 @@ export default function InteractiveMapPage() {
             )}
           </div>
 
-          <WeatherOverlay
-            latitude={location?.latitude ?? null}
-            longitude={location?.longitude ?? null}
-          />
+          {!isError && location && (
+            <WeatherOverlay
+              latitude={location?.latitude ?? null}
+              longitude={location?.longitude ?? null}
+            />
+          )}
         </div>
 
         {/* Map controls — fixed to right */}
@@ -124,14 +129,27 @@ export default function InteractiveMapPage() {
           {/* geolocate */}
           <div className='flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 pointer-events-auto'>
             <button
-              onClick={() => interactiveMapRef.current?.geolocate()}
-              className='aspect-square hover:bg-gray-200 rounded-md p-1'
+              onClick={async () => {
+                if (!interactiveMapRef.current || isGeolocating) return;
+                setIsGeolocating(true);
+                try {
+                  await interactiveMapRef.current.geolocate();
+                } finally {
+                  setIsGeolocating(false);
+                }
+              }}
+              className='aspect-square hover:bg-gray-200 rounded-md p-1 disabled:opacity-60 disabled:hover:bg-transparent'
+              disabled={isGeolocating}
               title='Geolocate'
             >
-              <IconCurrentLocation
-                className='w-[1.5em]! h-[1.5em]!'
-                strokeWidth={1.5}
-              />
+              {isGeolocating ? (
+                <Spinner className='w-[1.5em]! h-[1.5em]!' />
+              ) : (
+                <IconCurrentLocation
+                  className='w-[1.5em]! h-[1.5em]!'
+                  strokeWidth={1.5}
+                />
+              )}
             </button>
           </div>
 

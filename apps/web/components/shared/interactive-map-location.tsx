@@ -7,7 +7,6 @@ import { Spinner } from '@/components/ui/spinner';
 import { useBoundary } from '@/hooks/use-boundary';
 import { FloodMarker } from './markers/flood-marker';
 import { SafetyMarker } from './markers/safety-marker';
-import { useEffect } from 'react';
 
 type BaseProps = {
   longitude: number | null;
