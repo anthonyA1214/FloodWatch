@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { useDirections } from '@/hooks/use-directions';
 import { useMapRouting } from '@/contexts/map-routing-context';
 import { Spinner } from '../ui/spinner';
+import { useMapPopup } from '@/contexts/map-popup-context';
 
 export default function AffectedLocationPopup({
   onClose,
@@ -55,6 +56,7 @@ export default function AffectedLocationPopup({
   const { isLoading: isMyVoteLoading } = useMyVote(reportId);
   const { getDirections } = useDirections();
   const { isLoadingRoute } = useMapRouting();
+  const { closePopup } = useMapPopup();
 
   const formattedTime = reportDetail
     ? format(reportDetail?.reportedAt, 'hh:mm a')
@@ -231,7 +233,9 @@ export default function AffectedLocationPopup({
           <button
             className='flex items-center gap-1.5 w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 duration-200 px-4 py-2.5 rounded-lg justify-center disabled:opacity-50 disabled:cursor-not-allowed'
             disabled={isLoadingRoute}
-            onClick={() => getDirections({ latitude, longitude })}
+            onClick={() =>
+              getDirections({ latitude, longitude }).then(() => closePopup())
+            }
           >
             {isLoadingRoute ? (
               <Spinner />
