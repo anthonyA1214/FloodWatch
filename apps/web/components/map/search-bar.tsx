@@ -76,6 +76,8 @@ export default function SearchBar() {
             handleSearch(e.currentTarget.value);
             setShowSuggestions(true);
           }}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={() => setShowSuggestions(false)}
         />
 
         <InputGroupAddon>
@@ -98,7 +100,7 @@ export default function SearchBar() {
       {hasSuggestions && (
         <div className='mt-1 rounded-xl bg-white shadow-md overflow-hidden'>
           {(reports?.length ?? 0) > 0 && (
-            <div>
+            <div onMouseDown={(e) => e.preventDefault()}>
               <p className='px-4 pt-3 pb-1 text-xs font-semibold text-muted-foreground tracking-wider uppercase'>
                 Affected Locations
               </p>
@@ -130,7 +132,7 @@ export default function SearchBar() {
           )}
 
           {(safetyLocations?.length ?? 0) > 0 && (
-            <div>
+            <div onMouseDown={(e) => e.preventDefault()}>
               <p className='px-4 pt-3 pb-1 text-xs font-semibold text-muted-foreground tracking-wider uppercase'>
                 Safety Locations
               </p>

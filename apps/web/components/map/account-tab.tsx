@@ -67,10 +67,10 @@ export default function AccountTab() {
             <span>{formatted}</span>
           </div>
 
-          <div className='flex justify-between'>
+          {/*<div className='flex justify-between'>
             <span>Posts</span>
             <span>5</span>
-          </div>
+          </div>*/}
         </div>
 
         <Separator />
