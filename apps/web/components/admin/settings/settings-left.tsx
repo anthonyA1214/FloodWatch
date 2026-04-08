@@ -52,14 +52,14 @@ export default function SettingsLeft() {
           <span>Member since</span>
           <span className='font-semibold'>{formatted}</span>
         </div>
-        <div className='flex justify-between'>
+        {/*<div className='flex justify-between'>
           <span>Post</span>
           <span className='font-semibold'>3</span>
         </div>
         <div className='flex justify-between'>
           <span>Reports Submitted</span>
           <span className='font-semibold'>5</span>
-        </div>
+        </div>*/}
       </div>
     </div>
   );

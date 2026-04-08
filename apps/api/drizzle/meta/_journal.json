@@ -64,6 +64,20 @@
       "when": 1775101273505,
       "tag": "0008_spooky_sway",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1775609706205,
+      "tag": "0009_yellow_the_watchers",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1775632337557,
+      "tag": "0010_bumpy_vanisher",
+      "breakpoints": true
     }
   ]
 }

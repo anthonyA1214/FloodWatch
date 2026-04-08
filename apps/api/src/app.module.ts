@@ -22,6 +22,7 @@ import { RolesGuard } from './common/guards/roles/roles.guard';
 import { AppController } from './app.controller';
 import { EventsModule } from './events/events.module';
 import { AppService } from './app.service';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { AppService } from './app.service';
     SafetyModule,
     CommentsModule,
     EventsModule,
+    NotificationsModule,
   ],
   providers: [
     AppService,

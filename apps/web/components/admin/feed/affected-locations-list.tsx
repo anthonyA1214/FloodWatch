@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ReportListItemInput, ReportListQueryInput } from '@repo/schemas';
 import {
   Select,
@@ -42,6 +42,12 @@ export default function AffectedLocationsList() {
       openReport(reportId);
     }
   };
+
+  useEffect(() => {
+    document
+      .getElementById('community-feed-scroll')
+      ?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [page]);
 
   return (
     <div className='flex-1 flex flex-col rounded-2xl border min-h-0 overflow-hidden'>

@@ -31,6 +31,7 @@ import {
 } from 'src/drizzle/schemas';
 import { type DrizzleDB } from 'src/drizzle/types/drizzle';
 import { ImagesService } from 'src/images/images.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class CommentsService {
@@ -38,6 +39,7 @@ export class CommentsService {
     @Inject(DRIZZLE) private db: DrizzleDB,
     private imagesService: ImagesService,
     private cloudinaryService: CloudinaryService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async getComments(
@@ -551,6 +553,15 @@ export class CommentsService {
           reviewedAt: new Date(),
         })
         .where(eq(commentReportReviews.commentId, commentId));
+
+      await this.notificationsService.create({
+        recipientId: comment.userId,
+        actorId: reviewerId,
+        type: 'admin_warning_comment',
+        message:
+          'One of your comments has been reviewed by our moderation team and flagged as a violation of our community guidelines. This is a warning. Repeated violations may result in further action on your account.',
+        commentId,
+      });
     } else if (action === 'block') {
       await this.db
         .update(commentReportReviews)
