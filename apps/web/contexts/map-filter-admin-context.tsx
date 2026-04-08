@@ -1,29 +1,27 @@
 'use client';
-
 import { createContext, useContext, useState } from 'react';
+import { MapFilterContextType, useMapFilterState } from './map-filter-base';
 
-type MapFilterAdminContextType = {
-  q: string;
-  setQ: (q: string) => void;
+type MapFilterAdminContextType = MapFilterContextType & {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 };
 
-const MapFilterAdminContext = createContext<
-  MapFilterAdminContextType | undefined
->(undefined);
+const MapFilterAdminContext = createContext<MapFilterAdminContextType | null>(
+  null,
+);
 
 export function MapFilterAdminProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [q, setQ] = useState('');
+  const base = useMapFilterState();
   const [activeTab, setActiveTab] = useState('affected');
 
   return (
     <MapFilterAdminContext.Provider
-      value={{ q, setQ, activeTab, setActiveTab }}
+      value={{ ...base, activeTab, setActiveTab }}
     >
       {children}
     </MapFilterAdminContext.Provider>

@@ -1,7 +1,11 @@
 'use client';
 
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { ActionState } from '@/lib/types/action-state';
@@ -11,6 +15,8 @@ import z from 'zod';
 import { Spinner } from '@/components/ui/spinner';
 import { mapResetPasswordAuthError } from '@/lib/services/auth/reset-password-auth-error';
 import { apiFetchClient } from '@/lib/api-fetch-client';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 export default function ResetPasswordForm() {
   const router = useRouter();
@@ -21,6 +27,23 @@ export default function ResetPasswordForm() {
     errors: null,
   });
 
+  const [formData, setFormData] = useState({
+    new_password: '',
+    confirm_new_password: '',
+  });
+
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setState((prev) => ({
+      ...prev,
+      errors: prev.errors ? { ...prev.errors, [name]: [] } : null,
+    }));
+  };
+
   useEffect(() => {
     sessionStorage.removeItem('reset_email');
     sessionStorage.removeItem('otp_cooldown');
@@ -30,28 +53,24 @@ export default function ResetPasswordForm() {
     e.preventDefault();
     setIsPending(true);
 
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-
     const resetSessionId = sessionStorage.getItem('resetSessionId');
 
     const parsed = resetPasswordSchema.safeParse({
       resetSessionId,
-      new_password: formData.get('new_password'),
-      confirm_new_password: formData.get('confirm_new_password'),
+      new_password: formData.new_password,
+      confirm_new_password: formData.confirm_new_password,
     });
 
     if (!parsed.success) {
+      console.log(
+        'Validation errors:',
+        z.flattenError(parsed.error).fieldErrors,
+      );
       setState({
         errors: z.flattenError(parsed.error).fieldErrors,
         status: 'error',
       });
-
-      (form.elements.namedItem('new_password') as HTMLInputElement).value = '';
-      (
-        form.elements.namedItem('confirm_new_password') as HTMLInputElement
-      ).value = '';
-
+      setFormData({ new_password: '', confirm_new_password: '' });
       setIsPending(false);
       return;
     }
@@ -80,11 +99,7 @@ export default function ResetPasswordForm() {
       router.replace('/auth/login');
     } catch (err) {
       setState(await mapResetPasswordAuthError(err));
-
-      (form.elements.namedItem('new_password') as HTMLInputElement).value = '';
-      (
-        form.elements.namedItem('confirm_new_password') as HTMLInputElement
-      ).value = '';
+      setFormData({ new_password: '', confirm_new_password: '' });
     } finally {
       setIsPending(false);
     }
@@ -92,42 +107,86 @@ export default function ResetPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit} className='space-y-6'>
-      <div className='space-y-2'>
-        <Label htmlFor='new_password'>New Password</Label>
-        <Input
-          id='new_password'
-          name='new_password'
-          type='password'
-          placeholder='Enter your new password'
-          className='rounded-full px-4 shadow-sm'
-        />
-        {state?.errors &&
-          'new_password' in state.errors &&
-          state.errors.new_password && (
-            <p className='text-red-500 text-sm'>{state.errors.new_password}</p>
+      {/* New Password */}
+      <Field data-invalid={!!state.errors?.new_password?.length}>
+        <FieldLabel
+          htmlFor='new_password'
+          className='font-poppins text-sm font-medium'
+        >
+          New Password
+        </FieldLabel>
+        <InputGroup className='rounded-full'>
+          <InputGroupInput
+            id='new_password'
+            name='new_password'
+            type={showNewPassword ? 'text' : 'password'}
+            placeholder='Enter your new password'
+            className='rounded-full'
+            value={formData.new_password}
+            onChange={handleChange}
+            aria-invalid={!!state.errors?.new_password?.length}
+          />
+          {formData.new_password.length > 0 && (
+            <InputGroupAddon align='inline-end'>
+              <InputGroupButton
+                className='bg-transparent! hover:bg-transparent!'
+                onClick={() => setShowNewPassword((prev) => !prev)}
+              >
+                {showNewPassword ? (
+                  <IconEyeOff className='size-[1.5em]! shrink-0' />
+                ) : (
+                  <IconEye className='size-[1.5em]! shrink-0' />
+                )}
+              </InputGroupButton>
+            </InputGroupAddon>
           )}
-      </div>
-
-      <div className='space-y-2'>
-        <Label htmlFor='confirm_new_password'>Confirm Password</Label>
-        <Input
-          id='confirm_new_password'
-          name='confirm_new_password'
-          type='password'
-          placeholder='Re-enter your new password'
-          className='rounded-full px-4 shadow-sm'
-        />
-        {state?.errors &&
-          'confirm_new_password' in state.errors &&
-          state.errors.confirm_new_password && (
-            <p className='text-red-500 text-sm'>
-              {state.errors.confirm_new_password}
-            </p>
-          )}
-        {state?.errors && '_form' in state.errors && state.errors._form && (
-          <p className='text-red-500 text-sm'>{state.errors._form}</p>
+        </InputGroup>
+        {!!state.errors?.new_password?.length && (
+          <FieldError>{state.errors.new_password[0]}</FieldError>
         )}
-      </div>
+      </Field>
+
+      {/* Confirm New Password */}
+      <Field data-invalid={!!state.errors?.confirm_new_password?.length}>
+        <FieldLabel
+          htmlFor='confirm_new_password'
+          className='font-poppins text-sm font-medium'
+        >
+          Confirm Password
+        </FieldLabel>
+        <InputGroup className='rounded-full'>
+          <InputGroupInput
+            id='confirm_new_password'
+            name='confirm_new_password'
+            type={showConfirmNewPassword ? 'text' : 'password'}
+            placeholder='Re-enter your new password'
+            className='rounded-full'
+            value={formData.confirm_new_password}
+            onChange={handleChange}
+            aria-invalid={!!state.errors?.confirm_new_password?.length}
+          />
+          {formData.confirm_new_password.length > 0 && (
+            <InputGroupAddon align='inline-end'>
+              <InputGroupButton
+                className='bg-transparent! hover:bg-transparent!'
+                onClick={() => setShowConfirmNewPassword((prev) => !prev)}
+              >
+                {showConfirmNewPassword ? (
+                  <IconEyeOff className='size-[1.5em]! shrink-0' />
+                ) : (
+                  <IconEye className='size-[1.5em]! shrink-0' />
+                )}
+              </InputGroupButton>
+            </InputGroupAddon>
+          )}
+        </InputGroup>
+        {!!state.errors?.confirm_new_password?.length && (
+          <FieldError>{state.errors.confirm_new_password[0]}</FieldError>
+        )}
+        {!!state.errors?._form?.length && (
+          <FieldError>{state.errors._form[0]}</FieldError>
+        )}
+      </Field>
 
       <Button disabled={isPending} className='w-full rounded-full'>
         {isPending ? (

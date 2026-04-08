@@ -25,7 +25,6 @@ import {
   CreateFloodAlertDto,
   createFloodAlertSchema,
   ReportFloodAlertDto,
-  reportFloodAlertSchema,
   ReportListQueryDto,
   ReportQueryDto,
   VoteDto,
@@ -51,18 +50,18 @@ export class ReportsController {
     private commentsService: CommentsService,
   ) {}
 
-  @Public()
-  @Get()
-  @HttpCode(HttpStatus.OK)
-  async getReportMapPins() {
-    return await this.reportsService.getReportMapPins();
-  }
-
   @Roles('admin')
-  @Get('admin')
+  @Get('')
   @HttpCode(HttpStatus.OK)
   async getAllReports(@Query() reportQuery: ReportQueryDto) {
     return await this.reportsService.getAllReports(reportQuery);
+  }
+
+  @Public()
+  @Get('map-pins')
+  @HttpCode(HttpStatus.OK)
+  async getReportMapPins() {
+    return await this.reportsService.getReportMapPins();
   }
 
   @Public()
@@ -70,6 +69,34 @@ export class ReportsController {
   @HttpCode(HttpStatus.OK)
   async getReportList(@Query() reportListQuery: ReportListQueryDto) {
     return await this.reportsService.getReportList(reportListQuery);
+  }
+
+  @Roles('admin')
+  @Get('recent')
+  @HttpCode(HttpStatus.OK)
+  async getRecentReports() {
+    return await this.reportsService.getRecentReports();
+  }
+
+  @Roles('admin')
+  @Get('needs-attention')
+  @HttpCode(HttpStatus.OK)
+  async getreportsNeedingAttention() {
+    return await this.reportsService.getReportsNeedingAttention();
+  }
+
+  @Roles('admin')
+  @Get('monthly')
+  @HttpCode(HttpStatus.OK)
+  async getMonthlyReport() {
+    return await this.reportsService.getMonthlyReport();
+  }
+
+  @Roles('admin')
+  @Get('distribution')
+  @HttpCode(HttpStatus.OK)
+  async getReportDistribution() {
+    return await this.reportsService.getReportDistribution();
   }
 
   @Public()
@@ -100,20 +127,12 @@ export class ReportsController {
   @ApiBody({ type: ReportFloodAlertWithImageDto })
   async createReport(
     @Request() req: AuthRequest,
-    @Body() createFloodAlertDto: ReportFloodAlertDto,
+    @Body() reportFloodAlertDto: ReportFloodAlertDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
-    const parsed = reportFloodAlertSchema.safeParse(createFloodAlertDto);
-    if (!parsed.success) {
-      throw new BadRequestException({
-        message: 'Validation failed',
-        issues: parsed.error.issues,
-      });
-    }
-
     return await this.reportsService.createReport(
       req.user.id,
-      createFloodAlertDto,
+      reportFloodAlertDto,
       image,
     );
   }
@@ -170,7 +189,7 @@ export class ReportsController {
   }
 
   @Roles('admin')
-  @Delete(':id/delete')
+  @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard, UserStatusGuard)
   async deleteReport(@Param('id', ParseIntPipe) id: number) {

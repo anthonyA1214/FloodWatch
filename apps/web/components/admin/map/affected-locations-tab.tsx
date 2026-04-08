@@ -2,7 +2,7 @@
 
 import CreateFloodAlertDialog from './create-flood-alert-dialog';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 import { ReportListItemInput, ReportListQueryInput } from '@repo/schemas';
 import {
   Select,
@@ -26,13 +26,20 @@ export default function AffectedLocationsTab() {
     'all-levels' | 'critical' | 'high' | 'moderate' | 'low'
   >('all-levels');
   const [page, setPage] = useState(1);
-  const { q } = useMapFilterAdmin();
+  const { q, filters } = useMapFilterAdmin();
   const { reportMapPins } = useReportMapPins();
+
+  const activeSeverities =
+    severity !== 'all-levels'
+      ? filters.severities.has(severity)
+        ? [severity]
+        : [] // dropdown pick is unchecked in popover = empty
+      : [...filters.severities];
 
   const params: ReportListQueryInput = {
     page: Number(page),
     limit: Number(searchParams.get('limit') || '10'),
-    severities: severity !== 'all-levels' ? [severity] : undefined,
+    severities: activeSeverities,
     q: q || undefined,
   };
 
@@ -45,6 +52,23 @@ export default function AffectedLocationsTab() {
       setActivePin({ type: 'report', report: pin });
     }
   };
+
+  // reset severity dropdown if its selection gets unchecked in popover
+  useEffect(() => {
+    if (severity !== 'all-levels' && !filters.severities.has(severity)) {
+      startTransition(() => {
+        setSeverity('all-levels');
+        setPage(1);
+      });
+    }
+  }, [filters.severities, severity]);
+
+  // reset page when popover filter changes
+  useEffect(() => {
+    startTransition(() => {
+      setPage(1);
+    });
+  }, [filters.severities, q]);
 
   return (
     <>
@@ -66,36 +90,48 @@ export default function AffectedLocationsTab() {
 
           <SelectContent>
             <SelectItem value='all-levels'>All Levels</SelectItem>
-            <SelectItem value='critical'>Critical</SelectItem>
-            <SelectItem value='high'>High</SelectItem>
-            <SelectItem value='moderate'>Moderate</SelectItem>
-            <SelectItem value='low'>Low</SelectItem>
+            {(['critical', 'high', 'moderate', 'low'] as const).map((s) =>
+              filters.severities.has(s) ? (
+                <SelectItem key={s} value={s}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </SelectItem>
+              ) : null,
+            )}
           </SelectContent>
         </Select>
 
-        <div className='flex-1 overflow-hidden min-h-0'>
-          <div className='space-y-4 p-4 overflow-y-auto h-full'>
+        <div className='flex-1 overflow-hidden min-h-0 h-full'>
+          <div className='flex flex-col p-4 overflow-y-auto h-full'>
             {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <AffectedLocationsCardSkeleton key={i} />
-              ))
-            ) : !reportList || reportList.length === 0 ? (
-              <LocationsListEmpty />
+              <div className='space-y-4'>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <AffectedLocationsCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : reportList && reportList.length > 0 ? (
+              <div className='space-y-4'>
+                {reportList?.map((report: ReportListItemInput) => (
+                  <AffectedLocationsCard
+                    key={report.id}
+                    isActive={
+                      activePin?.type === 'report' &&
+                      activePin?.report?.id === report.id
+                    }
+                    severity={report.severity}
+                    location={report?.location}
+                    description={report?.description}
+                    reportedAt={report?.reportedAt}
+                    onClick={() => handleCardClick(report.id)}
+                  />
+                ))}
+              </div>
             ) : (
-              reportList?.map((report: ReportListItemInput) => (
-                <AffectedLocationsCard
-                  key={report.id}
-                  isActive={
-                    activePin?.type === 'report' &&
-                    activePin?.report?.id === report.id
-                  }
-                  severity={report.severity}
-                  location={report?.location}
-                  description={report?.description}
-                  reportedAt={report?.reportedAt}
-                  onClick={() => handleCardClick(report.id)}
+              <div className='flex items-center justify-center h-full'>
+                <LocationsListEmpty
+                  title='No affected locations found'
+                  description='Try adjusting your filters or check back later for updates.'
                 />
-              ))
+              </div>
             )}
           </div>
         </div>

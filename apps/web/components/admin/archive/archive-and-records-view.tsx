@@ -4,7 +4,7 @@ import SearchBar from '@/components/shared/search-bar';
 import { DataTable } from '@/components/shared/data-table';
 // import { columns } from './columns';
 import PagePagination from '@/components/shared/page-pagination';
-import { useReportsAdmin } from '@/hooks/use-reports-admin';
+import { useReports } from '@/hooks/use-reports';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,8 +24,7 @@ export default function ArchiveAndRecordsView() {
     q: q || undefined,
   };
 
-  const { reports, meta, stats, isLoading, isValidating } =
-    useReportsAdmin(params);
+  const { reports, meta, stats, isLoading, isValidating } = useReports(params);
 
   const isFirstLoad = !reports;
 

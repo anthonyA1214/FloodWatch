@@ -184,6 +184,11 @@
     cursor: pointer;
   }
 
+  input[type='password']::-ms-reveal,
+  input[type='password']::-ms-clear {
+    display: none;
+  }
+
   html {
     @apply scroll-smooth;
   }

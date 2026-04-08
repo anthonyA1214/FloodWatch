@@ -6,15 +6,7 @@ export async function getMe() {
     method: 'GET',
   });
 
-  if (res.status === 401) {
-    return null;
-  }
+  if (!res.ok) throw new Error('Failed to fetch user data');
 
-  if (!res.ok) {
-    console.error('ME ERROR:', res.status);
-    return null;
-  }
-
-  const data = await res.json();
-  return data;
+  return res.json();
 }

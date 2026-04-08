@@ -1,5 +1,6 @@
 import { ReportedCommentsDialogProvider } from '@/contexts/reported-comments-dialog-context';
-import ReportedCommentsDialog from './reported-comments-dialog';
+import ViewReportedCommentDialog from './view-reported-comment-dialog';
+import DeleteReportedCommentDialog from './delete-reported-comment-dialog';
 
 export default function ReportedCommentsClient({
   children,
@@ -9,7 +10,8 @@ export default function ReportedCommentsClient({
   return (
     <ReportedCommentsDialogProvider>
       {children}
-      <ReportedCommentsDialog />
+      <ViewReportedCommentDialog />
+      <DeleteReportedCommentDialog />
     </ReportedCommentsDialogProvider>
   );
 }

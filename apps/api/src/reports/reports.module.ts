@@ -16,6 +16,7 @@ import { CommentsModule } from 'src/comments/comments.module';
     CommentsModule,
   ],
   providers: [ReportsService],
+  exports: [ReportsService],
   controllers: [ReportsController],
 })
 export class ReportsModule {}

@@ -1,3 +1,4 @@
+import { el } from '@faker-js/faker';
 import {
   BadRequestException,
   ForbiddenException,
@@ -9,6 +10,7 @@ import {
   CommentQueryInput,
   CreateCommentInput,
   ReportCommentInput,
+  ReportedCommentActionInput,
   ReportedCommentQueryInput,
   UpdateCommentDto,
 } from '@repo/schemas';
@@ -29,6 +31,7 @@ import {
 } from 'src/drizzle/schemas';
 import { type DrizzleDB } from 'src/drizzle/types/drizzle';
 import { ImagesService } from 'src/images/images.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class CommentsService {
@@ -36,6 +39,7 @@ export class CommentsService {
     @Inject(DRIZZLE) private db: DrizzleDB,
     private imagesService: ImagesService,
     private cloudinaryService: CloudinaryService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async getComments(
@@ -163,7 +167,11 @@ export class CommentsService {
     image: Express.Multer.File,
   ) {
     const [comment] = await this.db
-      .select()
+      .select({
+        userId: comments.userId,
+        image: comments.image,
+        imagePublicId: comments.imagePublicId,
+      })
       .from(comments)
       .where(eq(comments.id, commentId))
       .limit(1);
@@ -415,6 +423,7 @@ export class CommentsService {
         createdAt: comments.createdAt,
         status: commentReportReviews.status,
         reviewedAt: commentReportReviews.reviewedAt,
+        actionTaken: commentReportReviews.actionTaken,
         reportCount: sql<number>`(
           SELECT COUNT(*) FROM ${commentReports}
           WHERE ${commentReports.commentId} = ${comments.id}
@@ -462,6 +471,7 @@ export class CommentsService {
     return {
       id: detail.commentId,
       createdAt: detail.createdAt,
+      actionTaken: detail.actionTaken,
       comment: {
         id: detail.commentId,
         content: detail.content,
@@ -505,5 +515,94 @@ export class CommentsService {
         createdAt: r.createdAt,
       })),
     };
+  }
+
+  async handleReportedCommentAction(
+    commentId: number,
+    actionDto: ReportedCommentActionInput,
+    reviewerId: number,
+  ) {
+    const { action } = actionDto;
+
+    const report = await this.db.query.commentReportReviews.findFirst({
+      where: and(
+        eq(commentReportReviews.commentId, commentId),
+        eq(commentReportReviews.status, 'pending'),
+      ),
+    });
+
+    if (!report) {
+      throw new NotFoundException('No pending report found for this comment');
+    }
+
+    const comment = await this.db.query.comments.findFirst({
+      where: eq(comments.id, commentId),
+    });
+
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    if (action === 'warn') {
+      await this.db
+        .update(commentReportReviews)
+        .set({
+          status: 'resolved',
+          actionTaken: action,
+          reviewedBy: reviewerId,
+          reviewedAt: new Date(),
+        })
+        .where(eq(commentReportReviews.commentId, commentId));
+
+      await this.notificationsService.create({
+        recipientId: comment.userId,
+        actorId: reviewerId,
+        type: 'admin_warning_comment',
+        message:
+          'One of your comments has been reviewed by our moderation team and flagged as a violation of our community guidelines. This is a warning. Repeated violations may result in further action on your account.',
+        commentId,
+      });
+    } else if (action === 'block') {
+      await this.db
+        .update(commentReportReviews)
+        .set({
+          status: 'resolved',
+          actionTaken: action,
+          reviewedBy: reviewerId,
+          reviewedAt: new Date(),
+        })
+        .where(eq(commentReportReviews.commentId, commentId));
+    } else if (action === 'dismiss') {
+      await this.db
+        .update(commentReportReviews)
+        .set({
+          status: 'dismissed',
+          actionTaken: action,
+          reviewedBy: reviewerId,
+          reviewedAt: new Date(),
+        })
+        .where(eq(commentReportReviews.commentId, commentId));
+    }
+
+    return {
+      message: `Comment report has been ${action === 'dismiss' ? 'dismissed' : 'resolved with action: ' + action}`,
+    };
+  }
+
+  async deleteReportedComment(commentId: number) {
+    const commentReview = await this.db.query.commentReportReviews.findFirst({
+      where: eq(commentReportReviews.commentId, commentId),
+    });
+
+    if (!commentReview) {
+      throw new NotFoundException('No reported comment found for this ID');
+    }
+
+    await this.db
+      .delete(commentReportReviews)
+      .where(eq(commentReportReviews.commentId, commentId));
+    await this.db
+      .delete(commentReports)
+      .where(eq(commentReports.commentId, commentId));
   }
 }

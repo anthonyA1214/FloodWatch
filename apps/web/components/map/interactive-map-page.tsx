@@ -4,7 +4,7 @@ import SearchBar from '@/components/map/search-bar';
 import InteractiveMap, {
   InteractiveMapHandle,
 } from '@/components/map/interactive-map';
-import { Suspense, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
 import { GoogleLinkToastHandler } from '@/components/shared/google-link-toast-handler';
 import { IconCurrentLocation, IconMinus, IconPlus } from '@tabler/icons-react';
@@ -16,15 +16,65 @@ import SafetyLocationsListOverlay from './safety-locations-list-overlay';
 import WeatherOverlay from './weather-overlay';
 import SafetyLocationOverlay from './safety-location-overlay';
 import MapLegendPopover from '../shared/map-legend-popover';
-import MapFilterPopover from './map-filter-popover';
+import MapFilterPopover from '../shared/map-filter-popover';
+import { useMapFilter } from '@/contexts/map-filter-context';
+import HotlinesAccordion from './hotlines-accordion';
+import { useWeather } from '@/hooks/use-weather';
+import { getUserLocation } from '@/lib/utils/get-user-location';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { Spinner } from '../ui/spinner';
+import { useMapRouting } from '@/contexts/map-routing-context';
 
 export default function InteractiveMapPage() {
   const { activeOverlay } = useMapOverlay();
+  const { clearRoute } = useMapRouting();
   const interactiveMapRef = useRef<InteractiveMapHandle>(null);
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      try {
+        const pos = await getUserLocation();
+        setLocation(pos);
+      } catch {
+        toast.error('Unable to retrieve your location.');
+      }
+    };
+
+    fetchLocation();
+  }, []);
+
+  const { isError } = useWeather(
+    location?.latitude ?? null,
+    location?.longitude ?? null,
+  );
+
+  const [isGeolocating, setIsGeolocating] = useState(false);
+
+  const { filters, toggleSeverity, toggleSafetyType, resetFilters } =
+    useMapFilter();
 
   return (
     <div className='relative w-full h-full'>
       <InteractiveMap ref={interactiveMapRef} />
+
+      {/* static hotlines pill (only when no overlay is active) */}
+      {!activeOverlay && (
+        <div
+          className={cn(
+            'absolute right-4 z-10 ',
+            isError || !location
+              ? 'bottom-4 md:bottom-4'
+              : 'bottom-20 md:bottom-4',
+          )}
+        >
+          <HotlinesAccordion />
+        </div>
+      )}
 
       {/* Top bar: search + controls in one row */}
       <div className='absolute top-0 left-0 right-0 flex items-start gap-4 pointer-events-none h-full'>
@@ -52,7 +102,12 @@ export default function InteractiveMapPage() {
             )}
           </div>
 
-          <WeatherOverlay />
+          {!isError && location && (
+            <WeatherOverlay
+              latitude={location?.latitude ?? null}
+              longitude={location?.longitude ?? null}
+            />
+          )}
         </div>
 
         {/* Map controls — fixed to right */}
@@ -78,14 +133,28 @@ export default function InteractiveMapPage() {
           {/* geolocate */}
           <div className='flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 pointer-events-auto'>
             <button
-              onClick={() => interactiveMapRef.current?.geolocate()}
-              className='aspect-square hover:bg-gray-200 rounded-md p-1'
+              onClick={async () => {
+                if (!interactiveMapRef.current || isGeolocating) return;
+                setIsGeolocating(true);
+                clearRoute();
+                try {
+                  await interactiveMapRef.current.geolocate();
+                } finally {
+                  setIsGeolocating(false);
+                }
+              }}
+              className='aspect-square hover:bg-gray-200 rounded-md p-1 disabled:opacity-60 disabled:hover:bg-transparent'
+              disabled={isGeolocating}
               title='Geolocate'
             >
-              <IconCurrentLocation
-                className='w-[1.5em]! h-[1.5em]!'
-                strokeWidth={1.5}
-              />
+              {isGeolocating ? (
+                <Spinner className='w-[1.5em]! h-[1.5em]!' />
+              ) : (
+                <IconCurrentLocation
+                  className='w-[1.5em]! h-[1.5em]!'
+                  strokeWidth={1.5}
+                />
+              )}
             </button>
           </div>
 
@@ -93,7 +162,12 @@ export default function InteractiveMapPage() {
           <MapLegendPopover />
 
           {/*  */}
-          <MapFilterPopover />
+          <MapFilterPopover
+            filters={filters}
+            toggleSeverity={toggleSeverity}
+            toggleSafetyType={toggleSafetyType}
+            resetFilters={resetFilters}
+          />
         </div>
 
         {(activeOverlay?.type === 'notification' ||

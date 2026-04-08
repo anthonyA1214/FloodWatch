@@ -8,7 +8,7 @@ import { ReportedCommentDetailInput } from '@repo/schemas';
 export function useReportedCommentDetail(commentId: number | null) {
   const { data, error, isLoading, isValidating, mutate } =
     useSWR<ReportedCommentDetailInput>(
-      commentId ? SWR_KEYS.safetyDetail(commentId) : null,
+      commentId ? SWR_KEYS.reportedCommentDetail(commentId) : null,
       () => getReportedCommentDetail(commentId!),
     );
 
@@ -17,6 +17,6 @@ export function useReportedCommentDetail(commentId: number | null) {
     isLoading,
     isValidating,
     isError: error,
-    mutateSafetyDetail: mutate,
+    mutateReportedComment: mutate,
   };
 }

@@ -1,22 +1,49 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
-const severityEnum = z.enum(['low', 'moderate', 'high', 'critical']);
+export const severityEnum = z.enum(['low', 'moderate', 'high', 'critical']);
 
 export const reportFloodAlertSchema = z.object({
   latitude: z.coerce.number(),
   longitude: z.coerce.number(),
-  range: z.coerce.number(),
-  description: z.string().optional(),
+  range: z.coerce
+    .number('Affected range is required.')
+    .refine((val) => val > 0, {
+      error: 'Affected range must be at least 1 meter.',
+      abort: true,
+    })
+    .refine((val) => val <= 1000, {
+      error: 'Affected range cannot exceed 1,000 meters.',
+      abort: true,
+    }),
+  description: z
+    .string()
+    .max(300, 'Description cannot exceed 300 characters.')
+    .optional(),
   severity: severityEnum,
 });
 
 export const createFloodAlertSchema = z.object({
-  locationName: z.string(),
+  locationName: z.string().refine((val) => val.length > 0, {
+    error: 'Location name is required.',
+    abort: true,
+  }),
   latitude: z.coerce.number(),
   longitude: z.coerce.number(),
-  range: z.coerce.number(),
-  description: z.string().optional(),
+  range: z.coerce
+    .number('Affected range is required.')
+    .refine((val) => val > 0, {
+      error: 'Affected range must be at least 1 meter.',
+      abort: true,
+    })
+    .refine((val) => val <= 1000, {
+      error: 'Affected range cannot exceed 1,000 meters.',
+      abort: true,
+    }),
+  description: z
+    .string()
+    .max(300, 'Description cannot exceed 300 characters.')
+    .optional(),
   severity: severityEnum,
 });
 
@@ -29,28 +56,29 @@ export const reportMapPinSchema = z.object({
   status: z.enum(['verified', 'unverified']),
 });
 
-export const reportDetailSchema = z.object({
+export const reportSchema = z.object({
   id: z.number(),
+  reporter: z.object({
+    id: z.number(),
+    email: z.string(),
+    name: z.string(),
+    profilePicture: z.string().nullable(),
+  }),
+  reportedAt: z.date(),
+  status: z.enum(['verified', 'unverified']),
+});
+
+export const reportDetailSchema = reportSchema.extend({
   location: z.string(),
   description: z.string().nullable(),
   latitude: z.number(),
   longitude: z.number(),
   range: z.number(),
   severity: severityEnum,
-  status: z.enum(['verified', 'unverified']),
   image: z.string().nullable(),
   confirms: z.number(),
   denies: z.number(),
-  reportedAt: z.date(),
   isAdmin: z.boolean(),
-  reporter: z
-    .object({
-      id: z.number(),
-      email: z.string(),
-      name: z.string(),
-      profilePicture: z.string().nullable(),
-    })
-    .nullable(),
   verifier: z
     .object({
       id: z.number(),
@@ -59,12 +87,13 @@ export const reportDetailSchema = z.object({
       profilePicture: z.string().nullable(),
     })
     .nullable(),
+  verifiedAt: z.date().nullable(),
 });
 
 export const reportListItemSchema = z.object({
   id: z.number(),
   location: z.string(),
-  description: z.string().nullable(),
+  description: z.string().optional(),
   severity: severityEnum,
   reportedAt: z.date(),
 });
@@ -86,18 +115,50 @@ export const reportListQuerySchema = z.object({
   q: z.string().optional(),
 });
 
+export const recentReportsSchema = reportListItemSchema;
+
+export const reportNeedingAttentionSchema = reportListItemSchema
+  .pick({
+    id: true,
+    location: true,
+    description: true,
+    reportedAt: true,
+  })
+  .extend({
+    confirms: z.number(),
+  });
+
+export const ReportDistributionSchema = z.object({
+  severity: severityEnum,
+  reports: z.number(),
+});
+
 export class ReportFloodAlertDto extends createZodDto(reportFloodAlertSchema) {}
 export class CreateFloodAlertDto extends createZodDto(createFloodAlertSchema) {}
 export class ReportMapPinDto extends createZodDto(reportMapPinSchema) {}
+export class ReportDto extends createZodDto(reportSchema) {}
 export class ReportDetailDto extends createZodDto(reportDetailSchema) {}
 export class ReportListItemDto extends createZodDto(reportListItemSchema) {}
 export class ReportQueryDto extends createZodDto(reportQuerySchema) {}
 export class ReportListQueryDto extends createZodDto(reportListQuerySchema) {}
+export class ReportDistributionDto extends createZodDto(
+  ReportDistributionSchema,
+) {}
+export class RecentReportDto extends createZodDto(recentReportsSchema) {}
+export class ReportNeedingAttentionDto extends createZodDto(
+  reportNeedingAttentionSchema,
+) {}
 
 export type ReportFloodAlertInput = z.infer<typeof reportFloodAlertSchema>;
 export type CreateFloodAlertInput = z.infer<typeof createFloodAlertSchema>;
 export type ReportMapPinInput = z.infer<typeof reportMapPinSchema>;
+export type ReportInput = z.infer<typeof reportSchema>;
 export type ReportDetailInput = z.infer<typeof reportDetailSchema>;
 export type ReportListItemInput = z.infer<typeof reportListItemSchema>;
 export type ReportQueryInput = z.infer<typeof reportQuerySchema>;
 export type ReportListQueryInput = z.infer<typeof reportListQuerySchema>;
+export type ReportDistributionInput = z.infer<typeof ReportDistributionSchema>;
+export type RecentReportInput = z.infer<typeof recentReportsSchema>;
+export type ReportNeedingAttentionInput = z.infer<
+  typeof reportNeedingAttentionSchema
+>;

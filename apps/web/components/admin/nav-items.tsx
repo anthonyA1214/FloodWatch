@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import {
-  IconBell,
+  IconArchive,
   IconClipboard,
   IconMap,
   IconMessageReport,
@@ -12,18 +12,13 @@ import {
   IconUserCog,
   IconUsers,
 } from '@tabler/icons-react';
-import {
-  SidebarMenuBadge,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@/components/ui/sidebar';
+import { SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import NotificationSheet from './notification-sheet';
+import { AnimatePresence, motion } from 'motion/react';
+import { useState } from 'react';
 
 export function NavItems() {
-  const notificationCount = 3;
-
   const items = [
     {
       title: 'DASHBOARD',
@@ -73,36 +68,62 @@ export function NavItems() {
     },
   ];
 
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const pathname = usePathname();
 
   return (
-    <>
-      <SidebarMenuItem className='mb-6'>
-        <NotificationSheet>
-          <SidebarMenuButton className='text-base rounded-full border border-black/20 flex items-center gap-4 py-4 pl-5'>
-            <IconBell className='w-[1.5em]! h-[1.5em]!' aria-hidden />
-            <span className='font-poppins'>NOTIFICATION</span>
-          </SidebarMenuButton>
-        </NotificationSheet>
-        <SidebarMenuBadge className='top-1/2 -translate-y-1/2 right-3 h-5 min-w-5 rounded-full bg-[#FF3B30] px-1.5 text-[10px] font-semibold leading-none text-white'>
-          {notificationCount}
-        </SidebarMenuBadge>
-      </SidebarMenuItem>
-
+    <AnimatePresence>
       {items.map((item) => {
         const isActive = pathname === item.url;
         return (
           <SidebarMenuItem
             key={item.title}
-            className={item.title === 'DASHBOARD' ? 'mb-1' : undefined}
+            className='relative'
+            onMouseEnter={() => setHoveredItem(item.url)}
+            onMouseLeave={() => setHoveredItem(null)}
           >
-            <SidebarMenuButton asChild className='text-base'>
+            <AnimatePresence>
+              {hoveredItem === item.url && !isActive && (
+                <motion.div
+                  key='hover'
+                  layoutId='hover-nav-indicator'
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className='absolute inset-0 rounded-md bg-[#0066CC]/5'
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
+            </AnimatePresence>
+
+            {isActive && (
+              <motion.div
+                layoutId='active-nav-indicator'
+                className='absolute inset-0 rounded-md bg-[#0066CC]/10'
+                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+              />
+            )}
+
+            {/* Left border pill */}
+            {isActive && (
+              <motion.div
+                layoutId='active-nav-border'
+                className='absolute left-0 top-1 bottom-1 w-1 rounded-full bg-[#0066CC]'
+                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+              />
+            )}
+
+            <SidebarMenuButton
+              asChild
+              className='text-base relative z-10 hover:bg-transparent active:bg-transparent'
+            >
               <Link
                 href={item.url}
                 className={cn(
-                  'flex items-center gap-4 py-6 pl-4 border-l-4 border-transparent',
-                  isActive &&
-                    'border-[#0066CC] text-[#0066CC] hover:text-[#0066CC]! hover:bg-transparent',
+                  'flex items-center gap-4 py-6 pl-4 transition-colors duration-200',
+                  isActive
+                    ? 'text-[#0066CC]'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 <item.icon className='w-[1.5em]! h-[1.5em]!' aria-hidden />
@@ -112,6 +133,6 @@ export function NavItems() {
           </SidebarMenuItem>
         );
       })}
-    </>
+    </AnimatePresence>
   );
 }

@@ -1,41 +1,81 @@
-'use client';
+import { formatDistanceToNow } from 'date-fns';
+import {
+  IconCircleCheck,
+  IconClock,
+  IconEye,
+  IconMapPin,
+} from '@tabler/icons-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useReportDialog } from '@/contexts/report-dialog-context';
 
-import { useState } from 'react';
-import { IconCircleDot } from '@tabler/icons-react';
-import ReportAttentionCard from './report-attention-card';
-import ViewFloodReportDialog from './view-flood-report';
+export default function NeedsAttentionCard({
+  id,
+  location,
+  description,
+  reportedAt,
+  confirms,
+}: {
+  id: number;
+  location: string;
+  description?: string;
+  reportedAt: Date;
+  confirms: number;
+}) {
+  const { openDialog } = useReportDialog();
 
-export default function NeedsAttentionCard() {
-  // added: controls modal visibility
-  const [openDialog, setOpenDialog] = useState(false);
+  const color = '#F97316';
 
   return (
-    <>
-      <div className='h-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm'>
-        {/* Header */}
-        <div className='mb-6 flex items-center gap-2'>
-          <IconCircleDot className='h-5 w-5 text-red-500' stroke={2} />
-
-          <h2 className='text-[18px] font-semibold text-slate-700'>
-            Needs Attention
-            <span className='font-normal text-slate-500'>
-              {' '}
-              – reports with 10+ community votes
-            </span>
-          </h2>
+    <div
+      className='grid border-l-4 rounded-lg p-4 gap-4'
+      style={{ borderLeftColor: color, backgroundColor: `${color}10` }}
+    >
+      <div className='flex justify-between gap-8 items-center'>
+        {/* Location */}
+        <div className='font-poppins flex items-center gap-2 text-base font-semibold'>
+          <IconMapPin
+            className='size-[1.5em]! shrink-0'
+            style={{ color: color }}
+          />
+          {location}
         </div>
 
-        {/* Reports container */}
-        <div className='space-y-4'>
-          {/* added: review click opens modal */}
-          <ReportAttentionCard onReview={() => setOpenDialog(true)} />
-        </div>
+        {/* Badge */}
+        <Badge
+          className='text-sm'
+          style={{
+            color: color,
+            backgroundColor: `${color}10`,
+            border: `1px solid ${color}`,
+          }}
+        >
+          <IconCircleCheck className='size-[1.5em]! shrink-0' />
+          {confirms}
+        </Badge>
       </div>
 
-      {/* added: static modal shown when openDialog is true */}
-      {openDialog && (
-        <ViewFloodReportDialog open={openDialog} onOpenChange={setOpenDialog} />
-      )}
-    </>
+      {/* description */}
+      {description && <p className='text-sm line-clamp-2'>{description}</p>}
+
+      <div className='flex items-center justify-between'>
+        {/* reported at */}
+        <div className='flex items-center text-sm gap-2 opacity-50'>
+          <IconClock className='size-[1.5em]! shrink-0' />
+          {formatDistanceToNow(new Date(reportedAt), { addSuffix: true })}
+        </div>
+
+        {/*review*/}
+        <Button
+          variant='ghost'
+          size='sm'
+          className='font-poppins flex items-center gap-2 text-[#0066CC] hover:bg-[#0066CC10] hover:text-[#0066CC]'
+          onClick={() => openDialog('view', id)}
+        >
+          <span>REVIEW</span>
+          <IconEye className='size-[1.25em]! shrink-0' />
+        </Button>
+      </div>
+    </div>
   );
 }

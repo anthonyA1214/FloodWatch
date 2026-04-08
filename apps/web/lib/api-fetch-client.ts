@@ -51,17 +51,19 @@ export async function apiFetchClient(path: string, init: RequestInit = {}) {
 
   let res = await request();
 
-  if (res.status === 401) {
+  // Don't attempt token refresh for auth routes
+  if (res.status === 401 && !path.startsWith('/auth')) {
     await refreshToken();
     res = await request();
   }
 
-  if (res.status === 403) {
+  if (res.status === 403 && !path.startsWith('/auth')) {
     await fetch(`${getApiUrl()}/auth/logout`, {
       method: 'DELETE',
       credentials: 'include',
     });
     window.location.href = '/auth/login';
+    return res;
   }
 
   if (!res.ok) {

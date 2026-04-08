@@ -11,12 +11,16 @@ import { reports } from './reports.schema';
 
 export const comments = pgTable('comments', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id, {
-    onDelete: 'cascade',
-  }),
-  reportId: integer('report_id').references(() => reports.id, {
-    onDelete: 'cascade',
-  }),
+  userId: integer('user_id')
+    .references(() => users.id, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
+  reportId: integer('report_id')
+    .references(() => reports.id, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
   content: text('content'),
   image: text('image'),
   imagePublicId: text('image_public_id'),

@@ -10,18 +10,12 @@ import StatCardSkeleton from '@/components/shared/admin/skeleton/stat-card-skele
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
 import SafetyStatCards from './safety-stat-cards';
-import { useSafetyLocationsAdmin } from '@/hooks/use-safety-admin';
+import { useSafetyLocations } from '@/hooks/use-safety-locations';
 import { SafetyLocationQueryInput } from '@repo/schemas';
 import { SafetyLocationsDataTableSkeleton } from './skeleton/safety-locations-data-table-skeleton';
 import SafetyLocationsPageSkeleton from './skeleton/safety-locations-page-skeleton';
-// ✅ Import the provider and dialogs
-import SafetyLocationsDialogProvider from '@/contexts/safety-locations-dialog-context';
-import EditSafetyLocationDialog from './edit-safety-location-dialog';
-import ViewSafetyLocationDialog from './view-safety-location-dialog';
-import DeleteSafetyLocationDialog from './delete-safety-location-dialog';
 
-// ✅ Create an inner component that uses the context
-function SafetyLocationsContent() {
+export default function SafetyLocationsView() {
   const searchParams = useSearchParams();
   const [type, setType] = useState<'total' | 'shelter' | 'hospital'>(
     (searchParams.get('status') as 'total' | 'shelter' | 'hospital') || 'total',
@@ -37,16 +31,17 @@ function SafetyLocationsContent() {
   };
 
   const { safetyLocations, meta, stats, isLoading, isValidating } =
-    useSafetyLocationsAdmin(params);
+    useSafetyLocations(params);
 
   const isFirstLoad = !safetyLocations;
 
   if (isLoading && isFirstLoad) return <SafetyLocationsPageSkeleton />;
 
   return (
-    <div className='flex-1 flex flex-col bg-white p-8 rounded-2xl gap-8 min-h-0'>
+    <div className='flex-1 flex flex-col bg-white px-8 pt-8 rounded-2xl gap-8 min-h-0 overflow-y-auto'>
       {/* Header */}
-      <h1 className='font-poppins text-3xl font-bold'>Safety Locations</h1>
+      <h1 className='font-poppins text-3xl font-bold'>SAFETY LOCATIONS</h1>
+
       <div className='flex justify-between gap-4'>
         <div className='flex-1'>
           <SearchBar
@@ -59,7 +54,8 @@ function SafetyLocationsContent() {
           />
         </div>
       </div>
-      <div className='flex-1 flex flex-col min-h-0 gap-4'>
+
+      <div className='flex-1 flex flex-col min-h-0 gap-4 pb-8'>
         {isFirstLoad ? (
           <div className='grid grid-cols-3 gap-8'>
             {Array.from({ length: 3 }).map((_, i) => (
@@ -85,43 +81,32 @@ function SafetyLocationsContent() {
           <DataTable columns={columns} data={safetyLocations || []} />
         )}
 
-        {isFirstLoad ? (
-          <div className='flex items-center justify-between'>
-            <Skeleton className='h-4 w-40' />
-            <PaginationSkeleton />
-          </div>
-        ) : (
-          <div className='flex items-center justify-between'>
-            <span className='text-sm text-gray-600'>
-              Showing {safetyLocations?.length ?? 0} of {stats?.totalCount ?? 0}{' '}
-              safety locations
-            </span>
+        <div className='flex items-center justify-between pb-8'>
+          {isFirstLoad ? (
+            <>
+              <Skeleton className='h-4 w-40' />
+              <PaginationSkeleton />
+            </>
+          ) : (
+            <>
+              <span className='text-sm text-gray-600'>
+                Showing {safetyLocations?.length ?? 0} of{' '}
+                {stats?.totalCount ?? 0} safety locations
+              </span>
 
-            <div>
-              <PagePagination
-                currentPage={meta?.page ?? 1}
-                totalPages={meta?.totalPages ?? 1}
-                hasNextPage={meta?.hasNextPage ?? false}
-                hasPrevPage={meta?.hasPrevPage ?? false}
-                onPageChange={setPage}
-              />
-            </div>
-          </div>
-        )}
+              <div>
+                <PagePagination
+                  currentPage={meta?.page ?? 1}
+                  totalPages={meta?.totalPages ?? 1}
+                  hasNextPage={meta?.hasNextPage ?? false}
+                  hasPrevPage={meta?.hasPrevPage ?? false}
+                  onPageChange={setPage}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
-      {/* ✅ Add both dialog components */}
-      <ViewSafetyLocationDialog />
-      <EditSafetyLocationDialog />
-      <DeleteSafetyLocationDialog />
     </div>
-  );
-}
-
-// ✅ Wrap the main component with the provider
-export default function SafetyLocationsView() {
-  return (
-    <SafetyLocationsDialogProvider>
-      <SafetyLocationsContent />
-    </SafetyLocationsDialogProvider>
   );
 }

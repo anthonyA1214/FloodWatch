@@ -20,6 +20,9 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { JwtAuthGuard } from './auth/guards/jwt-auth/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles/roles.guard';
 import { AppController } from './app.controller';
+import { EventsModule } from './events/events.module';
+import { AppService } from './app.service';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -64,8 +67,11 @@ import { AppController } from './app.controller';
     NewsModule,
     SafetyModule,
     CommentsModule,
+    EventsModule,
+    NotificationsModule,
   ],
   providers: [
+    AppService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

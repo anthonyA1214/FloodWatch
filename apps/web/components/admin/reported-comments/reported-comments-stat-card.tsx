@@ -50,10 +50,10 @@ export default function ReportedCommentsStatCard({
     <div
       onClick={onClick}
       className={cn(
-        'relative flex flex-col rounded-2xl border shadow-md p-6 gap-2',
+        'relative flex flex-col rounded-2xl border shadow-md p-4 xl:p-6 gap-2',
         isActive
           ? 'cursor-default'
-          : 'cursor-pointer text-[#9E9E9E] hover:shadow-lg transition-shadow',
+          : 'cursor-pointer text-[#9E9E9E] hover:shadow-xl transition-shadow',
       )}
       style={
         isActive
@@ -71,25 +71,27 @@ export default function ReportedCommentsStatCard({
           style={{ backgroundColor: `${color}10` }}
         />
       )}
-      <h3 className='font-poppins font-semibold text-xl'>{label}</h3>
+      <h3 className='font-poppins font-semibold text-base xl:text-xl'>
+        {label.toUpperCase()}
+      </h3>
       <div className='flex flex-col gap-2 flex-1'>
         <div className='flex justify-between flex-1'>
-          <h2 className='font-bold text-4xl mt-auto'>{count}</h2>
+          <h2 className='font-bold text-2xl xl:text-4xl mt-auto'>{count}</h2>
           <div
-            className='rounded-full p-4 text-2xl mt-auto'
+            className='rounded-full p-3 xl:p-4 text-xl xl:text-2xl mt-auto'
             style={
               isActive
                 ? { backgroundColor: `${color}25`, color: color }
                 : { backgroundColor: '#E0E0E0' }
             }
           >
-            <Icon className='w-[1.5em]! h-[1.5em]!' />
+            <Icon className='size-[1.5em]!' />
           </div>
         </div>
 
         {isActive && (
           <div className='flex gap-2 items-center text-sm' style={{ color }}>
-            <IconCircleCheck className='w-[1.5em]! h-[1.5em]!' />
+            <IconCircleCheck className='size-[1.5em]!' />
             <p>{statusText}</p>
           </div>
         )}

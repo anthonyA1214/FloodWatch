@@ -21,7 +21,7 @@ export default function ReportedCommentsStatCards({
   onStatusChange,
 }: ReportStatCardsProps) {
   return (
-    <div className='grid grid-cols-4 gap-8'>
+    <div className='grid grid-cols-2 xl:grid-cols-4 gap-4 xl:gap-8'>
       <ReportedCommentsStatCard
         label='Total'
         count={stats.totalCount}

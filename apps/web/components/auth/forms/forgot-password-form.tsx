@@ -1,6 +1,5 @@
 'use client';
 
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -10,6 +9,7 @@ import { sendOtpSchema } from '@repo/schemas';
 import z from 'zod';
 import { Spinner } from '@/components/ui/spinner';
 import { apiFetchClient } from '@/lib/api-fetch-client';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 
 export default function ForgotPasswordForm() {
   const router = useRouter();
@@ -20,15 +20,23 @@ export default function ForgotPasswordForm() {
     errors: null,
   });
 
+  const [formData, setFormData] = useState({ email: '' });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setState((prev) => ({
+      ...prev,
+      errors: prev.errors ? { ...prev.errors, [name]: [] } : null,
+    }));
+  };
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsPending(true);
 
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-
     const parsed = sendOtpSchema.safeParse({
-      email: formData.get('email'),
+      email: formData.email,
     });
 
     if (!parsed.success) {
@@ -36,9 +44,7 @@ export default function ForgotPasswordForm() {
         errors: z.flattenError(parsed.error).fieldErrors,
         status: 'error',
       });
-
-      (form.elements.namedItem('email') as HTMLInputElement).value = '';
-
+      setFormData({ email: '' });
       setIsPending(false);
       return;
     }
@@ -58,7 +64,7 @@ export default function ForgotPasswordForm() {
         status: 'success',
       });
 
-      form.reset();
+      setFormData({ email: '' });
       router.replace('/auth/verify-otp');
     } catch {
       // swallowed
@@ -69,18 +75,27 @@ export default function ForgotPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit} className='space-y-6'>
-      <div className='space-y-2'>
-        <Label htmlFor='email'>Email</Label>
+      <Field data-invalid={!!state.errors?.email?.length}>
+        <FieldLabel
+          htmlFor='email'
+          className='font-poppins text-sm font-medium'
+        >
+          Email
+        </FieldLabel>
         <Input
+          id='email'
           type='email'
           name='email'
           placeholder='Enter your email'
           className='rounded-full shadow-sm'
+          value={formData.email}
+          onChange={handleChange}
+          aria-invalid={!!state.errors?.email?.length}
         />
-        {state?.errors && 'email' in state.errors && state.errors.email && (
-          <p className='text-red-500 text-sm'>{state.errors.email}</p>
+        {!!state.errors?.email?.length && (
+          <FieldError>{state.errors.email[0]}</FieldError>
         )}
-      </div>
+      </Field>
 
       <Button disabled={isPending} className='w-full rounded-full'>
         {isPending ? (

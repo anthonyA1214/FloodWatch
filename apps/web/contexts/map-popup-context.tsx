@@ -1,19 +1,23 @@
 'use client';
 
 import { useReportMapPins } from '@/hooks/use-report-map-pins';
-import { ReportMapPinInput, SafetyMapPinInput } from '@repo/schemas';
+import {
+  ReportMapPinInput,
+  ReportResultInput,
+  SafetyLocationMapPinInput,
+} from '@repo/schemas';
 import { createContext, RefObject, useContext, useRef, useState } from 'react';
 import { useMapFilter } from './map-filter-context';
 
 type ActivePopup =
-  | { type: 'report'; report: ReportMapPinInput }
-  | { type: 'safety'; safety: SafetyMapPinInput }
+  | { type: 'report'; report: ReportMapPinInput | ReportResultInput }
+  | { type: 'safety'; safety: SafetyLocationMapPinInput }
   | null;
 
 type MapPopupContextType = {
   activePopup: ActivePopup;
-  openReportPopup: (report: ReportMapPinInput) => void;
-  openSafetyPopup: (safety: SafetyMapPinInput) => void;
+  openReportPopup: (report: ReportMapPinInput | ReportResultInput) => void;
+  openSafetyPopup: (safety: SafetyLocationMapPinInput) => void;
   closePopup: () => void;
   nextReport: () => void;
   prevReport: () => void;
@@ -44,12 +48,12 @@ export function MapPopupProvider({ children }: { children: React.ReactNode }) {
     flyToRef.current?.(loc);
   };
 
-  const openReportPopup = (report: ReportMapPinInput) => {
+  const openReportPopup = (report: ReportMapPinInput | ReportResultInput) => {
     setActivePopup({ type: 'report', report });
     flyTo(report);
   };
 
-  const openSafetyPopup = (safety: SafetyMapPinInput) => {
+  const openSafetyPopup = (safety: SafetyLocationMapPinInput) => {
     setActivePopup({ type: 'safety', safety });
     flyTo(safety);
   };

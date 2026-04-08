@@ -1,19 +1,20 @@
 import { formatDistanceToNow } from 'date-fns';
 import { IconClock, IconMapPin } from '@tabler/icons-react';
 import { SEVERITY_COLOR_MAP } from '@/lib/utils/get-color-map';
+import { Badge } from '../ui/badge';
 
 export default function AffectedLocationsCard({
-  severity = 'high',
-  isActive = false,
-  location = 'Barangay 176',
-  description = 'Floodwaters reaching waist level, residents advised to evacuate immediately.',
-  reportedAt = new Date(),
+  severity,
+  isActive,
+  location,
+  description,
+  reportedAt,
   onClick,
 }: {
   severity: 'critical' | 'high' | 'moderate' | 'low';
   isActive?: boolean;
   location: string;
-  description: string | null;
+  description?: string | null;
   reportedAt: Date;
   onClick?: () => void;
 }) {
@@ -39,16 +40,16 @@ export default function AffectedLocationsCard({
         </div>
 
         {/* Badge */}
-        <div
-          className='flex items-center rounded-full px-3 py-1'
-          style={{ color: color, backgroundColor: `${color}25` }}
+        <Badge
+          className='text-xs'
+          style={{ backgroundColor: `${color}25`, color }}
         >
-          <span className='text-xs font-medium'>{severity.toUpperCase()}</span>
-        </div>
+          {severity.toUpperCase()}
+        </Badge>
       </div>
 
       {/* description */}
-      <p className='text-sm'>{description}</p>
+      {description && <p className='text-sm line-clamp-2'>{description}</p>}
 
       {/* reported at */}
       <div className='flex items-center text-xs gap-2 text-gray-600'>

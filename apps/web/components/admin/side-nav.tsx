@@ -42,8 +42,8 @@ export default function SideNav() {
         <SidebarContent className='w-full flex-1 min-h-0'>
           {/* profile */}
           <SidebarGroup>
-            <SidebarGroupContent className='flex flex-col items-center justify-center py-2'>
-              <div className='py-1'>
+            <SidebarGroupContent className='flex flex-col items-center justify-center py-4'>
+              <div className='py-2'>
                 {isLoading ? (
                   <Skeleton className='size-24 rounded-full' />
                 ) : (
@@ -60,18 +60,16 @@ export default function SideNav() {
                 )}
               </div>
 
-              <div className='flex flex-col text-center gap-0.5'>
+              <div className='flex flex-col text-center'>
                 {isLoading ? (
                   <>
-                    <Skeleton className='h-6 w-28' />
-                    <Skeleton className='h-4 w-20 mx-auto' />
+                    <Skeleton className='h-7 w-32' />
+                    <Skeleton className='h-5 w-24 mx-auto' />
                   </>
                 ) : (
                   <>
-                    <span className='text-base font-bold leading-tight'>
-                      {me?.name}
-                    </span>
-                    <span className='text-sm text-muted-foreground leading-tight'>
+                    <span className='text-lg font-bold'>{me?.name}</span>
+                    <span className='text-muted-foreground'>
                       {me?.role.toUpperCase()}
                     </span>
                   </>
@@ -79,11 +77,14 @@ export default function SideNav() {
               </div>
             </SidebarGroupContent>
           </SidebarGroup>
-          <SidebarGroup>
-            <SidebarGroupContent className='space-y-2'>
-              <NavItems />
-            </SidebarGroupContent>
-          </SidebarGroup>
+          {/* Nav items - scrollable */}
+          <div className='flex-1 min-h-0 h-0 overflow-y-auto'>
+            <SidebarGroup>
+              <SidebarGroupContent className='space-y-2'>
+                <NavItems />
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </div>
         </SidebarContent>
         <SidebarFooter className='border-t py-4 w-full'>
           <SidebarGroup>
