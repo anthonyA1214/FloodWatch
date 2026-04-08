@@ -17,6 +17,7 @@ import { reportConfirmations } from 'src/drizzle/schemas/report-confirmations.sc
 import type { DrizzleDB } from 'src/drizzle/types/drizzle';
 import { GeocoderService } from 'src/geocoder/geocoder.service';
 import { ImagesService } from 'src/images/images.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class ReportsService {
@@ -25,6 +26,7 @@ export class ReportsService {
     private imagesService: ImagesService,
     private cloudinaryService: CloudinaryService,
     private geocoderService: GeocoderService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async getReportMapPins() {
@@ -334,33 +336,50 @@ export class ReportsService {
       imagePublicId = uploaded.public_id as string;
     }
 
-    await this.db.insert(reports).values({
-      userId,
-      latitude,
-      longitude,
-      severity,
-      description,
-      range,
-      image: imageUrl,
-      imagePublicId,
-      location: locationName,
-      status: 'verified', // Admin-created reports are auto-verified
-      isAdmin: true,
-      verifierId: userId, // Set the admin as the verifier
-      verifiedAt: new Date(),
+    const [report] = await this.db
+      .insert(reports)
+      .values({
+        userId,
+        latitude,
+        longitude,
+        severity,
+        description,
+        range,
+        image: imageUrl,
+        imagePublicId,
+        location: locationName,
+        status: 'verified', // Admin-created reports are auto-verified
+        isAdmin: true,
+        verifierId: userId, // Set the admin as the verifier
+        verifiedAt: new Date(),
+      })
+      .returning();
+
+    // TODO: optimize by sending notifications in background (e.g. queue) instead of awaiting here
+
+    await Promise.all([
+      this.notificationsService.create({
+        recipientId: userId,
+        actorId: userId,
+        type: 'admin_self_reported_flood',
+        message: 'You have successfully reported a flood alert.',
+        reportId: report.id,
+      }),
+    ]).catch((err) => {
+      console.error('Failed to send notifications:', err);
     });
 
     return { message: 'Report created and verified successfully' };
   }
 
   async verifyReportStatus(reportId: number, userId: number) {
-    const report = await this.db
+    const [report] = await this.db
       .select()
       .from(reports)
       .where(eq(reports.id, reportId))
       .limit(1);
 
-    if (!report.length) {
+    if (!report) {
       throw new NotFoundException('Report not found');
     }
 
@@ -374,10 +393,29 @@ export class ReportsService {
       })
       .where(eq(reports.id, reportId));
 
+    await Promise.all([
+      this.notificationsService.create({
+        recipientId: report.userId,
+        actorId: userId,
+        type: 'admin_verified_report',
+        message: 'An admin has verified your flood report.',
+        reportId,
+      }),
+      this.notificationsService.create({
+        recipientId: userId,
+        actorId: userId,
+        type: 'admin_self_verified_report',
+        message: 'You have successfully verified a flood report.',
+        reportId,
+      }),
+    ]).catch((err) => {
+      console.error('Failed to send notifications:', err);
+    });
+
     return { message: 'Report verified successfully' };
   }
 
-  async deleteReport(id: number) {
+  async deleteReport(id: number, userId: number) {
     const [report] = await this.db
       .select()
       .from(reports)
@@ -394,6 +432,23 @@ export class ReportsService {
     }
 
     await this.db.delete(reports).where(eq(reports.id, id));
+
+    await Promise.all([
+      this.notificationsService.create({
+        recipientId: report.userId,
+        actorId: userId,
+        type: 'admin_deleted_report',
+        message: 'An admin has deleted your flood report.',
+      }),
+      this.notificationsService.create({
+        recipientId: userId,
+        actorId: userId,
+        type: 'admin_self_deleted_report',
+        message: 'You have successfully deleted a flood report.',
+      }),
+    ]).catch((err) => {
+      console.error('Failed to send notifications:', err);
+    });
 
     return { message: 'Report deleted successfully' };
   }
