@@ -6,10 +6,12 @@ import { FacebookIcon, GitHubIcon } from '@/components/shared/icons';
 import Link from 'next/link';
 import { useState } from 'react';
 import { X } from 'lucide-react';
+import { IconMapPin } from '@tabler/icons-react';
 import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { TermsContent } from './terms-of-services';
@@ -54,19 +56,12 @@ export default function Footer() {
           className='bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden p-0 border-0'
         >
           {/* Header */}
-          <div className='flex items-center gap-3 bg-[#1A56DB] px-6 py-4 rounded-t-2xl shrink-0'>
+          <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-t-2xl px-6 py-4 shrink-0 text-white'>
             {/* Location pin icon */}
             <div className='w-9 h-9 rounded-full border-2 border-white/60 flex items-center justify-center shrink-0'>
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                className='w-5 h-5 text-white'
-                viewBox='0 0 24 24'
-                fill='currentColor'
-              >
-                <path d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z' />
-              </svg>
+              <IconMapPin className='w-5 h-5 text-white' />
             </div>
-            <DialogTitle className='text-white font-semibold text-lg'>
+            <DialogTitle className='font-poppins text-sm sm:text-base font-medium'>
               Terms of Services
             </DialogTitle>
             <DialogClose
@@ -75,7 +70,7 @@ export default function Footer() {
             >
               <X className='w-5 h-5' />
             </DialogClose>
-          </div>
+          </DialogHeader>
 
           {/* Scrollable body */}
           <div className='overflow-y-auto px-8 py-6 text-sm text-gray-700 leading-relaxed flex-1'>
@@ -99,19 +94,12 @@ export default function Footer() {
           className='bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden p-0 border-0'
         >
           {/* Header */}
-          <div className='flex items-center gap-3 bg-[#1A56DB] px-6 py-4 rounded-t-2xl shrink-0'>
+          <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-t-2xl px-6 py-4 shrink-0 text-white'>
             {/* Location pin icon */}
             <div className='w-9 h-9 rounded-full border-2 border-white/60 flex items-center justify-center shrink-0'>
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                className='w-5 h-5 text-white'
-                viewBox='0 0 24 24'
-                fill='currentColor'
-              >
-                <path d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z' />
-              </svg>
+              <IconMapPin className='w-5 h-5 text-white' />
             </div>
-            <DialogTitle className='text-white font-semibold text-lg'>
+            <DialogTitle className='font-poppins text-sm sm:text-base font-medium'>
               Privacy Policy
             </DialogTitle>
             <DialogClose
@@ -120,7 +108,7 @@ export default function Footer() {
             >
               <X className='w-5 h-5' />
             </DialogClose>
-          </div>
+          </DialogHeader>
 
           {/* Scrollable body */}
           <div className='overflow-y-auto px-8 py-6 text-sm text-gray-700 leading-relaxed flex-1'>
