@@ -1,21 +1,10 @@
-'use client';
-
 import Image from 'next/image';
 import { Separator } from '@radix-ui/react-separator';
 import { FacebookIcon, GitHubIcon } from '@/components/shared/icons';
 import Link from 'next/link';
-import { useState } from 'react';
-import { X } from 'lucide-react';
-import { IconMapPin } from '@tabler/icons-react';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { TermsContent } from './terms-of-services';
-import { PrivacyContent } from './privacy-policy';
+import PrivacyPolicyDialog from './privacy-policy-dialog';
+import TermsOfServicesDialog from './terms-of-services-dialog';
+import { IconPointFilled } from '@tabler/icons-react';
 
 const quickLinks = [
   { label: 'Home', href: '#' },
@@ -37,223 +26,128 @@ const resourcesLinks = [
 ];
 
 const contactUsLinks = [
-  { label: 'aidlinktechnologies@gmail.com' },
+  { label: '0969-512-6532' },
   { label: 'University of Caloocan City, Congressional Road' },
 ];
 
-// ─── Footer ───────────────────────────────────────────────────────────────────
-
 export default function Footer() {
-  const [showTerms, setShowTerms] = useState(false);
-  const [showPrivacy, setShowPrivacy] = useState(false);
-
   return (
-    <>
-      {/* ── Modals (shadcn dialog) ── */}
-      <Dialog open={showTerms} onOpenChange={setShowTerms}>
-        <DialogContent
-          showCloseButton={false}
-          className='bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden p-0 border-0'
-        >
-          {/* Header */}
-          <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-t-2xl px-6 py-4 shrink-0 text-white'>
-            {/* Location pin icon */}
-            <div className='w-9 h-9 rounded-full border-2 border-white/60 flex items-center justify-center shrink-0'>
-              <IconMapPin className='w-5 h-5 text-white' />
-            </div>
-            <DialogTitle className='font-poppins text-sm sm:text-base font-medium'>
-              Terms of Services
-            </DialogTitle>
-            <DialogClose
-              className='ml-auto text-white hover:text-white/70 transition'
-              aria-label='Close modal'
-            >
-              <X className='w-5 h-5' />
-            </DialogClose>
-          </DialogHeader>
-
-          {/* Scrollable body */}
-          <div className='overflow-y-auto px-8 py-6 text-sm text-gray-700 leading-relaxed flex-1'>
-            <TermsContent />
-          </div>
-
-          {/* Footer */}
-          <div className='px-6 py-4 flex justify-end border-t border-gray-100 shrink-0'>
-            <DialogClose asChild>
-              <button className='bg-[#1A56DB] hover:bg-[#1648c0] text-white font-medium px-6 py-2 rounded-lg transition'>
-                Close
-              </button>
-            </DialogClose>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showPrivacy} onOpenChange={setShowPrivacy}>
-        <DialogContent
-          showCloseButton={false}
-          className='bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden p-0 border-0'
-        >
-          {/* Header */}
-          <DialogHeader className='flex flex-row items-center gap-4 bg-[#0066CC] rounded-t-2xl px-6 py-4 shrink-0 text-white'>
-            {/* Location pin icon */}
-            <div className='w-9 h-9 rounded-full border-2 border-white/60 flex items-center justify-center shrink-0'>
-              <IconMapPin className='w-5 h-5 text-white' />
-            </div>
-            <DialogTitle className='font-poppins text-sm sm:text-base font-medium'>
-              Privacy Policy
-            </DialogTitle>
-            <DialogClose
-              className='ml-auto text-white hover:text-white/70 transition'
-              aria-label='Close modal'
-            >
-              <X className='w-5 h-5' />
-            </DialogClose>
-          </DialogHeader>
-
-          {/* Scrollable body */}
-          <div className='overflow-y-auto px-8 py-6 text-sm text-gray-700 leading-relaxed flex-1'>
-            <PrivacyContent />
-          </div>
-
-          {/* Footer */}
-          <div className='px-6 py-4 flex justify-end border-t border-gray-100 shrink-0'>
-            <DialogClose asChild>
-              <button className='bg-[#1A56DB] hover:bg-[#1648c0] text-white font-medium px-6 py-2 rounded-lg transition'>
-                Close
-              </button>
-            </DialogClose>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Footer ── */}
-      <footer className='relative bg-[#2F327D] mt-auto rounded-t-[2.5rem]'>
-        <div className='absolute top-0 left-0 h-16 w-full bg-white -z-10'></div>
-        <div className='max-w-7xl mx-auto px-4 py-16'>
-          <div className='grid grid-cols-1 md:grid-cols-5 w-full gap-6 sm:gap-8 md:gap-12'>
-            {/* Logo, taglines and social */}
-            <div className='flex flex-col gap-4 md:col-span-2'>
-              <div className='flex items-center gap-2'>
-                <Image
-                  src='/logo-white.svg'
-                  alt='FloodWatch Logo'
-                  width={48}
-                  height={48}
-                />
-                <h1 className='font-poppins font-medium text-2xl text-white'>
-                  FloodWatch
-                </h1>
-              </div>
-
-              <span className='text-sm text-white/90'>
-                Partner with us. Help FloodWatch protect communities everywhere.
-              </span>
-
-              <div className='flex items-center gap-4'>
-                <a
-                  href='https://www.facebook.com/profile.php?id=61580210802670'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                >
-                  <button className='text-white rounded-2xl text-3xl'>
-                    <FacebookIcon />
-                  </button>
-                </a>
-
-                <a
-                  href='https://github.com/anthonyA1214/floodwatch'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                >
-                  <button className='text-white rounded-2xl text-3xl'>
-                    <GitHubIcon />
-                  </button>
-                </a>
-              </div>
+    <footer className='relative bg-[#2F327D] mt-auto rounded-t-[2.5rem]'>
+      <div className='absolute top-0 left-0 h-16 w-full bg-white -z-10'></div>
+      <div className='max-w-7xl mx-auto px-4 py-16'>
+        <div className='grid grid-cols-1 md:grid-cols-5 w-full gap-6 sm:gap-8 md:gap-12'>
+          {/* Logo, taglines and social */}
+          <div className='flex flex-col gap-4 md:col-span-2'>
+            <div className='flex items-center gap-2'>
+              <Image
+                src='/logo-white.svg'
+                alt='FloodWatch Logo'
+                width={48}
+                height={48}
+              />
+              <h1 className='font-poppins font-medium text-2xl text-white'>
+                FloodWatch
+              </h1>
             </div>
 
-            {/* Links */}
-            <div className='grid grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 col-span-3'>
-              {/* Quick Links */}
-              <div className='flex flex-col gap-4'>
-                <h3 className='font-poppins text-white font-semibold text-xl'>
-                  Quick Links
-                </h3>
-                <ul className='flex flex-col text-sm text-white/90 gap-4'>
-                  {quickLinks.map((link, i) => (
-                    <li key={i}>
-                      <a
-                        href={link.href}
-                        className='inline-block text-white/90 hover:text-white transform hover:translate-x-1 transition duration-200'
-                      >
-                        {link.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            <span className='text-sm text-white/90'>
+              Partner with us. Help FloodWatch protect communities everywhere.
+            </span>
 
-              {/* Resources */}
-              <div className='flex flex-col gap-4'>
-                <h3 className='font-poppins text-white font-semibold text-xl'>
-                  Resources
-                </h3>
-                <ul className='flex flex-col text-sm text-white/90 gap-4'>
-                  {resourcesLinks.map((link, i) => (
-                    <li key={i}>
-                      <Link
-                        href={link.href}
-                        className='inline-block text-white/90 hover:text-white transform hover:translate-x-1 transition duration-200'
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Contact Us */}
-              <div className='flex flex-col gap-4'>
-                <h3 className='font-poppins text-white font-semibold text-xl'>
-                  Contact Us
-                </h3>
-                <ul className='flex flex-col text-sm text-white/90 gap-4'>
-                  {contactUsLinks.map((link, i) => (
-                    <li key={i}>
-                      <p className='inline-block text-white/90 hover:text-white transition duration-200'>
-                        {link.label}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <Separator className='my-10 bg-white/30 h-px' />
-
-          {/* Bottom bar */}
-          <div className='flex flex-col sm:flex-row justify-between items-center gap-4 text-white'>
-            <span>&copy; 2026 AidLink Tech. All rights reserved.</span>
-
-            <div className='flex items-center gap-4 text-sm'>
-              <button
-                onClick={() => setShowTerms(true)}
-                className='text-white/80 hover:text-white transition duration-200 underline-offset-2 hover:underline'
+            <div className='flex items-center gap-4'>
+              {/* github */}
+              <a
+                href='https://www.facebook.com/profile.php?id=61580210802670'
+                target='_blank'
+                rel='noopener noreferrer'
               >
-                Terms of Services
-              </button>
-              <span className='text-white/80'>•</span>
-              <button
-                onClick={() => setShowPrivacy(true)}
-                className='text-white/80 hover:text-white transition duration-200 underline-offset-2 hover:underline'
+                <button className='text-white rounded-2xl text-3xl'>
+                  <FacebookIcon />
+                </button>
+              </a>
+
+              {/* github */}
+              <a
+                href='https://github.com/anthonyA1214/floodwatch'
+                target='_blank'
+                rel='noopener noreferrer'
               >
-                Privacy Policy
-              </button>
+                <button className='text-white rounded-2xl text-3xl'>
+                  <GitHubIcon />
+                </button>
+              </a>
+            </div>
+          </div>
+
+          {/* Links */}
+          <div className='grid grid-cols-2  md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 col-span-3'>
+            {/* quick links */}
+            <div className='flex flex-col gap-4'>
+              <h3 className='font-poppins text-white font-semibold text-xl'>
+                Quick Links
+              </h3>
+              <ul className='flex flex-col text-sm text-white/90 gap-4'>
+                {quickLinks.map((link, i) => (
+                  <li key={i}>
+                    <a
+                      href={link.href}
+                      className='inline-block text-white/90 hover:text-white transform hover:translate-x-1 transition duration-200'
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* resources */}
+            <div className='flex flex-col gap-4'>
+              <h3 className='font-poppins text-white font-semibold text-xl'>
+                Resources
+              </h3>
+              <ul className='flex flex-col text-sm text-white/90 gap-4'>
+                {resourcesLinks.map((link, i) => (
+                  <li key={i}>
+                    <Link
+                      href={link.href}
+                      className='inline-block text-white/90 hover:text-white transform hover:translate-x-1 transition duration-200'
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* contact us */}
+            <div className='flex flex-col gap-4'>
+              <h3 className='font-poppins text-white font-semibold text-xl'>
+                Contact Us
+              </h3>
+              <ul className='flex flex-col text-sm text-white/90 gap-4'>
+                {contactUsLinks.map((link, i) => (
+                  <li key={i}>
+                    <p className='inline-block text-white/90 hover:text-white transition duration-200'>
+                      {link.label}
+                    </p>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
-      </footer>
-    </>
+
+        <Separator className='my-10 bg-white/30 h-px' />
+
+        <div className='flex sm:justify-between sm:flex-row flex-col gap-4 items-center text-white'>
+          <span> &copy; 2026 AidLink Tech. All rights reserved. </span>
+          <div className='flex items-center gap-2'>
+            <PrivacyPolicyDialog />
+            <IconPointFilled className='size-[0.75em]' />
+            <TermsOfServicesDialog />
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 }
