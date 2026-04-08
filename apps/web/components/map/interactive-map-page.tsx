@@ -62,20 +62,6 @@ export default function InteractiveMapPage() {
     <div className='relative w-full h-full'>
       <InteractiveMap ref={interactiveMapRef} />
 
-      {/* static hotlines pill (only when no overlay is active) */}
-      {!activeOverlay && (
-        <div
-          className={cn(
-            'absolute right-4 z-10 ',
-            isError || !location
-              ? 'bottom-4 md:bottom-4'
-              : 'bottom-20 md:bottom-4',
-          )}
-        >
-          <HotlinesAccordion />
-        </div>
-      )}
-
       {/* Top bar: search + controls in one row */}
       <div className='absolute top-0 left-0 right-0 flex items-start gap-4 pointer-events-none h-full'>
         {/* Search bar + affected panel share the left flex slot */}
@@ -108,6 +94,18 @@ export default function InteractiveMapPage() {
               longitude={location?.longitude ?? null}
             />
           )}
+
+          {/* static hotlines pill (only when no overlay is active) */}
+          <div
+            className={cn(
+              'absolute right-4 ',
+              isError || !location
+                ? 'bottom-4 md:bottom-4'
+                : 'bottom-20 md:bottom-4',
+            )}
+          >
+            <HotlinesAccordion />
+          </div>
         </div>
 
         {/* Map controls — fixed to right */}

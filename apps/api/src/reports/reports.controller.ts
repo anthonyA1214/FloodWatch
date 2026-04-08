@@ -192,8 +192,11 @@ export class ReportsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard, UserStatusGuard)
-  async deleteReport(@Param('id', ParseIntPipe) id: number) {
-    return await this.reportsService.deleteReport(id);
+  async deleteReport(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthRequest,
+  ) {
+    return await this.reportsService.deleteReport(id, req.user.id);
   }
 
   @Public()
