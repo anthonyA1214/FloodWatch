@@ -13,40 +13,52 @@ export class AppService {
   async search(searchQuery: SearchQueryInput) {
     const { severities, types, q } = searchQuery;
 
-    const pattern = `%${q}%`;
+    if (!q || q.trim() === '') {
+      return {
+        reports: [],
+        safety: [],
+      };
+    }
+    const pattern = `%${q?.trim()}%`;
 
-    const severityCondition =
-      severities && severities.length > 0
-        ? inArray(reports.severity, severities)
-        : undefined;
-
-    const typeCondition =
-      types && types.length > 0 ? inArray(safety.type, types) : undefined;
+    const hasSeverities = severities && severities.length > 0;
+    const hasTypes = types && types.length > 0;
 
     const [reportResults, safetyResults] = await Promise.all([
-      this.db
-        .select({
-          id: reports.id,
-          latitude: reports.latitude,
-          longitude: reports.longitude,
-          location: reports.location,
-          severity: reports.severity,
-        })
-        .from(reports)
-        .where(and(ilike(reports.location, pattern), severityCondition))
-        .limit(3),
+      hasSeverities
+        ? this.db
+            .select({
+              id: reports.id,
+              latitude: reports.latitude,
+              longitude: reports.longitude,
+              location: reports.location,
+              severity: reports.severity,
+            })
+            .from(reports)
+            .where(
+              and(
+                ilike(reports.location, pattern),
+                inArray(reports.severity, severities),
+              ),
+            )
+            .limit(3)
+        : Promise.resolve([]),
 
-      this.db
-        .select({
-          id: safety.id,
-          latitude: safety.latitude,
-          longitude: safety.longitude,
-          location: safety.location,
-          type: safety.type,
-        })
-        .from(safety)
-        .where(and(ilike(safety.location, pattern), typeCondition))
-        .limit(3),
+      hasTypes
+        ? this.db
+            .select({
+              id: safety.id,
+              latitude: safety.latitude,
+              longitude: safety.longitude,
+              location: safety.location,
+              type: safety.type,
+            })
+            .from(safety)
+            .where(
+              and(ilike(safety.location, pattern), inArray(safety.type, types)),
+            )
+            .limit(3)
+        : Promise.resolve([]),
     ]);
 
     return {

@@ -34,6 +34,7 @@ export default function CommunityFeedRight() {
   return (
     <div
       ref={scrollRef}
+      id='community-feed-scroll'
       className='flex flex-col flex-1 min-h-0 h-full gap-4 overflow-y-auto'
     >
       {isLoading || isValidating ? (
