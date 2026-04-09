@@ -52,7 +52,7 @@ export default function SafetyLocationsCard({
 
       {/* availability */}
       {availability && (
-        <div className='flex items-center text-xs gap-2 text-gray-600'>
+        <div className='flex items-center text-xs gap-2 opacity-50'>
           <IconCircleCheck className='size-[1.5em]! shrink-0' />
           {availability}
         </div>
