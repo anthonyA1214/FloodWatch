@@ -39,9 +39,6 @@ import { BullModule } from '@nestjs/bullmq';
         },
       }),
     }),
-    BullModule.registerQueue({
-      name: 'notifications',
-    }),
     ThrottlerModule.forRoot([
       {
         name: 'global',

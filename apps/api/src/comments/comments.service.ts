@@ -1,4 +1,5 @@
 import { el } from '@faker-js/faker';
+import { InjectQueue } from '@nestjs/bullmq';
 import {
   BadRequestException,
   ForbiddenException,
@@ -14,6 +15,7 @@ import {
   ReportedCommentQueryInput,
   UpdateCommentDto,
 } from '@repo/schemas';
+import { Queue } from 'bullmq';
 import { count } from 'drizzle-orm';
 import { ilike } from 'drizzle-orm';
 import { and, desc, eq, lt, or, sql } from 'drizzle-orm';
@@ -31,7 +33,12 @@ import {
 } from 'src/drizzle/schemas';
 import { type DrizzleDB } from 'src/drizzle/types/drizzle';
 import { ImagesService } from 'src/images/images.service';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { notificationMessageMap } from 'src/notifications/notifications-messages';
+import {
+  NOTIFICATION_JOBS,
+  NotificationJobData,
+  NOTIFICATIONS_QUEUE,
+} from 'src/notifications/notifications.types';
 
 @Injectable()
 export class CommentsService {
@@ -39,7 +46,7 @@ export class CommentsService {
     @Inject(DRIZZLE) private db: DrizzleDB,
     private imagesService: ImagesService,
     private cloudinaryService: CloudinaryService,
-    private notificationsService: NotificationsService,
+    @InjectQueue(NOTIFICATIONS_QUEUE) private notificationsQueue: Queue,
   ) {}
 
   async getComments(
@@ -301,6 +308,25 @@ export class CommentsService {
       .values({ commentId, status: 'pending' })
       .onConflictDoNothing();
 
+    const recipients = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.role, 'admin'));
+
+    await this.notificationsQueue.addBulk(
+      recipients.map((recipient) => ({
+        name: NOTIFICATION_JOBS.SEND,
+        data: {
+          recipientId: recipient.id,
+          actorId: userId,
+          type: 'user_reported_comment',
+          message: notificationMessageMap['user_reported_comment'],
+          commentId,
+          reportId: report.id,
+        } satisfies NotificationJobData,
+      })),
+    );
+
     return report;
   }
 
@@ -554,15 +580,16 @@ export class CommentsService {
         })
         .where(eq(commentReportReviews.commentId, commentId));
 
-      await this.notificationsService.create({
+      await this.db.delete(comments).where(eq(comments.id, commentId));
+
+      await this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
         recipientId: comment.userId,
         actorId: reviewerId,
         type: 'admin_warning_comment',
-        message:
-          'One of your comments has been reviewed by our moderation team and flagged as a violation of our community guidelines. This is a warning. Repeated violations may result in further action on your account.',
+        message: notificationMessageMap['admin_warning_comment'],
         commentId,
         reportId: report.id,
-      });
+      } satisfies NotificationJobData);
     } else if (action === 'block') {
       await this.db
         .update(commentReportReviews)
