@@ -36,7 +36,7 @@ export default function WeatherAccordion({
   if (!latitude && !longitude) return null;
   if (isLoading || !weather) {
     return (
-      <div className='bg-white/80 pointer-events-auto rounded-2xl shadow-lg border px-4 py-3'>
+      <div className='bg-white/80 pointer-events-auto rounded-2xl shadow-lg border px-4 py-3 w-full'>
         <div className='flex items-center justify-between w-full'>
           <div className='flex gap-2 items-center'>
             <Skeleton className='w-9 h-9 rounded-full' />
@@ -55,7 +55,7 @@ export default function WeatherAccordion({
   }
 
   return (
-    <div className='bg-white/80 pointer-events-auto overflow-hidden rounded-2xl shadow-lg border'>
+    <div className='bg-white/80 pointer-events-auto overflow-hidden rounded-2xl  shadow-lg border w-full'>
       <Accordion type='single' collapsible>
         <AccordionItem value='item-1'>
           <AccordionTrigger className='flex items-center px-4 py-3 hover:no-underline! shadow-2xs rounded-2xl'>
