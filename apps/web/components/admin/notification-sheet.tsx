@@ -94,9 +94,12 @@ export default function NotificationSheet({
   const triggerChild = React.useMemo(
     () =>
       React.isValidElement(children)
-        ? React.cloneElement(children as React.ReactElement, {
-            'data-open': open ? 'true' : 'false',
-          })
+        ? React.cloneElement(
+            children as React.ReactElement<{ 'data-open'?: string }>,
+            {
+              'data-open': open ? 'true' : 'false',
+            },
+          )
         : children,
     [children, open],
   );
