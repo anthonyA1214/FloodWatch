@@ -1,106 +1,97 @@
 'use client';
 
-import {
-  IconAlertTriangle,
-  IconBellRinging,
-  IconWaveSine,
-  IconMap,
-  IconSearch,
-  IconSpeakerphone,
-  IconHome,
-  Icon,
-} from '@tabler/icons-react';
-
-// Reusable interface for TypeScript to handle props safely
-interface NotificationItemProps {
-  icon: Icon;
-  title: string;
-  message: string;
-  color?: string;
-}
-
-// Pixel-perfect Notification Item matching your image layout
-const NotificationItem = ({
-  icon: Icon,
-  title,
-  message,
-  color = 'text-black',
-}: NotificationItemProps) => (
-  <div className='flex gap-4 mb-8 items-start'>
-    <div className={`mt-1 shrink-0 ${color}`}>
-      {/* Icon size 32 matches the visual weight of your reference */}
-      <Icon size={32} stroke={2} />
-    </div>
-    <div className='flex flex-col gap-1'>
-      <h4 className='text-[14px] leading-tight text-gray-800'>
-        <span className='font-bold'>{title}:</span>{' '}
-        <span className='font-normal text-gray-500'>{message}</span>
-      </h4>
-    </div>
-  </div>
-);
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '../ui/button';
+import NotificationOverlayAllTab from '@/components/shared/notification-overlay-all-tab';
+import NotificationOverlayUnreadTab from '@/components/shared/notification-overlay-unread-tab';
+import { useNotificationsUnreadCount } from '@/hooks/use-notifications-unread-count';
+import { apiFetchClient } from '@/lib/api-fetch-client';
+import { useNotifications } from '@/hooks/use-notifications';
+import { toast } from 'sonner';
 
 export default function NotificationOverlay() {
+  const { unreadCount } = useNotificationsUnreadCount();
+  const { mutateNotifications } = useNotifications();
+  const { mutateUnreadCount } = useNotificationsUnreadCount();
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await apiFetchClient('/me/notifications/read-all', {
+        method: 'PATCH',
+      });
+
+      await Promise.all([
+        mutateNotifications((prev) =>
+          prev?.map((notification) => ({ ...notification, isRead: true })),
+        ),
+        mutateUnreadCount((prev: number) => (prev ?? 1) - 1, {
+          revalidate: false,
+        }),
+      ]);
+      mutateUnreadCount(); // background revalidate to sync with server
+    } catch {
+      toast.error(
+        'Failed to mark all notifications as read. Please try again.',
+      );
+    }
+  };
+
   return (
-    <div className='flex flex-col bg-white ps-4 py-4 w-screen md:w-[400px] md:h-[80vh] rounded-xl shadow-md pointer-events-auto'>
-      <h3 className='font-poppins font-semibold pb-4'>Notifications</h3>
-
-      <div className='flex-1 overflow-y-auto pr-4'>
-        <div className='flex flex-col'>
-          {/* Section: New */}
-          <h2 className='font-poppins font-bold text-lg mb-6'>New</h2>
-          <NotificationItem
-            icon={IconAlertTriangle}
-            title='Flood Alert'
-            message='A danger-level flood has been detected 1.2 km from your area. Stay alert and prepare to move to higher ground.'
-            color='text-red-600'
-          />
-          <NotificationItem
-            icon={IconBellRinging}
-            title='Rising Water Levels'
-            message='Your location is now within a monitored danger zone. Stay updated for further instructions.'
-            color='text-orange-400'
-          />
-
-          {/* Section: Earlier */}
-          <h2 className='font-poppins font-bold text-lg mb-6 mt-2'>Earlier</h2>
-          <NotificationItem
-            icon={IconWaveSine}
-            title='Flood Severity Update'
-            message='Water levels in your zone have reached Level 3 – High Risk. Avoid low-lying roads and riversides.'
-            color='text-blue-600'
-          />
-          <NotificationItem
-            icon={IconMap}
-            title='Area Advisory'
-            message='Barangay San Isidro and nearby communities are now marked as Affected Areas due to ongoing flooding.'
-            color='text-red-500'
-          />
-          <NotificationItem
-            icon={IconSearch}
-            title='Flood Impact Update'
-            message='3 new streets reported blocked due to high water. Check the map for reroutes.'
-            color='text-[#5C2D1B]'
-          />
-
-          {/* Section: Yesterday */}
-          <h2 className='font-poppins font-bold text-lg mb-6 mt-2'>
-            Yesterday
-          </h2>
-          <NotificationItem
-            icon={IconSpeakerphone}
-            title='Critical Zone Identified'
-            message='Zone 4B is currently the most heavily affected. Avoid all travel to this area.'
-            color='text-black'
-          />
-          <NotificationItem
-            icon={IconHome}
-            title='Safe Shelter Available'
-            message='The nearest evacuation center at Lagro Community Hall is now open and ready to receive residents.'
-            color='text-green-700'
-          />
-        </div>
+    <div className='flex flex-col gap-2 bg-white w-screen md:w-[400px] md:h-[80vh] rounded-xl shadow-md pointer-events-auto'>
+      <div className='flex items-center justify-between pt-4 px-4 shrink-0'>
+        <h3 className='font-poppins font-semibold'>Notifications</h3>
+        <Button
+          variant='outline'
+          size='xs'
+          className='font-poppins flex items-center gap-2 border-[#0066CC] bg-white text-[#0066CC] hover:bg-[#0066CC10] hover:text-[#0066CC]'
+          onClick={handleMarkAllAsRead}
+        >
+          <span>MARK ALL AS READ</span>
+        </Button>
       </div>
+
+      <Tabs defaultValue='all' className='flex-1 flex flex-col min-h-0'>
+        <div className='w-full border-b shrink-0'>
+          <TabsList className='font-poppins bg-transparent gap-2 text-xs mb-2 px-4'>
+            <TabsTrigger
+              value='all'
+              className='border border-gray-300 rounded-full
+                data-[state=active]:text-white
+                data-[state=active]:bg-[#0066CC]
+                data-[state=active]:border-[#0066CC]'
+            >
+              ALL
+            </TabsTrigger>
+            <TabsTrigger
+              value='unread'
+              className='border border-gray-300 rounded-full
+                data-[state=active]:text-white
+                data-[state=active]:bg-[#0066CC]
+                data-[state=active]:border-[#0066CC]'
+            >
+              UNREAD
+              {unreadCount > 0 && (
+                <div className='text-[10px] text-white bg-[#FB2C36] size-5 rounded-full flex items-center justify-center'>
+                  {unreadCount}
+                </div>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent
+          value='all'
+          className='flex-1 min-h-0 overflow-y-auto px-4 pb-4'
+        >
+          <NotificationOverlayAllTab />
+        </TabsContent>
+        <TabsContent
+          value='unread'
+          className='flex-1 min-h-0 overflow-y-auto px-4 pb-4'
+        >
+          <NotificationOverlayUnreadTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

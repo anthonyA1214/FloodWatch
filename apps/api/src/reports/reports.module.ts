@@ -6,6 +6,7 @@ import { ImagesModule } from 'src/images/images.module';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { GeocoderModule } from 'src/geocoder/geocoder.module';
 import { CommentsModule } from 'src/comments/comments.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CommentsModule } from 'src/comments/comments.module';
     CloudinaryModule,
     GeocoderModule,
     CommentsModule,
+    NotificationsModule,
   ],
   providers: [ReportsService],
   exports: [ReportsService],

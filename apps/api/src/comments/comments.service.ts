@@ -561,6 +561,7 @@ export class CommentsService {
         message:
           'One of your comments has been reviewed by our moderation team and flagged as a violation of our community guidelines. This is a warning. Repeated violations may result in further action on your account.',
         commentId,
+        reportId: report.id,
       });
     } else if (action === 'block') {
       await this.db

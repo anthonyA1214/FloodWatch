@@ -18,6 +18,8 @@ import { Button } from '../ui/button';
 import { Spinner } from '../ui/spinner';
 import { apiFetchClient } from '@/lib/api-fetch-client';
 import { toast } from 'sonner';
+import { useSWRConfig } from 'swr';
+import { SWR_KEYS } from '@/lib/constants/swr-keys';
 
 const REASONS = [
   {
@@ -56,6 +58,7 @@ export default function ReportCommentDialog({
   onClose: () => void;
   commentId: number | null;
 }) {
+  const { mutate } = useSWRConfig();
   const [step, setStep] = useState<
     'select-reason' | 'provide-details' | 'success'
   >('select-reason');
@@ -94,6 +97,9 @@ export default function ReportCommentDialog({
         }),
       });
       setStep('success');
+      mutate(
+        (key) => Array.isArray(key) && key[0] === SWR_KEYS.reportedComments,
+      );
     } catch (error) {
       if (error instanceof Response) {
         if (error.status === 400) {
