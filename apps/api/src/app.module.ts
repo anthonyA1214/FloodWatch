@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { DrizzleModule } from './drizzle/drizzle.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from './mailer/mailer.module';
@@ -23,10 +23,25 @@ import { AppController } from './app.controller';
 import { EventsModule } from './events/events.module';
 import { AppService } from './app.service';
 import { NotificationsModule } from './notifications/notifications.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.getOrThrow('REDIS_HOST'),
+          port: configService.getOrThrow('REDIS_PORT'),
+          username: configService.getOrThrow('REDIS_USERNAME'),
+          password: configService.getOrThrow('REDIS_PASSWORD'),
+        },
+      }),
+    }),
+    BullModule.registerQueue({
+      name: 'notifications',
+    }),
     ThrottlerModule.forRoot([
       {
         name: 'global',

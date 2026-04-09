@@ -2,6 +2,9 @@ import Image from 'next/image';
 import { Separator } from '@radix-ui/react-separator';
 import { FacebookIcon, GitHubIcon } from '@/components/shared/icons';
 import Link from 'next/link';
+import PrivacyPolicyDialog from './privacy-policy-dialog';
+import TermsOfServicesDialog from './terms-of-services-dialog';
+import { IconPointFilled } from '@tabler/icons-react';
 
 const quickLinks = [
   { label: 'Home', href: '#' },
@@ -136,8 +139,13 @@ export default function Footer() {
 
         <Separator className='my-10 bg-white/30 h-px' />
 
-        <div className='flex justify-between items-center text-white'>
-          &copy; 2026 AidLink Tech. All rights reserved.
+        <div className='flex sm:justify-between sm:flex-row flex-col gap-4 items-center text-white'>
+          <span> &copy; 2026 AidLink Tech. All rights reserved. </span>
+          <div className='flex items-center gap-2'>
+            <PrivacyPolicyDialog />
+            <IconPointFilled className='size-[0.75em]' />
+            <TermsOfServicesDialog />
+          </div>
         </div>
       </div>
     </footer>

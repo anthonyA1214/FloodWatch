@@ -84,16 +84,18 @@ export default function SearchBar() {
           <IconSearch />
         </InputGroupAddon>
 
-        {activeOverlay && (
-          <InputGroupAddon align='inline-end'>
-            <button
-              className='mr-2 opacity-70 hover:opacity-100 transition'
-              onClick={handleClose}
-            >
-              <IconX className='size-[1.5em]! shrink-0' />
-            </button>
-          </InputGroupAddon>
-        )}
+        {activeOverlay &&
+          activeOverlay.type !== 'notification' &&
+          activeOverlay.type !== 'profile' && (
+            <InputGroupAddon align='inline-end'>
+              <button
+                className='mr-2 opacity-70 hover:opacity-100 transition'
+                onClick={handleClose}
+              >
+                <IconX className='size-[1.5em]! shrink-0' />
+              </button>
+            </InputGroupAddon>
+          )}
       </InputGroup>
 
       {/*suggestions*/}

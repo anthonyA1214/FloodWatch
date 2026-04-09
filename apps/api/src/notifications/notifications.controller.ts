@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -22,34 +23,45 @@ export class NotificationsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, UserStatusGuard)
-  findAll(@Request() req: AuthRequest) {
-    return this.notificationsService.findAll(req.user.id);
+  async findAll(@Request() req: AuthRequest) {
+    return await this.notificationsService.findAll(req.user.id);
   }
 
   // GET /me/notifications/unread-count
   @Get('unread-count')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, UserStatusGuard)
-  unreadCount(@Request() req: AuthRequest) {
-    return this.notificationsService.unreadCount(req.user.id);
+  async unreadCount(@Request() req: AuthRequest) {
+    return await this.notificationsService.unreadCount(req.user.id);
   }
 
-  // PATCH /me/notifications/read-all  👈 must be ABOVE :id route or NestJS reads "read-all" as an :id
+  // PATCH /me/notifications/read-all
   @Patch('read-all')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard, UserStatusGuard)
-  markAllRead(@Request() req: AuthRequest) {
-    return this.notificationsService.markAllRead(req.user.id);
+  async markAllRead(@Request() req: AuthRequest) {
+    return await this.notificationsService.markAllRead(req.user.id);
   }
 
   // PATCH /me/notifications/:id/read
   @Patch(':id/read')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard, UserStatusGuard)
-  markOneRead(
+  async markOneRead(
     @Param('id', ParseIntPipe) id: number,
     @Request() req: AuthRequest,
   ) {
-    return this.notificationsService.markOneRead(id, req.user.id);
+    return await this.notificationsService.markOneRead(id, req.user.id);
+  }
+
+  // DELETE /me/notifications/:id
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  async deleteOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthRequest,
+  ) {
+    return await this.notificationsService.deleteOne(id, req.user.id);
   }
 }

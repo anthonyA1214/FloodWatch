@@ -11,7 +11,7 @@ export default function CommunityFeedEmpty() {
   return (
     <Empty>
       <EmptyHeader>
-        <EmptyMedia variant='icon' className='rounded-full'>
+        <EmptyMedia variant='icon'>
           <IconUsers />
         </EmptyMedia>
         <EmptyTitle>No report selected</EmptyTitle>
