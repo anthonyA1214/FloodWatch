@@ -360,6 +360,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
             maxWidth='none'
             onClose={closePopup}
             closeOnClick={false}
+            className='z-1000'
           >
             <AffectedLocationPopup
               onClose={closePopup}
