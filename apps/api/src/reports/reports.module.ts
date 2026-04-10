@@ -7,6 +7,7 @@ import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { GeocoderModule } from 'src/geocoder/geocoder.module';
 import { CommentsModule } from 'src/comments/comments.module';
 import { NotificationsModule } from 'src/notifications/notifications.module';
+import { MailerModule } from 'src/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { NotificationsModule } from 'src/notifications/notifications.module';
     GeocoderModule,
     CommentsModule,
     NotificationsModule,
+    MailerModule,
   ],
   providers: [ReportsService],
   exports: [ReportsService],

@@ -25,6 +25,13 @@ import {
 } from 'src/notifications/notifications.types';
 import { Queue } from 'bullmq';
 import { notificationMessageMap } from 'src/notifications/notifications-messages';
+import { MailerService } from 'src/mailer/mailer.service';
+
+interface UploadedImageFile {
+  buffer: Buffer;
+  mimetype: string;
+  originalname: string;
+}
 
 @Injectable()
 export class ReportsService {
@@ -33,6 +40,7 @@ export class ReportsService {
     private imagesService: ImagesService,
     private cloudinaryService: CloudinaryService,
     private geocoderService: GeocoderService,
+    private mailerService: MailerService,
     @InjectQueue(NOTIFICATIONS_QUEUE) private notificationsQueue: Queue,
   ) {}
 
@@ -256,7 +264,7 @@ export class ReportsService {
   async createReport(
     userId: number,
     reportFloodAlertDto: ReportFloodAlertInput,
-    image: Express.Multer.File,
+    image: UploadedImageFile,
   ) {
     const { latitude, longitude, severity, description, range } =
       reportFloodAlertDto;
@@ -269,7 +277,7 @@ export class ReportsService {
         image.buffer,
       );
 
-      const normalizedFile: Express.Multer.File = {
+      const normalizedFile: UploadedImageFile = {
         ...image,
         buffer,
         mimetype,
@@ -280,7 +288,7 @@ export class ReportsService {
       };
 
       const uploaded = await this.cloudinaryService.uploadImage(
-        normalizedFile,
+        normalizedFile as any,
         'reports',
       );
 
@@ -305,13 +313,18 @@ export class ReportsService {
       location: displayName,
     });
 
+    await this.sendFloodAlertEmails({
+      location: displayName,
+      severity,
+    });
+
     return { message: 'Report created successfully' };
   }
 
   async createReportAdmin(
     userId: number,
     floodAlertDto: CreateFloodAlertInput,
-    image: Express.Multer.File,
+    image: UploadedImageFile,
   ) {
     const { latitude, longitude, locationName, severity, description, range } =
       floodAlertDto;
@@ -324,7 +337,7 @@ export class ReportsService {
         image.buffer,
       );
 
-      const normalizedFile: Express.Multer.File = {
+      const normalizedFile: UploadedImageFile = {
         ...image,
         buffer,
         mimetype,
@@ -335,7 +348,7 @@ export class ReportsService {
       };
 
       const uploaded = await this.cloudinaryService.uploadImage(
-        normalizedFile,
+        normalizedFile as any,
         'reports',
       );
 
@@ -388,8 +401,13 @@ export class ReportsService {
         message: notificationMessageMap['admin_self_reported_flood'],
         reportId: report.id,
       } satisfies NotificationJobData),
-    ]).catch((err) => {
+    ]).catch((err: unknown) => {
       console.error('Failed to send notifications:', err);
+    });
+
+    await this.sendFloodAlertEmails({
+      location: locationName,
+      severity,
     });
 
     return { message: 'Report created and verified successfully' };
@@ -431,9 +449,24 @@ export class ReportsService {
         message: notificationMessageMap['admin_self_verified_report'],
         reportId,
       } satisfies NotificationJobData),
-    ]).catch((err) => {
+    ]).catch((err: unknown) => {
       console.error('Failed to send notifications:', err);
     });
+
+    if (report.userId) {
+      const [reporter] = await this.db
+        .select({ email: users.email })
+        .from(users)
+        .where(eq(users.id, report.userId))
+        .limit(1);
+
+      if (reporter?.email && report.location && report.severity) {
+        await this.mailerService.sendReportVerifiedEmail(reporter.email, {
+          location: report.location,
+          severity: report.severity,
+        });
+      }
+    }
 
     return { message: 'Report verified successfully' };
   }
@@ -462,14 +495,12 @@ export class ReportsService {
         actorId: userId,
         type: 'admin_deleted_report',
         message: notificationMessageMap['admin_deleted_report'],
-        reportId: id,
       } satisfies NotificationJobData),
       this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
         recipientId: userId,
         actorId: userId,
         type: 'admin_self_deleted_report',
         message: notificationMessageMap['admin_self_deleted_report'],
-        reportId: id,
       } satisfies NotificationJobData),
     ]).catch((err) => {
       console.error('Failed to send notifications:', err);
@@ -616,6 +647,87 @@ export class ReportsService {
       severity: item.severity,
       reports: Number(item.reports),
     }));
+  }
+
+  private async sendFloodAlertEmails(args: {
+    location: string;
+    severity: string;
+  }) {
+    const { location, severity } = args;
+
+    const recipients = await this.db
+      .select({
+        id: users.id,
+        email: users.email,
+        role: users.role,
+        status: users.status,
+        homeAddress: profileInfo.homeAddress,
+      })
+      .from(users)
+      .leftJoin(profileInfo, eq(users.id, profileInfo.userId));
+
+    const userRecipients = recipients.filter(
+      (recipient) =>
+        recipient.email &&
+        recipient.role === 'user' &&
+        recipient.status === 'active',
+    );
+
+    const adminRecipients = recipients.filter(
+      (recipient) =>
+        recipient.email &&
+        recipient.role === 'admin' &&
+        recipient.status === 'active',
+    );
+
+    const nearRecipients: { email: string }[] = [];
+    const genericRecipients: { email: string }[] = [];
+
+    for (const recipient of userRecipients) {
+      const homeAddress = recipient.homeAddress ?? '';
+
+      if (this.isHomeAddressMatchingLocation(homeAddress, location)) {
+        nearRecipients.push({ email: recipient.email });
+      } else {
+        genericRecipients.push({ email: recipient.email });
+      }
+    }
+
+    const nearTasks = nearRecipients.map(({ email }) =>
+      this.mailerService.sendFloodNearYouEmail(email, {
+        location,
+        severity,
+      }),
+    );
+
+    const genericTasks = genericRecipients.map(({ email }) =>
+      this.mailerService.sendGenericFloodAlertEmail(email, {
+        location,
+        severity,
+      }),
+    );
+
+    await Promise.all(nearTasks.concat(genericTasks));
+
+    for (const { email } of adminRecipients) {
+      await this.mailerService.sendAdminFloodAlertEmail(email, {
+        location,
+        severity,
+      });
+    }
+  }
+
+  private isHomeAddressMatchingLocation(homeAddress: string, location: string) {
+    const trimmedHome = homeAddress.trim().toLowerCase();
+    if (!trimmedHome) return false;
+
+    const parts = location
+      .toLowerCase()
+      .split(',')
+      .map((part) => part.trim())
+      .filter((part) => part.length >= 3);
+
+    return parts.some((part) => trimmedHome.includes(part));
   }
 
   async getRecentReports() {
