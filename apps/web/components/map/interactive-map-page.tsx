@@ -88,13 +88,6 @@ export default function InteractiveMapPage() {
             )}
           </div>
 
-          {!isError && location && (
-            <WeatherOverlay
-              latitude={location?.latitude ?? null}
-              longitude={location?.longitude ?? null}
-            />
-          )}
-
           {/* static hotlines pill (only when no overlay is active) */}
           <div
             className={cn(
@@ -180,6 +173,13 @@ export default function InteractiveMapPage() {
           <GoogleLinkToastHandler />
         </Suspense>
       </div>
+
+      {!isError && location && (
+        <WeatherOverlay
+          latitude={location?.latitude ?? null}
+          longitude={location?.longitude ?? null}
+        />
+      )}
     </div>
   );
 }

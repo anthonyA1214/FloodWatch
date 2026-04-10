@@ -22,7 +22,7 @@ export default function WeatherOverlay({
     return null;
   }
 
-  if (activeOverlay && isMobile) return null; // Don't show weather if any other overlay is active
+  if (activeOverlay && isMobile) return null;
 
   if (isMobile) {
     return (
@@ -36,7 +36,7 @@ export default function WeatherOverlay({
   }
 
   return (
-    <div className='absolute bottom-4 left-4 max-w-xs w-full flex flex-col'>
+    <div className='absolute bottom-4 left-4 w-64 lg:w-72 xl:w-90 flex flex-col'>
       <WeatherAccordion
         latitude={latitude ?? null}
         longitude={longitude ?? null}
