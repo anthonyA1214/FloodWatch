@@ -52,7 +52,7 @@ export default function AffectedLocationsCard({
       {description && <p className='text-sm line-clamp-2'>{description}</p>}
 
       {/* reported at */}
-      <div className='flex items-center text-xs gap-2 text-gray-600'>
+      <div className='flex items-center text-xs gap-2 opacity-50'>
         <IconClock className='w-[1.5em]! h-[1.5em]!' />
         {formatDistanceToNow(new Date(reportedAt), { addSuffix: true })}
       </div>

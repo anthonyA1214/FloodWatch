@@ -17,7 +17,14 @@ import { reportConfirmations } from 'src/drizzle/schemas/report-confirmations.sc
 import type { DrizzleDB } from 'src/drizzle/types/drizzle';
 import { GeocoderService } from 'src/geocoder/geocoder.service';
 import { ImagesService } from 'src/images/images.service';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import {
+  NOTIFICATION_JOBS,
+  NotificationJobData,
+  NOTIFICATIONS_QUEUE,
+} from 'src/notifications/notifications.types';
+import { Queue } from 'bullmq';
+import { notificationMessageMap } from 'src/notifications/notifications-messages';
 
 @Injectable()
 export class ReportsService {
@@ -26,7 +33,7 @@ export class ReportsService {
     private imagesService: ImagesService,
     private cloudinaryService: CloudinaryService,
     private geocoderService: GeocoderService,
-    private notificationsService: NotificationsService,
+    @InjectQueue(NOTIFICATIONS_QUEUE) private notificationsQueue: Queue,
   ) {}
 
   async getReportMapPins() {
@@ -355,16 +362,32 @@ export class ReportsService {
       })
       .returning();
 
-    // TODO: optimize by sending notifications in background (e.g. queue) instead of awaiting here
+    const recipients = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.role, 'user'));
 
     await Promise.all([
-      this.notificationsService.create({
+      this.notificationsQueue.addBulk(
+        recipients.map((recipient) => ({
+          name: NOTIFICATION_JOBS.SEND,
+          data: {
+            recipientId: recipient.id,
+            actorId: userId,
+            type: 'admin_reported_flood',
+            message: notificationMessageMap['admin_reported_flood'],
+            reportId: report.id,
+          } satisfies NotificationJobData,
+        })),
+      ),
+
+      this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
         recipientId: userId,
         actorId: userId,
         type: 'admin_self_reported_flood',
-        message: 'You have successfully reported a flood alert.',
+        message: notificationMessageMap['admin_self_reported_flood'],
         reportId: report.id,
-      }),
+      } satisfies NotificationJobData),
     ]).catch((err) => {
       console.error('Failed to send notifications:', err);
     });
@@ -394,20 +417,20 @@ export class ReportsService {
       .where(eq(reports.id, reportId));
 
     await Promise.all([
-      this.notificationsService.create({
+      this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
         recipientId: report.userId,
         actorId: userId,
         type: 'admin_verified_report',
-        message: 'An admin has verified your flood report.',
+        message: notificationMessageMap['admin_verified_report'],
         reportId,
-      }),
-      this.notificationsService.create({
+      } satisfies NotificationJobData),
+      this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
         recipientId: userId,
         actorId: userId,
         type: 'admin_self_verified_report',
-        message: 'You have successfully verified a flood report.',
+        message: notificationMessageMap['admin_self_verified_report'],
         reportId,
-      }),
+      } satisfies NotificationJobData),
     ]).catch((err) => {
       console.error('Failed to send notifications:', err);
     });
@@ -434,18 +457,20 @@ export class ReportsService {
     await this.db.delete(reports).where(eq(reports.id, id));
 
     await Promise.all([
-      this.notificationsService.create({
+      this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
         recipientId: report.userId,
         actorId: userId,
         type: 'admin_deleted_report',
-        message: 'An admin has deleted your flood report.',
-      }),
-      this.notificationsService.create({
+        message: notificationMessageMap['admin_deleted_report'],
+        reportId: id,
+      } satisfies NotificationJobData),
+      this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
         recipientId: userId,
         actorId: userId,
         type: 'admin_self_deleted_report',
-        message: 'You have successfully deleted a flood report.',
-      }),
+        message: notificationMessageMap['admin_self_deleted_report'],
+        reportId: id,
+      } satisfies NotificationJobData),
     ]).catch((err) => {
       console.error('Failed to send notifications:', err);
     });

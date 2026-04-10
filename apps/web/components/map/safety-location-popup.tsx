@@ -15,6 +15,7 @@ import SafetyLocationPopupSkeleton from './skeletons/safety-location-popup-skele
 import { useDirections } from '@/hooks/use-directions';
 import { useMapRouting } from '@/contexts/map-routing-context';
 import { Spinner } from '../ui/spinner';
+import { useMapPopup } from '@/contexts/map-popup-context';
 
 export default function SafetyLocationPopup({
   onClose,
@@ -32,6 +33,7 @@ export default function SafetyLocationPopup({
   const { safetyDetail, isLoading } = useSafetyLocationDetail(safetyId);
   const { getDirections } = useDirections();
   const { isLoadingRoute } = useMapRouting();
+  const { closePopup } = useMapPopup();
 
   if (isLoading || !safetyDetail) return <SafetyLocationPopupSkeleton />;
 
@@ -140,7 +142,9 @@ export default function SafetyLocationPopup({
           <button
             className='flex items-center gap-1.5 w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 duration-200 px-4 py-2.5 rounded-lg justify-center disabled:opacity-50 disabled:cursor-not-allowed'
             disabled={isLoadingRoute}
-            onClick={() => getDirections({ latitude, longitude })}
+            onClick={() =>
+              getDirections({ latitude, longitude }).then(() => closePopup())
+            }
           >
             {isLoadingRoute ? (
               <Spinner />

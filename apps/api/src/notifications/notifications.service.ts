@@ -73,4 +73,12 @@ export class NotificationsService {
       .returning();
     return created;
   }
+
+  async createMany(dtos: (typeof notifications.$inferInsert)[]) {
+    const created = await this.db
+      .insert(notifications)
+      .values(dtos)
+      .returning();
+    return created;
+  }
 }
