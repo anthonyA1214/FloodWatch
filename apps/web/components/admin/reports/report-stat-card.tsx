@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 type UserStatCardProps = {
   label: string;
   count: number;
-  status: 'total' | 'verified' | 'unverified';
+  status: 'total' | 'verified' | 'unverified' | 'resolved';
   isActive: boolean;
   onClick: () => void;
 };
@@ -24,18 +24,21 @@ export default function ReportStatCard({
     total: IconReportAnalytics,
     verified: IconCircleCheck,
     unverified: IconExclamationCircle,
+    resolved: IconCircleCheck,
   };
 
   const statusColorMap = {
     total: '#0066CC',
     verified: '#00D69B',
     unverified: '#F0B204',
+    resolved: '#6B7280',
   };
 
   const statusTextMap = {
     total: 'Showing all reports',
     verified: 'Filtered by verified reports',
     unverified: 'Filtered by unverified reports',
+    resolved: 'Filtered by resolved reports',
   };
 
   const Icon = iconMap[status];
