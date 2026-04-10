@@ -240,10 +240,10 @@ export default function ReportFloodAlertDialog() {
           <div className='flex flex-col p-4 gap-4'>
             <div className='flex items-center justify-between'>
               <span className='font-poppins text-sm font-medium text-gray-600'>
-                PIN LOCATION ON MAP
+                LOCATION
               </span>
               <button
-                className='font-poppins text-xs flex gap-2 border px-3 py-1.5 rounded-lg items-center text-gray-600 hover:bg-gray-100'
+                className='font-poppins text-[12px]  flex gap-2 border px-3 py-1.5 rounded-lg items-center text-gray-600 hover:bg-gray-100'
                 onClick={handleUseCurrentLocation}
               >
                 {loadingLocation ? (
@@ -253,8 +253,14 @@ export default function ReportFloodAlertDialog() {
                   </>
                 ) : (
                   <>
-                    <IconCurrentLocation className='w-[1.5em]! h-[1.5em]!' />
-                    <span>USE MY CURRENT LOCATION</span>
+                    <IconCurrentLocation className='w-[1.25em]! h-[1.25em]! sm:w-[1.5em]! sm:h-[1.5em]!' />
+                    {/* Mobile: shorter label, Desktop: full label */}
+                    <span className='whitespace-nowrap sm:hidden'>
+                      CURRENT LOCATION
+                    </span>
+                    <span className='whitespace-nowrap hidden sm:inline'>
+                      USE MY CURRENT LOCATION
+                    </span>
                   </>
                 )}
               </button>
