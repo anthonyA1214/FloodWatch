@@ -82,7 +82,7 @@ export default function SideNav() {
               </div>
 
               <NotificationSheet>
-                <SidebarMenuButton className='text-base relative z-10 hover:bg-transparent active:bg-transparent mt-4 w-full text-muted-foreground data-[open=true]:text-foreground'>
+                <SidebarMenuButton className='text-base relative z-10 hover:bg-transparent active:bg-transparent mt-4 w-full text-muted-foreground data-[open=true]:text-primary'>
                   <div className='flex items-center gap-4 py-4 pl-4 pr-2 transition-colors duration-200'>
                     <span className='relative inline-flex items-center justify-center'>
                       <IconBell className='w-[1.5em]! h-[1.5em]!' aria-hidden />
