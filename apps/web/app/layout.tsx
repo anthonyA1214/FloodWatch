@@ -17,6 +17,12 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang='en'>
+      <head>
+        <meta
+          name='viewport'
+          content='width=device-width, initial-scale=1, interactive-widget=resizes-content'
+        />
+      </head>
       <body
         className={`${inter.className} ${poppins.variable} bg-[#EAEAEA] antialiased min-h-screen`}
         suppressHydrationWarning
