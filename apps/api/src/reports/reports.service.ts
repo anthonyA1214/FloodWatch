@@ -495,14 +495,12 @@ export class ReportsService {
         actorId: userId,
         type: 'admin_deleted_report',
         message: notificationMessageMap['admin_deleted_report'],
-        reportId: id,
       } satisfies NotificationJobData),
       this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
         recipientId: userId,
         actorId: userId,
         type: 'admin_self_deleted_report',
         message: notificationMessageMap['admin_self_deleted_report'],
-        reportId: id,
       } satisfies NotificationJobData),
     ]).catch((err) => {
       console.error('Failed to send notifications:', err);

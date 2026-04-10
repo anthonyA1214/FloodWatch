@@ -21,8 +21,6 @@ export default function DeleteReportDialog() {
   const [isPending, setIsPending] = useState(false);
   const { mutate } = useSWRConfig();
 
-  console.log(reportId);
-
   const handleDelete = async () => {
     if (!reportId) return;
     setIsPending(true);

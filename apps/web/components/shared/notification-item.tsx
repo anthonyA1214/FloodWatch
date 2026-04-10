@@ -83,7 +83,7 @@ export default function NotificationItem({
                 <IconDots className='size-[1.5em]! shrink-0' />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent className='z-1002'>
               <DropdownMenuItem onClick={handleMarkAsRead} disabled={isRead}>
                 <IconCheck className='size-[1.5em]! shrink-0' />
                 <span className='font-poppins'>
