@@ -170,7 +170,7 @@ export default function InteractiveMapPage() {
 
         {(activeOverlay?.type === 'notification' ||
           activeOverlay?.type === 'profile') && (
-          <div className='absolute z-1001 flex gap-4 inset-0 md:inset-auto md:top-0 md:right-0 md:p-4'>
+          <div className='absolute z-2 flex gap-4 inset-0 md:inset-auto md:top-0 md:right-0 md:p-4'>
             {activeOverlay.type === 'notification' && <NotificationOverlay />}
             {activeOverlay.type === 'profile' && <ProfileOverlay />}
           </div>

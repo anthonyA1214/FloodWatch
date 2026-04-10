@@ -20,6 +20,7 @@ export const severityEnum = pgEnum('severity', [
 export const reportsStatusEnum = pgEnum('report_status', [
   'unverified',
   'verified',
+  'resolved',
 ]);
 
 export const reports = pgTable('reports', {

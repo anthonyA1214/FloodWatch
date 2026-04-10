@@ -15,8 +15,8 @@ export default function FloodReportsPageSkeleton() {
       </div>
 
       <div className='flex-1 flex flex-col min-h-0 gap-4'>
-        <div className='grid grid-cols-3 gap-8'>
-          {Array.from({ length: 3 }).map((_, i) => (
+        <div className='grid grid-cols-4 gap-8'>
+          {Array.from({ length: 4 }).map((_, i) => (
             <StatCardSkeleton key={i} />
           ))}
         </div>

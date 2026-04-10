@@ -2,6 +2,19 @@
 
 import { apiFetchServer } from '../api-fetch-server';
 
+export async function resolveReport(reportId: number) {
+  try {
+    await apiFetchServer(`/reports/${reportId}/resolve`, {
+      method: 'PATCH',
+    });
+
+    return { status: 'success' };
+  } catch (error) {
+    console.error('Error resolving report:', error);
+    return { status: 'error', message: 'Failed to resolve report' };
+  }
+}
+
 export async function verifyReport(reportId: number) {
   try {
     await apiFetchServer(`/reports/${reportId}/verify`, {

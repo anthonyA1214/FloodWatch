@@ -17,9 +17,14 @@ import FloodReportsPageSkeleton from './skeleton/flood-reports-page-skeleton';
 
 export default function FloodReportsView() {
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<'total' | 'verified' | 'unverified'>(
-    (searchParams.get('status') as 'total' | 'verified' | 'unverified') ||
-      'total',
+  const [status, setStatus] = useState<
+    'total' | 'verified' | 'unverified' | 'resolved'
+  >(
+    (searchParams.get('status') as
+      | 'total'
+      | 'verified'
+      | 'unverified'
+      | 'resolved') || 'total',
   );
   const [page, setPage] = useState(1);
   const [q, setQ] = useState(searchParams.get('q') || '');
@@ -57,8 +62,8 @@ export default function FloodReportsView() {
 
       <div className='flex-1 flex flex-col min-h-0 gap-4'>
         {isFirstLoad ? (
-          <div className='grid grid-cols-3 gap-8'>
-            {Array.from({ length: 3 }).map((_, i) => (
+          <div className='grid grid-cols-4 gap-8'>
+            {Array.from({ length: 4 }).map((_, i) => (
               <StatCardSkeleton key={i} />
             ))}
           </div>
@@ -67,6 +72,7 @@ export default function FloodReportsView() {
             totalCount={stats?.totalCount ?? 0}
             verifiedCount={stats?.verifiedCount ?? 0}
             unverifiedCount={stats?.unverifiedCount ?? 0}
+            resolvedCount={stats?.resolvedCount ?? 0}
             activeStatus={status}
             onStatusChange={(newStatus) => {
               setStatus(newStatus);

@@ -221,6 +221,7 @@ export class ReportsService {
           totalCount: count(),
           verifiedCount: sql<number>`COUNT(*) FILTER (WHERE ${reports.status} = 'verified')`,
           unverifiedCount: sql<number>`COUNT(*) FILTER (WHERE ${reports.status} = 'unverified')`,
+          resolvedCount: sql<number>`COUNT(*) FILTER (WHERE ${reports.status} = 'resolved')`,
         })
         .from(reports)
         .leftJoin(users, eq(reports.userId, users.id))
@@ -229,7 +230,8 @@ export class ReportsService {
     ]);
 
     const { total } = counts[0];
-    const { totalCount, verifiedCount, unverifiedCount } = statsResult[0];
+    const { totalCount, verifiedCount, unverifiedCount, resolvedCount } =
+      statsResult[0];
 
     const formattedData = data.map((item) => ({
       id: item.id,
@@ -257,6 +259,7 @@ export class ReportsService {
         verifiedCount,
         unverifiedCount,
         totalCount,
+        resolvedCount,
       },
     };
   }
@@ -469,6 +472,49 @@ export class ReportsService {
     }
 
     return { message: 'Report verified successfully' };
+  }
+
+  async resolveReport(reportId: number, userId: number) {
+    const [report] = await this.db
+      .select()
+      .from(reports)
+      .where(eq(reports.id, reportId))
+      .limit(1);
+
+    if (!report) {
+      throw new NotFoundException('Report not found');
+    }
+
+    await this.db
+      .update(reports)
+      .set({
+        verifierId: userId,
+        status: 'resolved',
+        verifiedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(reports.id, reportId));
+
+    const recipients = await this.db.select({ id: users.id }).from(users);
+
+    await Promise.all([
+      this.notificationsQueue.addBulk(
+        recipients.map((recipient) => ({
+          name: NOTIFICATION_JOBS.SEND,
+          data: {
+            recipientId: recipient.id,
+            actorId: userId,
+            type: 'flood_resolved',
+            message: notificationMessageMap['flood_resolved'],
+            reportId,
+          } satisfies NotificationJobData,
+        })),
+      ),
+    ]).catch((err: unknown) => {
+      console.error('Failed to send notifications:', err);
+    });
+
+    return { message: 'Report resolved successfully' };
   }
 
   async deleteReport(id: number, userId: number) {
