@@ -37,6 +37,7 @@ export const FloodMarker = ({
         alignItems: 'center',
         position: 'relative',
       }}
+      data-tour='map-flood-marker'
     >
       {/* circle head */}
       <div

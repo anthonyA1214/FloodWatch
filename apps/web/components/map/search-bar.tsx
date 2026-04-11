@@ -60,7 +60,10 @@ export default function SearchBar() {
   };
 
   return (
-    <div className='flex flex-col z-50 w-full h-fit pointer-events-auto'>
+    <div
+      className='flex flex-col z-50 w-full h-fit pointer-events-auto'
+      data-tour='map-search-bar'
+    >
       <InputGroup className='h-12 rounded-xl bg-white shadow-md'>
         <InputGroupInput
           value={inputValue}

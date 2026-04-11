@@ -1,7 +1,20 @@
+'use client';
+
 import Image from 'next/image';
-import Link from 'next/link';
+import { useMapOnboardingTour } from '@/hooks/use-map-onboarding-tour';
+import { useRouter } from 'next/navigation';
 
 export default function HeroSection() {
+  const { startOnboardingTour } = useMapOnboardingTour();
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('start_map_tour', 'true');
+    }
+    router.push('/map');
+  };
+
   return (
     <section className='relative flex items-center justify-center bg-[#0066CC] w-full min-h-screen px-4 py-20'>
       <div className='flex flex-col-reverse md:flex-row gap-10 items-center max-w-7xl justify-center w-full'>
@@ -24,9 +37,9 @@ export default function HeroSection() {
 
           {/* Button below text */}
           <div className='w-full'>
-            <Link href='/map'>
-              <button
-                className='bg-[#5c9ce6] hover:bg-[#4d8cd1]
+            <button
+              type='button'
+              className='bg-[#5c9ce6] hover:bg-[#4d8cd1]
                 w-full md:w-auto
               text-white font-semibold
                 text-lg mm:text-xl
@@ -36,10 +49,10 @@ export default function HeroSection() {
                 shadow-lg hover:shadow-xl
                 transition-all duration-300
                 hover:-translate-y-0.5'
-              >
-                Get Started
-              </button>
-            </Link>
+              onClick={handleGetStarted}
+            >
+              Get Started
+            </button>
           </div>
         </div>
 

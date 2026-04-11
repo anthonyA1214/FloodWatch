@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { inter, poppins } from '@/config/fonts';
 import './globals.css';
+import 'driver.js/dist/driver.css';
 import SWRProvider from '@/providers/swr-provider';
 import { Toaster } from '@/components/ui/sonner';
 import CsrfProvider from '@/providers/csrf-provider';

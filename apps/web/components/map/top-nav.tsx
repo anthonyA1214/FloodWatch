@@ -54,6 +54,7 @@ export default function TopNav() {
               activeOverlay?.type === 'affected-list' &&
                 'bg-white/30 border-white/30',
             )}
+            data-tour='topnav-affected-locations-mobile'
             onClick={() => openLocations('affected-list')}
           >
             <IconMapPinExclamation className='size-[1.5em]! shrink-0' />
@@ -71,6 +72,7 @@ export default function TopNav() {
               activeOverlay?.type === 'safety-list' &&
                 'bg-white/30 border-white/30',
             )}
+            data-tour='topnav-safety-locations-mobile'
             onClick={() => openLocations('safety-list')}
           >
             <IconShieldPin className='size-[1.5em]! shrink-0' />
@@ -92,6 +94,7 @@ export default function TopNav() {
                 activeOverlay?.type === 'affected-list' &&
                   'bg-white/30 border-white/30',
               )}
+              data-tour='topnav-affected-locations-desktop'
               onClick={() => {
                 setInputValue('');
                 setQ('');
@@ -113,6 +116,7 @@ export default function TopNav() {
                 activeOverlay?.type === 'safety-list' &&
                   'bg-white/30 border-white/30',
               )}
+              data-tour='topnav-safety-locations-desktop'
               onClick={() => {
                 setInputValue('');
                 setQ('');
@@ -133,7 +137,9 @@ export default function TopNav() {
             </div>
           ) : me ? (
             <div className='flex items-center gap-3 ml-auto'>
-              <ReportFloodAlertDialog />
+              <div data-tour='report-flood-alert'>
+                <ReportFloodAlertDialog />
+              </div>
 
               <button
                 className={cn(

@@ -39,7 +39,10 @@ export default function MapFilterPopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className='flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 pointer-events-auto'>
+        <div
+          className='flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 pointer-events-auto'
+          data-tour='map-filters'
+        >
           <button
             className={cn(
               'aspect-square rounded-md p-1',
