@@ -11,6 +11,7 @@ import {
 import { cn } from '@/lib/utils';
 import { SAFETY_TYPE_COLOR_MAP } from '@/lib/utils/get-color-map';
 import { useSafetyLocationDialog } from '@/contexts/safety-location-dialog-context';
+import { Badge } from '@/components/ui/badge';
 
 export const columns: ColumnDef<SafetyLocationInput>[] = [
   {
@@ -41,14 +42,12 @@ export const columns: ColumnDef<SafetyLocationInput>[] = [
 
       return (
         <div className='flex justify-center w-full'>
-          <div
-            className='inline-flex items-center rounded-full px-4 py-1.5'
+          <Badge
+            className='text-sm'
             style={{ backgroundColor: `${color}25`, color }}
           >
-            <span className='text-sm font-medium capitalize'>
-              {safetyLocation.type.toUpperCase()}
-            </span>
-          </div>
+            {safetyLocation.type.toUpperCase()}
+          </Badge>
         </div>
       );
     },

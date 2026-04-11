@@ -1,13 +1,26 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
-const severityEnum = z.enum(['low', 'moderate', 'high', 'critical']);
+export const severityEnum = z.enum(['low', 'moderate', 'high', 'critical']);
+export const statusEnum = z.enum(['verified', 'unverified', 'resolved']);
 
 export const reportFloodAlertSchema = z.object({
   latitude: z.coerce.number(),
   longitude: z.coerce.number(),
-  range: z.coerce.number(),
-  description: z.string().optional(),
+  range: z.coerce
+    .number('Affected range is required.')
+    .refine((val) => val > 0, {
+      error: 'Affected range must be at least 1 meter.',
+      abort: true,
+    })
+    .refine((val) => val <= 1000, {
+      error: 'Affected range cannot exceed 1,000 meters.',
+      abort: true,
+    }),
+  description: z
+    .string()
+    .max(300, 'Description cannot exceed 300 characters.')
+    .optional(),
   severity: severityEnum,
 });
 
@@ -41,7 +54,7 @@ export const reportMapPinSchema = z.object({
   longitude: z.number(),
   range: z.number(),
   severity: severityEnum,
-  status: z.enum(['verified', 'unverified']),
+  status: statusEnum,
 });
 
 export const reportSchema = z.object({
@@ -53,7 +66,7 @@ export const reportSchema = z.object({
     profilePicture: z.string().nullable(),
   }),
   reportedAt: z.date(),
-  status: z.enum(['verified', 'unverified']),
+  status: statusEnum,
 });
 
 export const reportDetailSchema = reportSchema.extend({
@@ -89,7 +102,7 @@ export const reportListItemSchema = z.object({
 export const reportQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
-  status: z.enum(['unverified', 'verified']).optional(),
+  status: z.enum(['unverified', 'verified', 'resolved']).optional(),
   q: z.string().optional(),
 });
 

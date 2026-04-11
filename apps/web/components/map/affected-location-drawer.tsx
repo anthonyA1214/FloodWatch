@@ -119,7 +119,7 @@ export default function AffectedLocationDrawer({
 
       <Drawer.Content
         data-testid='content'
-        className='z-1 absolute flex flex-col bg-white border border-gray-200 border-b-none rounded-t-[10px] bottom-0 left-0 right-0 h-full max-h-full -mx-px'
+        className='z-1001 absolute flex flex-col bg-white border border-gray-200 border-b-none rounded-t-[10px] bottom-0 left-0 right-0 h-full max-h-full -mx-px'
       >
         <Drawer.Handle className='w-16! my-3! rounded-full! shrink-0!' />
 
@@ -188,37 +188,36 @@ export default function AffectedLocationDrawer({
 
               {/* details */}
               <div className='flex flex-col border rounded-lg text-xs lg:text-sm'>
+                <div className='flex justify-between items-center p-3 lg:p-4'>
+                  <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
+                    <IconUser className='w-[1.5em]! h-[1.5em]!' />
+                    <span className='font-poppins font-medium'>
+                      REPORTED BY
+                    </span>
+                  </div>
+
+                  <div className='flex items-center gap-2'>
+                    <UIAvatar className='size-5'>
+                      <AvatarImage
+                        src={
+                          reportDetail?.reporter?.profilePicture || undefined
+                        }
+                      />
+                      <AvatarFallback>
+                        <Avatar
+                          name={`${reportDetail?.reporter?.name} ${reportDetail?.reporter?.id}`}
+                          variant='beam'
+                        />
+                      </AvatarFallback>
+                    </UIAvatar>
+                    <span>{reportDetail?.reporter?.name}</span>
+                  </div>
+                </div>
+
+                <Separator />
+
                 {!reportDetail?.isAdmin && (
                   <>
-                    <div className='flex justify-between items-center p-3 lg:p-4'>
-                      <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
-                        <IconUser className='w-[1.5em]! h-[1.5em]!' />
-                        <span className='font-poppins font-medium'>
-                          REPORTED BY
-                        </span>
-                      </div>
-
-                      <div className='flex items-center gap-2'>
-                        <UIAvatar className='size-5'>
-                          <AvatarImage
-                            src={
-                              reportDetail?.reporter?.profilePicture ||
-                              undefined
-                            }
-                          />
-                          <AvatarFallback>
-                            <Avatar
-                              name={`${reportDetail?.reporter?.name} ${reportDetail?.reporter?.id}`}
-                              variant='beam'
-                            />
-                          </AvatarFallback>
-                        </UIAvatar>
-                        <span>{reportDetail?.reporter?.name}</span>
-                      </div>
-                    </div>
-
-                    <Separator />
-
                     <div className='flex justify-between items-center p-3 lg:p-4'>
                       <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
                         <IconShield className='w-[1.5em]! h-[1.5em]!' />

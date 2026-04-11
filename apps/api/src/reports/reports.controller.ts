@@ -24,6 +24,7 @@ import {
   CreateCommentDto,
   CreateFloodAlertDto,
   createFloodAlertSchema,
+  ReportFloodAlertDto,
   ReportListQueryDto,
   ReportQueryDto,
   VoteDto,
@@ -126,12 +127,12 @@ export class ReportsController {
   @ApiBody({ type: ReportFloodAlertWithImageDto })
   async createReport(
     @Request() req: AuthRequest,
-    @Body() createFloodAlertDto: CreateFloodAlertDto,
+    @Body() reportFloodAlertDto: ReportFloodAlertDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
     return await this.reportsService.createReport(
       req.user.id,
-      createFloodAlertDto,
+      reportFloodAlertDto,
       image,
     );
   }
@@ -188,11 +189,25 @@ export class ReportsController {
   }
 
   @Roles('admin')
+  @Patch(':id/resolve')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  async resolveReport(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthRequest,
+  ) {
+    return await this.reportsService.resolveReport(id, req.user.id);
+  }
+
+  @Roles('admin')
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard, UserStatusGuard)
-  async deleteReport(@Param('id', ParseIntPipe) id: number) {
-    return await this.reportsService.deleteReport(id);
+  async deleteReport(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthRequest,
+  ) {
+    return await this.reportsService.deleteReport(id, req.user.id);
   }
 
   @Public()

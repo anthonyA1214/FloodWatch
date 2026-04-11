@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { DrizzleModule } from './drizzle/drizzle.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from './mailer/mailer.module';
@@ -20,11 +20,24 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { JwtAuthGuard } from './auth/guards/jwt-auth/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles/roles.guard';
 import { AppController } from './app.controller';
-import { EventsModule } from './events/events.module';
+import { AppService } from './app.service';
+import { NotificationsModule } from './notifications/notifications.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.getOrThrow('REDIS_HOST'),
+          port: configService.getOrThrow('REDIS_PORT'),
+          username: configService.getOrThrow('REDIS_USERNAME'),
+          password: configService.getOrThrow('REDIS_PASSWORD'),
+        },
+      }),
+    }),
     ThrottlerModule.forRoot([
       {
         name: 'global',
@@ -65,9 +78,10 @@ import { EventsModule } from './events/events.module';
     NewsModule,
     SafetyModule,
     CommentsModule,
-    EventsModule,
+    NotificationsModule,
   ],
   providers: [
+    AppService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

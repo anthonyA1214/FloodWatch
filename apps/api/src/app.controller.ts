@@ -3,6 +3,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Query,
   Req,
   Res,
 } from '@nestjs/common';
@@ -12,13 +13,22 @@ import { type Request, type Response } from 'express';
 import { Roles } from './common/decorators/roles.decorator';
 import { ReportsService } from './reports/reports.service';
 import { SafetyService } from './safety/safety.service';
+import { AppService } from './app.service';
+import { SearchQueryDto } from '@repo/schemas';
 
 @Controller()
 export class AppController {
   constructor(
+    private appService: AppService,
     private reportsService: ReportsService,
     private safetyService: SafetyService,
   ) {}
+
+  @Public()
+  @Get('search')
+  async search(@Query() searchQuery: SearchQueryDto) {
+    return await this.appService.search(searchQuery);
+  }
 
   @Roles('admin')
   @Get('dashboard/stats')

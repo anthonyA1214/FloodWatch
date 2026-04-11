@@ -165,6 +165,7 @@ const InteractiveMapPinLocation = forwardRef<
       onClick={handleMapClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      attributionControl={false}
     >
       {/* boundary fill */}
       {caloocanGeoJSON && (

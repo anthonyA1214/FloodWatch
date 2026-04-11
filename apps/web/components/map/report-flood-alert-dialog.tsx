@@ -22,8 +22,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { IconCurrentLocation, IconMinus, IconPlus } from '@tabler/icons-react';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import {
+  IconCurrentLocation,
+  IconMinus,
+  IconPhoto,
+  IconPlus,
+  IconX,
+} from '@tabler/icons-react';
 import { useRef, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import { useSWRConfig } from 'swr';
@@ -32,6 +38,7 @@ import { toast } from 'sonner';
 import { apiFetchClient } from '@/lib/api-fetch-client';
 import { z } from 'zod';
 import { reportFloodAlertSchema } from '@repo/schemas';
+import Image from 'next/image';
 
 export default function ReportFloodAlertDialog() {
   const interactiveMapRef = useRef<InteractiveMapHandle>(null);
@@ -41,16 +48,22 @@ export default function ReportFloodAlertDialog() {
   const { mutate } = useSWRConfig();
 
   // form data
-  const [severityValue, setSeverityValue] = useState<
-    'low' | 'moderate' | 'high' | 'critical'
-  >('low');
-  const [radius, setRadius] = useState<number | undefined>(undefined);
-  const [descriptionValue, setDescriptionValue] = useState<string>('');
-  const [image, setImage] = useState<File | null>(null);
-  const [location, setLocation] = useState<{
-    longitude: number;
-    latitude: number;
-  } | null>(null);
+  const [formData, setFormData] = useState<{
+    severity: 'low' | 'moderate' | 'high' | 'critical';
+    range: number;
+    description: string;
+    image: File | null;
+    location: { longitude: number; latitude: number } | null;
+  }>({
+    severity: 'low',
+    range: 0,
+    description: '',
+    image: null,
+    location: null,
+  });
+
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // errors
   const [state, setState] = useState<{
@@ -62,12 +75,34 @@ export default function ReportFloodAlertDialog() {
   });
 
   const resetForm = () => {
-    setSeverityValue('low');
-    setRadius(undefined);
-    setDescriptionValue('');
-    setImage(null);
-    setLocation(null);
+    setPreview(null);
+    setFormData({
+      severity: 'low',
+      range: 0,
+      description: '',
+      image: null,
+      location: null,
+    });
     setState({ status: null, errors: null });
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setState((prev) => ({
+      ...prev,
+      errors: prev.errors ? { ...prev.errors, [name]: [] } : null,
+    }));
+  };
+
+  const handleSelectChange = (name: string) => (value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setState((prev) => ({
+      ...prev,
+      errors: prev.errors ? { ...prev.errors, [name]: [] } : null,
+    }));
   };
 
   const handleUseCurrentLocation = async () => {
@@ -85,7 +120,7 @@ export default function ReportFloodAlertDialog() {
     const file = e.target.files?.[0];
 
     if (!file) {
-      setImage(null);
+      setFormData((prev) => ({ ...prev, image: null }));
       return;
     }
 
@@ -103,42 +138,34 @@ export default function ReportFloodAlertDialog() {
       return;
     }
 
-    setImage(file);
+    setFormData((prev) => ({ ...prev, image: file }));
+    setPreview(URL.createObjectURL(file));
+  };
+
+  const handleRemoveImage = () => {
+    setFormData((prev) => ({ ...prev, image: null }));
+    setPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!location)
+    if (!formData?.location)
       return toast.error('Location is required to create a flood alert.');
 
     const parsedData = reportFloodAlertSchema.safeParse({
-      latitude: location!.latitude,
-      longitude: location!.longitude,
-      range: radius,
-      description: descriptionValue,
-      severity: severityValue,
+      latitude: formData.location!.latitude,
+      longitude: formData.location!.longitude,
+      range: formData.range,
+      description: formData.description,
+      severity: formData.severity,
     });
 
     if (!parsedData.success) {
-      const fieldErrors = z.flattenError(parsedData.error).fieldErrors;
-
-      // Normalize range errors so we don't show raw "received NaN" messages
-      const normalizedErrors: Record<string, string[]> | null = fieldErrors
-        ? { ...fieldErrors }
-        : null;
-
-      if (normalizedErrors?.range?.length) {
-        normalizedErrors.range = normalizedErrors.range.map((msg) =>
-          msg.toLowerCase().includes('nan')
-            ? 'Affected range is required.'
-            : msg,
-        );
-      }
-
       setState({
         status: 'error',
-        errors: normalizedErrors,
+        errors: z.flattenError(parsedData.error).fieldErrors,
       });
       return;
     }
@@ -146,25 +173,29 @@ export default function ReportFloodAlertDialog() {
     const { latitude, longitude, range, description, severity } =
       parsedData.data;
 
-    const formData = new FormData();
-    formData.append('latitude', latitude.toString());
-    formData.append('longitude', longitude.toString());
-    formData.append('severity', severity);
-    formData.append('range', range.toString());
-    if (description) formData.append('description', description);
-    if (image) formData.append('image', image);
+    const form = new FormData();
+    form.append('latitude', latitude.toString());
+    form.append('longitude', longitude.toString());
+    form.append('severity', severity);
+    form.append('range', range.toString());
+    if (description) form.append('description', description);
+    if (formData.image) form.append('image', formData.image);
 
     try {
       setIsPending(true);
       await apiFetchClient('/reports/create', {
         method: 'POST',
-        body: formData,
+        body: form,
       });
       setState({ status: 'success', errors: null });
       toast.success('Flood alert created successfully!');
+      resetForm();
+      mutate(SWR_KEYS.reportMapPins);
+      mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reports);
+      mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reportList);
       setOpen(false);
-    } catch (err) {
-      console.error('Failed to create flood alert:', err);
+    } catch {
+      toast.error('Failed to create flood alert. Please try again.');
     } finally {
       setIsPending(false);
     }
@@ -172,6 +203,7 @@ export default function ReportFloodAlertDialog() {
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
+    if (!isOpen) resetForm();
   };
 
   return (
@@ -208,10 +240,10 @@ export default function ReportFloodAlertDialog() {
           <div className='flex flex-col p-4 gap-4'>
             <div className='flex items-center justify-between'>
               <span className='font-poppins text-sm font-medium text-gray-600'>
-                PIN LOCATION ON MAP
+                LOCATION
               </span>
               <button
-                className='font-poppins text-xs flex gap-2 border px-3 py-1.5 rounded-lg items-center text-gray-600 hover:bg-gray-100'
+                className='font-poppins text-[12px]  flex gap-2 border px-3 py-1.5 rounded-lg items-center text-gray-600 hover:bg-gray-100'
                 onClick={handleUseCurrentLocation}
               >
                 {loadingLocation ? (
@@ -221,8 +253,14 @@ export default function ReportFloodAlertDialog() {
                   </>
                 ) : (
                   <>
-                    <IconCurrentLocation className='w-[1.5em]! h-[1.5em]!' />
-                    <span>USE MY CURRENT LOCATION</span>
+                    <IconCurrentLocation className='w-[1.25em]! h-[1.25em]! sm:w-[1.5em]! sm:h-[1.5em]!' />
+                    {/* Mobile: shorter label, Desktop: full label */}
+                    <span className='whitespace-nowrap sm:hidden'>
+                      CURRENT LOCATION
+                    </span>
+                    <span className='whitespace-nowrap hidden sm:inline'>
+                      USE MY CURRENT LOCATION
+                    </span>
                   </>
                 )}
               </button>
@@ -232,10 +270,12 @@ export default function ReportFloodAlertDialog() {
             <div className='relative flex-1 flex aspect-video rounded-2xl overflow-hidden border h-fit'>
               <InteractiveMap
                 ref={interactiveMapRef}
-                severity={severityValue}
-                range={radius}
+                severity={formData?.severity}
+                range={formData?.range}
                 mode='flood-alert'
-                onLocationSelect={setLocation}
+                onLocationSelect={(loc) =>
+                  setFormData((prev) => ({ ...prev, location: loc }))
+                }
               />
               <div className='absolute flex flex-col top-4 left-4 z-1 w-fit gap-2 h-fit'>
                 <div className='flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 text-xs'>
@@ -274,12 +314,8 @@ export default function ReportFloodAlertDialog() {
                 </FieldLabel>
                 <Select
                   name='severity'
-                  value={severityValue}
-                  onValueChange={(value) =>
-                    setSeverityValue(
-                      value as 'critical' | 'high' | 'moderate' | 'low',
-                    )
-                  }
+                  value={formData?.severity}
+                  onValueChange={handleSelectChange('severity')}
                 >
                   <SelectTrigger className='w-full'>
                     <SelectValue placeholder='Severity Level' />
@@ -295,9 +331,7 @@ export default function ReportFloodAlertDialog() {
                   </SelectContent>
                 </Select>
                 {state.errors?.severity && (
-                  <span className='text-sm text-red-600'>
-                    {state.errors.severity[0]}
-                  </span>
+                  <FieldError>{state.errors.severity[0]}</FieldError>
                 )}
               </Field>
 
@@ -307,32 +341,23 @@ export default function ReportFloodAlertDialog() {
                   className='font-poppins text-sm font-medium'
                 >
                   AFFECTED RANGE
-                  <span className='font-inter text-xs text-gray-600'>
+                  <span className='font-inter text-xs opacity-50'>
                     (meters)
                   </span>
                 </FieldLabel>
+
                 <Input
                   id='range'
                   name='range'
                   type='number'
                   placeholder='e.g., 100'
                   min={1}
-                  value={radius ?? ''}
+                  value={formData?.range ?? ''}
                   aria-invalid={!!state.errors?.range?.length}
-                  onChange={(e) => {
-                    setRadius(Number(e.target.value));
-                    setState((prev) => ({
-                      ...prev,
-                      errors: prev.errors
-                        ? { ...prev.errors, range: [] }
-                        : null,
-                    }));
-                  }}
+                  onChange={handleChange}
                 />
                 {state.errors?.range && (
-                  <span className='text-sm text-red-600'>
-                    {state.errors.range[0]}
-                  </span>
+                  <FieldError>{state.errors.range[0]}</FieldError>
                 )}
               </Field>
             </div>
@@ -344,62 +369,90 @@ export default function ReportFloodAlertDialog() {
                 className='font-poppins text-sm font-medium'
               >
                 ADDITIONAL DETAILS
-                <span className='font-inter text-gray-600 text-xs'>
+                <span className='font-inter text-xs opacity-50'>
                   (Optional)
                 </span>
               </FieldLabel>
+
               <Textarea
                 id='description'
+                name='description'
                 placeholder='Enter the description'
                 className='no-scrollbar min-h-[120px] max-h-[120px]'
                 style={{ wordBreak: 'break-word' }}
-                value={descriptionValue}
                 aria-invalid={!!state.errors?.description?.length}
-                onChange={(e) => {
-                  setDescriptionValue(e.target.value);
-                  setState((prev) => ({
-                    ...prev,
-                    errors: prev.errors
-                      ? { ...prev.errors, description: [] }
-                      : null,
-                  }));
-                }}
+                value={formData.description}
+                onChange={handleChange}
               />
               {state.errors?.description && (
-                <span className='text-sm text-red-600'>
-                  {state.errors.description[0]}
-                </span>
+                <FieldError>{state.errors.description[0]}</FieldError>
               )}
             </Field>
 
-            {/* image upload */}
+            {/*image upload*/}
             <Field data-invalid={!!state.errors?.image?.length}>
-              <FieldLabel className='font-poppins text-sm font-medium'>
+              <FieldLabel
+                htmlFor='image'
+                className='font-poppins text-sm font-medium'
+              >
                 UPLOAD IMAGE
-                <span className='font-inter text-gray-600 text-xs'>
+                <span className='font-inter text-xs opacity-50'>
                   (Optional)
                 </span>
               </FieldLabel>
               <Input
+                ref={fileInputRef}
                 id='image'
                 type='file'
                 accept='image/*'
                 name='image'
+                onChange={handleImageChange}
                 aria-invalid={!!state.errors?.image?.length}
-                onChange={(e) => {
-                  handleImageChange(e);
-                  setState((prev) => ({
-                    ...prev,
-                    errors: prev.errors ? { ...prev.errors, image: [] } : null,
-                  }));
-                }}
               />
+
               {state.errors?.image && (
-                <span className='text-sm text-red-600'>
-                  {state.errors.image[0]}
-                </span>
+                <FieldError>{state.errors.image[0]}</FieldError>
               )}
             </Field>
+
+            {/*image preview*/}
+            {preview && (
+              <div className='relative w-fit'>
+                {/* group only wraps the image + overlay */}
+                <div className='relative group w-fit'>
+                  <Image
+                    src={preview}
+                    alt='Preview'
+                    width={320}
+                    height={180}
+                    unoptimized
+                    className='rounded-lg object-cover border max-h-48 w-auto'
+                  />
+                  {/* overlay */}
+                  <div
+                    className='absolute inset-0 bg-black/50
+                      top-0 left-0 flex flex-col gap-1 items-center
+                      justify-center text-white opacity-0 cursor-pointer
+                      group-hover:opacity-100 transition-opacity rounded-lg'
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <IconPhoto className='w-[1.5em]! h-[1.5em]!' />
+                    <span className='font-poppins font-medium text-sm'>
+                      REPLACE
+                    </span>
+                  </div>
+                </div>
+
+                {/* X button outside the group */}
+                <button
+                  type='button'
+                  onClick={handleRemoveImage}
+                  className='absolute -top-1.5 -right-1.5 bg-black text-white rounded-full p-0.5 hover:bg-gray-700 z-10'
+                >
+                  <IconX className='size-3.5' />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

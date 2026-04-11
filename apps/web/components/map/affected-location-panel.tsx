@@ -165,36 +165,32 @@ export default function AffectedLocationPanel({
 
             {/* details */}
             <div className='flex flex-col border rounded-lg text-xs lg:text-sm'>
+              <div className='flex justify-between items-center p-3 lg:p-4'>
+                <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
+                  <IconUser className='w-[1.5em]! h-[1.5em]!' />
+                  <span className='font-poppins font-medium'>REPORTED BY</span>
+                </div>
+
+                <div className='flex items-center gap-2'>
+                  <UIAvatar className='size-5'>
+                    <AvatarImage
+                      src={reportDetail?.reporter?.profilePicture || undefined}
+                    />
+                    <AvatarFallback>
+                      <Avatar
+                        name={`${reportDetail?.reporter?.name} ${reportDetail?.reporter?.id}`}
+                        variant='beam'
+                      />
+                    </AvatarFallback>
+                  </UIAvatar>
+                  <span>{reportDetail?.reporter?.name}</span>
+                </div>
+              </div>
+
+              <Separator />
+
               {!reportDetail?.isAdmin && (
                 <>
-                  <div className='flex justify-between items-center p-3 lg:p-4'>
-                    <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
-                      <IconUser className='w-[1.5em]! h-[1.5em]!' />
-                      <span className='font-poppins font-medium'>
-                        REPORTED BY
-                      </span>
-                    </div>
-
-                    <div className='flex items-center gap-2'>
-                      <UIAvatar className='size-5'>
-                        <AvatarImage
-                          src={
-                            reportDetail?.reporter?.profilePicture || undefined
-                          }
-                        />
-                        <AvatarFallback>
-                          <Avatar
-                            name={`${reportDetail?.reporter?.name} ${reportDetail?.reporter?.id}`}
-                            variant='beam'
-                          />
-                        </AvatarFallback>
-                      </UIAvatar>
-                      <span>{reportDetail?.reporter?.name}</span>
-                    </div>
-                  </div>
-
-                  <Separator />
-
                   <div className='flex justify-between items-center p-3 lg:p-4'>
                     <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
                       <IconShield className='w-[1.5em]! h-[1.5em]!' />

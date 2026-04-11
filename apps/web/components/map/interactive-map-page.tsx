@@ -24,9 +24,11 @@ import { getUserLocation } from '@/lib/utils/get-user-location';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Spinner } from '../ui/spinner';
+import { useMapRouting } from '@/contexts/map-routing-context';
 
 export default function InteractiveMapPage() {
   const { activeOverlay } = useMapOverlay();
+  const { clearRoute } = useMapRouting();
   const interactiveMapRef = useRef<InteractiveMapHandle>(null);
   const [location, setLocation] = useState<{
     latitude: number;
@@ -60,18 +62,6 @@ export default function InteractiveMapPage() {
     <div className='relative w-full h-full'>
       <InteractiveMap ref={interactiveMapRef} />
 
-      {/* static hotlines pill (only when no overlay is active) */}
-      {!activeOverlay && (
-        <div
-          className={cn(
-            'absolute right-4 z-10 ',
-            isError ? 'bottom-4 md:bottom-4' : 'bottom-20 md:bottom-4',
-          )}
-        >
-          <HotlinesAccordion />
-        </div>
-      )}
-
       {/* Top bar: search + controls in one row */}
       <div className='absolute top-0 left-0 right-0 flex items-start gap-4 pointer-events-none h-full'>
         {/* Search bar + affected panel share the left flex slot */}
@@ -104,6 +94,18 @@ export default function InteractiveMapPage() {
               longitude={location?.longitude ?? null}
             />
           )}
+
+          {/* static hotlines pill (only when no overlay is active) */}
+          <div
+            className={cn(
+              'absolute right-4 ',
+              isError || !location
+                ? 'bottom-4 md:bottom-4'
+                : 'bottom-20 md:bottom-4',
+            )}
+          >
+            <HotlinesAccordion />
+          </div>
         </div>
 
         {/* Map controls — fixed to right */}
@@ -132,6 +134,7 @@ export default function InteractiveMapPage() {
               onClick={async () => {
                 if (!interactiveMapRef.current || isGeolocating) return;
                 setIsGeolocating(true);
+                clearRoute();
                 try {
                   await interactiveMapRef.current.geolocate();
                 } finally {
@@ -167,7 +170,7 @@ export default function InteractiveMapPage() {
 
         {(activeOverlay?.type === 'notification' ||
           activeOverlay?.type === 'profile') && (
-          <div className='absolute z-10 flex gap-4 inset-0 md:inset-auto md:top-0 md:right-0 md:p-4'>
+          <div className='absolute z-2 flex gap-4 inset-0 md:inset-auto md:top-0 md:right-0 md:p-4'>
             {activeOverlay.type === 'notification' && <NotificationOverlay />}
             {activeOverlay.type === 'profile' && <ProfileOverlay />}
           </div>

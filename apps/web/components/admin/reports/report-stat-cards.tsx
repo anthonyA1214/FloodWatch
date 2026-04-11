@@ -6,19 +6,23 @@ type ReportStatCardsProps = {
   totalCount: number;
   verifiedCount: number;
   unverifiedCount: number;
-  activeStatus: 'total' | 'verified' | 'unverified';
-  onStatusChange: (status: 'total' | 'verified' | 'unverified') => void;
+  resolvedCount: number;
+  activeStatus: 'total' | 'verified' | 'unverified' | 'resolved';
+  onStatusChange: (
+    status: 'total' | 'verified' | 'unverified' | 'resolved',
+  ) => void;
 };
 
 export default function ReportStatCards({
   totalCount,
   verifiedCount,
   unverifiedCount,
+  resolvedCount,
   activeStatus,
   onStatusChange,
 }: ReportStatCardsProps) {
   return (
-    <div className='grid grid-cols-3 gap-8'>
+    <div className='grid grid-cols-4 gap-8'>
       <ReportStatCard
         label='Total Reports'
         count={totalCount}
@@ -39,6 +43,13 @@ export default function ReportStatCards({
         status='unverified'
         isActive={activeStatus === 'unverified'}
         onClick={() => onStatusChange('unverified')}
+      />
+      <ReportStatCard
+        label='Resolved Reports'
+        count={resolvedCount}
+        status='resolved'
+        isActive={activeStatus === 'resolved'}
+        onClick={() => onStatusChange('resolved')}
       />
     </div>
   );

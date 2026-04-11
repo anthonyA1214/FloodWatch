@@ -11,6 +11,7 @@ export const SAFETY_TYPE_COLOR_MAP: Record<string, string> = {
 };
 
 export const REPORT_STATUS_COLOR_MAP: Record<string, string> = {
+  resolved: '#6B7280',
   verified: '#00D69B',
   unverified: '#FB923C',
 };

@@ -7,6 +7,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
+  SidebarMenuButton,
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -20,9 +21,13 @@ import { NavItems } from './nav-items';
 import LogoutButton from './logout-button';
 import { useMe } from '@/hooks/use-me';
 import { Skeleton } from '../ui/skeleton';
+import NotificationSheet from './notification-sheet';
+import { IconBell } from '@tabler/icons-react';
+import { useNotificationsUnreadCount } from '@/hooks/use-notifications-unread-count';
 
 export default function SideNav() {
   const { me, isLoading } = useMe();
+  const { unreadCount } = useNotificationsUnreadCount();
 
   return (
     <div className='p-4 h-screen'>
@@ -42,7 +47,7 @@ export default function SideNav() {
         <SidebarContent className='w-full flex-1 min-h-0'>
           {/* profile */}
           <SidebarGroup>
-            <SidebarGroupContent className='flex flex-col items-center justify-center py-4'>
+            <SidebarGroupContent className='flex flex-col items-center justify-center py-2'>
               <div className='py-2'>
                 {isLoading ? (
                   <Skeleton className='size-24 rounded-full' />
@@ -75,8 +80,23 @@ export default function SideNav() {
                   </>
                 )}
               </div>
+
+              <NotificationSheet>
+                <SidebarMenuButton className='text-base relative z-10 hover:bg-transparent active:bg-transparent mt-4 w-full text-muted-foreground data-[open=true]:text-primary'>
+                  <div className='flex items-center gap-4 py-4 pl-4 pr-2 transition-colors duration-200'>
+                    <span className='relative inline-flex items-center justify-center'>
+                      <IconBell className='w-[1.5em]! h-[1.5em]!' aria-hidden />
+                      {unreadCount > 0 && (
+                        <span className='absolute -top-0.5 -right-0.5 size-2 rounded-full bg-[#FB2C36]' />
+                      )}
+                    </span>
+                    <span className='font-poppins'>NOTIFICATIONS</span>
+                  </div>
+                </SidebarMenuButton>
+              </NotificationSheet>
             </SidebarGroupContent>
           </SidebarGroup>
+
           {/* Nav items - scrollable */}
           <div className='flex-1 min-h-0 h-0 overflow-y-auto'>
             <SidebarGroup>
