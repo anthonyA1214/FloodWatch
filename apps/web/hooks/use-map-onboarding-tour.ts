@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useRef } from 'react';
-import { driver, type Driver } from 'driver.js';
+import { driver, type Driver, type DriveStep, type Config } from 'driver.js';
 
 const STORAGE_KEY = 'map_onboarding_completed_v1';
 
@@ -199,18 +199,20 @@ export function useMapOnboardingTour() {
         },
       });
 
-      driverRef.current = driver({
+      const config: Config = {
         showProgress: true,
         allowClose: true,
         overlayOpacity: 0.6,
         animate: true,
-        steps: steps as unknown as Parameters<typeof driver>[0]['steps'],
+        steps: steps as DriveStep[],
         onDestroyed: () => {
           if (typeof window !== 'undefined') {
             window.localStorage.setItem(STORAGE_KEY, 'true');
           }
         },
-      });
+      };
+
+      driverRef.current = driver(config);
     }
 
     return driverRef.current;
