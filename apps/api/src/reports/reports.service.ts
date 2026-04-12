@@ -735,7 +735,6 @@ export class ReportsService {
     );
 
     const nearRecipients: { email: string }[] = [];
-    const genericRecipients: { email: string }[] = [];
 
     for (const recipient of userRecipients) {
       const homeAddress = recipient.homeAddress ?? '';
@@ -743,7 +742,7 @@ export class ReportsService {
       if (this.isHomeAddressMatchingLocation(homeAddress, location)) {
         nearRecipients.push({ email: recipient.email });
       } else {
-        genericRecipients.push({ email: recipient.email });
+        // Do not add to genericRecipients
       }
     }
 
@@ -753,15 +752,6 @@ export class ReportsService {
         severity,
       }),
     );
-
-    const genericTasks = genericRecipients.map(({ email }) =>
-      this.mailerService.sendGenericFloodAlertEmail(email, {
-        location,
-        severity,
-      }),
-    );
-
-    await Promise.all(nearTasks.concat(genericTasks));
 
     for (const { email } of adminRecipients) {
       await this.mailerService.sendAdminFloodAlertEmail(email, {

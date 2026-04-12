@@ -33,23 +33,6 @@ export class MailerService {
     });
   }
 
-  async sendGenericFloodAlertEmail(
-    to: string,
-    options: { location: string; severity: string },
-  ) {
-    const { location, severity } = options;
-
-    await this.nestMailerService.sendMail({
-      to,
-      subject: `New flood reported on FloodWatch (${severity})`,
-      template: 'flood-generic',
-      context: {
-        location,
-        severity,
-      },
-    });
-  }
-
   async sendAdminFloodAlertEmail(
     to: string,
     options: { location: string; severity: string },
