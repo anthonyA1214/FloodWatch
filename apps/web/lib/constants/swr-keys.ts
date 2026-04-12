@@ -32,4 +32,7 @@ export const SWR_KEYS = {
   reportDistribution: '/reports/distribution',
 
   search: `/search`,
+
+  notifications: '/me/notifications',
+  notificationsUnreadCount: '/me/notifications/unread-count',
 };

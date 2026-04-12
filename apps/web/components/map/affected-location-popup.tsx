@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { useDirections } from '@/hooks/use-directions';
 import { useMapRouting } from '@/contexts/map-routing-context';
 import { Spinner } from '../ui/spinner';
+import { useMapPopup } from '@/contexts/map-popup-context';
 
 export default function AffectedLocationPopup({
   onClose,
@@ -55,6 +56,7 @@ export default function AffectedLocationPopup({
   const { isLoading: isMyVoteLoading } = useMyVote(reportId);
   const { getDirections } = useDirections();
   const { isLoadingRoute } = useMapRouting();
+  const { closePopup } = useMapPopup();
 
   const formattedTime = reportDetail
     ? format(reportDetail?.reportedAt, 'hh:mm a')
@@ -190,12 +192,16 @@ export default function AffectedLocationPopup({
         <Separator />
 
         {/* credibility and confirm and deny */}
-        {!reportDetail?.isAdmin && (
+        {['unverified', 'verified'].includes(reportDetail?.status) && (
           <div className='flex flex-col text-xs'>
             <div className='flex justify-between items-center p-3'>
               <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
                 <IconShieldCheck className='w-[1.5em]! h-[1.5em]!' />
-                <span className='font-poppins font-medium'>CREDIBILITY</span>
+                <span className='font-poppins font-medium'>
+                  {reportDetail?.status === 'verified'
+                    ? 'IS THIS FLOOD STILL HAPPENING?'
+                    : 'CREDIBILITY'}
+                </span>
               </div>
 
               <div className='flex items-center gap-2'>
@@ -231,7 +237,9 @@ export default function AffectedLocationPopup({
           <button
             className='flex items-center gap-1.5 w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 duration-200 px-4 py-2.5 rounded-lg justify-center disabled:opacity-50 disabled:cursor-not-allowed'
             disabled={isLoadingRoute}
-            onClick={() => getDirections({ latitude, longitude })}
+            onClick={() =>
+              getDirections({ latitude, longitude }).then(() => closePopup())
+            }
           >
             {isLoadingRoute ? (
               <Spinner />

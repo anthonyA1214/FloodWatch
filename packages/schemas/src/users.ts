@@ -26,8 +26,8 @@ export const getMeSchema = z.object({
 });
 
 export const updateProfileSchema = z.object({
-  firstName: z.string().min(1).optional(),
-  lastName: z.string().min(1).optional(),
+  firstName: z.string().min(1, 'First name is required.').optional(),
+  lastName: z.string().min(1, 'Last name is required.').optional(),
   homeAddress: z.string().optional(),
   profilePicture: z.string().optional(),
 });

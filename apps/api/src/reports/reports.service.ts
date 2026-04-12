@@ -8,7 +8,7 @@ import {
 import { inArray } from 'drizzle-orm';
 import { ilike } from 'drizzle-orm';
 import { aliasedTable, asc } from 'drizzle-orm';
-import { and, count, desc, eq, like, or, sql } from 'drizzle-orm';
+import { and, count, desc, eq, like, or, sql, ne } from 'drizzle-orm';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { DRIZZLE } from 'src/drizzle/drizzle-connection';
 import { profileInfo, users } from 'src/drizzle/schemas';
@@ -17,6 +17,16 @@ import { reportConfirmations } from 'src/drizzle/schemas/report-confirmations.sc
 import type { DrizzleDB } from 'src/drizzle/types/drizzle';
 import { GeocoderService } from 'src/geocoder/geocoder.service';
 import { ImagesService } from 'src/images/images.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import {
+  NOTIFICATION_JOBS,
+  NotificationJobData,
+  NOTIFICATIONS_QUEUE,
+} from 'src/notifications/notifications.types';
+import { Queue } from 'bullmq';
+import { notificationMessageMap } from 'src/notifications/notifications-messages';
+import { MailerService } from 'src/mailer/mailer.service';
+import { type UploadedImageFile } from 'src/common/types/uploaded-image-file.type';
 
 @Injectable()
 export class ReportsService {
@@ -25,6 +35,8 @@ export class ReportsService {
     private imagesService: ImagesService,
     private cloudinaryService: CloudinaryService,
     private geocoderService: GeocoderService,
+    private mailerService: MailerService,
+    @InjectQueue(NOTIFICATIONS_QUEUE) private notificationsQueue: Queue,
   ) {}
 
   async getReportMapPins() {
@@ -38,7 +50,8 @@ export class ReportsService {
         status: reports.status,
       })
       .from(reports)
-      .orderBy(asc(reports.createdAt));
+      .orderBy(asc(reports.createdAt))
+      .where(ne(reports.status, 'resolved')); // dont show resolved reports on the map
   }
 
   async getReportDetail(reportId: number) {
@@ -107,11 +120,13 @@ export class ReportsService {
       severities && severities.length > 0
         ? inArray(reports.severity, severities)
         : undefined;
+    const notResolvedCondition = ne(reports.status, 'resolved');
 
-    const whereClause =
-      severityCondition && searchCondition
-        ? and(severityCondition, searchCondition)
-        : (severityCondition ?? searchCondition);
+    const whereClause = and(
+      notResolvedCondition,
+      severityCondition,
+      searchCondition,
+    );
 
     const [data, counts] = await Promise.all([
       this.db
@@ -204,6 +219,7 @@ export class ReportsService {
           totalCount: count(),
           verifiedCount: sql<number>`COUNT(*) FILTER (WHERE ${reports.status} = 'verified')`,
           unverifiedCount: sql<number>`COUNT(*) FILTER (WHERE ${reports.status} = 'unverified')`,
+          resolvedCount: sql<number>`COUNT(*) FILTER (WHERE ${reports.status} = 'resolved')`,
         })
         .from(reports)
         .leftJoin(users, eq(reports.userId, users.id))
@@ -212,7 +228,8 @@ export class ReportsService {
     ]);
 
     const { total } = counts[0];
-    const { totalCount, verifiedCount, unverifiedCount } = statsResult[0];
+    const { totalCount, verifiedCount, unverifiedCount, resolvedCount } =
+      statsResult[0];
 
     const formattedData = data.map((item) => ({
       id: item.id,
@@ -240,6 +257,7 @@ export class ReportsService {
         verifiedCount,
         unverifiedCount,
         totalCount,
+        resolvedCount,
       },
     };
   }
@@ -247,7 +265,7 @@ export class ReportsService {
   async createReport(
     userId: number,
     reportFloodAlertDto: ReportFloodAlertInput,
-    image: Express.Multer.File,
+    image: UploadedImageFile,
   ) {
     const { latitude, longitude, severity, description, range } =
       reportFloodAlertDto;
@@ -260,7 +278,7 @@ export class ReportsService {
         image.buffer,
       );
 
-      const normalizedFile: Express.Multer.File = {
+      const normalizedFile: UploadedImageFile = {
         ...image,
         buffer,
         mimetype,
@@ -271,7 +289,7 @@ export class ReportsService {
       };
 
       const uploaded = await this.cloudinaryService.uploadImage(
-        normalizedFile,
+        normalizedFile as any,
         'reports',
       );
 
@@ -296,13 +314,18 @@ export class ReportsService {
       location: displayName,
     });
 
+    await this.sendFloodAlertEmails({
+      location: displayName,
+      severity,
+    });
+
     return { message: 'Report created successfully' };
   }
 
   async createReportAdmin(
     userId: number,
     floodAlertDto: CreateFloodAlertInput,
-    image: Express.Multer.File,
+    image: UploadedImageFile,
   ) {
     const { latitude, longitude, locationName, severity, description, range } =
       floodAlertDto;
@@ -315,7 +338,7 @@ export class ReportsService {
         image.buffer,
       );
 
-      const normalizedFile: Express.Multer.File = {
+      const normalizedFile: UploadedImageFile = {
         ...image,
         buffer,
         mimetype,
@@ -326,7 +349,7 @@ export class ReportsService {
       };
 
       const uploaded = await this.cloudinaryService.uploadImage(
-        normalizedFile,
+        normalizedFile as any,
         'reports',
       );
 
@@ -334,33 +357,71 @@ export class ReportsService {
       imagePublicId = uploaded.public_id as string;
     }
 
-    await this.db.insert(reports).values({
-      userId,
-      latitude,
-      longitude,
-      severity,
-      description,
-      range,
-      image: imageUrl,
-      imagePublicId,
+    const [report] = await this.db
+      .insert(reports)
+      .values({
+        userId,
+        latitude,
+        longitude,
+        severity,
+        description,
+        range,
+        image: imageUrl,
+        imagePublicId,
+        location: locationName,
+        status: 'verified', // Admin-created reports are auto-verified
+        isAdmin: true,
+        verifierId: userId, // Set the admin as the verifier
+        verifiedAt: new Date(),
+      })
+      .returning();
+
+    const recipients = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.role, 'user'));
+
+    await Promise.all([
+      this.notificationsQueue.addBulk(
+        recipients.map((recipient) => ({
+          name: NOTIFICATION_JOBS.SEND,
+          data: {
+            recipientId: recipient.id,
+            actorId: userId,
+            type: 'admin_reported_flood',
+            message: notificationMessageMap['admin_reported_flood'],
+            reportId: report.id,
+          } satisfies NotificationJobData,
+        })),
+      ),
+
+      this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
+        recipientId: userId,
+        actorId: userId,
+        type: 'admin_self_reported_flood',
+        message: notificationMessageMap['admin_self_reported_flood'],
+        reportId: report.id,
+      } satisfies NotificationJobData),
+    ]).catch((err: unknown) => {
+      console.error('Failed to send notifications:', err);
+    });
+
+    await this.sendFloodAlertEmails({
       location: locationName,
-      status: 'verified', // Admin-created reports are auto-verified
-      isAdmin: true,
-      verifierId: userId, // Set the admin as the verifier
-      verifiedAt: new Date(),
+      severity,
     });
 
     return { message: 'Report created and verified successfully' };
   }
 
   async verifyReportStatus(reportId: number, userId: number) {
-    const report = await this.db
+    const [report] = await this.db
       .select()
       .from(reports)
       .where(eq(reports.id, reportId))
       .limit(1);
 
-    if (!report.length) {
+    if (!report) {
       throw new NotFoundException('Report not found');
     }
 
@@ -374,10 +435,97 @@ export class ReportsService {
       })
       .where(eq(reports.id, reportId));
 
+    // after verifying a reset, reset the confirmations for that report
+    await this.db
+      .delete(reportConfirmations)
+      .where(eq(reportConfirmations.reportId, reportId));
+
+    await Promise.all([
+      this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
+        recipientId: report.userId,
+        actorId: userId,
+        type: 'admin_verified_report',
+        message: notificationMessageMap['admin_verified_report'],
+        reportId,
+      } satisfies NotificationJobData),
+      this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
+        recipientId: userId,
+        actorId: userId,
+        type: 'admin_self_verified_report',
+        message: notificationMessageMap['admin_self_verified_report'],
+        reportId,
+      } satisfies NotificationJobData),
+    ]).catch((err: unknown) => {
+      console.error('Failed to send notifications:', err);
+    });
+
+    if (report.userId) {
+      const [reporter] = await this.db
+        .select({ email: users.email })
+        .from(users)
+        .where(eq(users.id, report.userId))
+        .limit(1);
+
+      if (reporter?.email && report.location && report.severity) {
+        await this.mailerService.sendReportVerifiedEmail(reporter.email, {
+          location: report.location,
+          severity: report.severity,
+        });
+      }
+    }
+
     return { message: 'Report verified successfully' };
   }
 
-  async deleteReport(id: number) {
+  async resolveReport(reportId: number, userId: number) {
+    const [report] = await this.db
+      .select()
+      .from(reports)
+      .where(eq(reports.id, reportId))
+      .limit(1);
+
+    if (!report) {
+      throw new NotFoundException('Report not found');
+    }
+
+    await this.db
+      .update(reports)
+      .set({
+        verifierId: userId,
+        status: 'resolved',
+        verifiedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(reports.id, reportId));
+
+    // after resolving a reset, reset the confirmations for that report
+    await this.db
+      .delete(reportConfirmations)
+      .where(eq(reportConfirmations.reportId, reportId));
+
+    const recipients = await this.db.select({ id: users.id }).from(users);
+
+    await Promise.all([
+      this.notificationsQueue.addBulk(
+        recipients.map((recipient) => ({
+          name: NOTIFICATION_JOBS.SEND,
+          data: {
+            recipientId: recipient.id,
+            actorId: userId,
+            type: 'flood_resolved',
+            message: notificationMessageMap['flood_resolved'],
+            reportId,
+          } satisfies NotificationJobData,
+        })),
+      ),
+    ]).catch((err: unknown) => {
+      console.error('Failed to send notifications:', err);
+    });
+
+    return { message: 'Report resolved successfully' };
+  }
+
+  async deleteReport(id: number, userId: number) {
     const [report] = await this.db
       .select()
       .from(reports)
@@ -394,6 +542,23 @@ export class ReportsService {
     }
 
     await this.db.delete(reports).where(eq(reports.id, id));
+
+    await Promise.all([
+      this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
+        recipientId: report.userId,
+        actorId: userId,
+        type: 'admin_deleted_report',
+        message: notificationMessageMap['admin_deleted_report'],
+      } satisfies NotificationJobData),
+      this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
+        recipientId: userId,
+        actorId: userId,
+        type: 'admin_self_deleted_report',
+        message: notificationMessageMap['admin_self_deleted_report'],
+      } satisfies NotificationJobData),
+    ]).catch((err) => {
+      console.error('Failed to send notifications:', err);
+    });
 
     return { message: 'Report deleted successfully' };
   }
@@ -538,6 +703,87 @@ export class ReportsService {
     }));
   }
 
+  private async sendFloodAlertEmails(args: {
+    location: string;
+    severity: string;
+  }) {
+    const { location, severity } = args;
+
+    const recipients = await this.db
+      .select({
+        id: users.id,
+        email: users.email,
+        role: users.role,
+        status: users.status,
+        homeAddress: profileInfo.homeAddress,
+      })
+      .from(users)
+      .leftJoin(profileInfo, eq(users.id, profileInfo.userId));
+
+    const userRecipients = recipients.filter(
+      (recipient) =>
+        recipient.email &&
+        recipient.role === 'user' &&
+        recipient.status === 'active',
+    );
+
+    const adminRecipients = recipients.filter(
+      (recipient) =>
+        recipient.email &&
+        recipient.role === 'admin' &&
+        recipient.status === 'active',
+    );
+
+    const nearRecipients: { email: string }[] = [];
+    const genericRecipients: { email: string }[] = [];
+
+    for (const recipient of userRecipients) {
+      const homeAddress = recipient.homeAddress ?? '';
+
+      if (this.isHomeAddressMatchingLocation(homeAddress, location)) {
+        nearRecipients.push({ email: recipient.email });
+      } else {
+        genericRecipients.push({ email: recipient.email });
+      }
+    }
+
+    const nearTasks = nearRecipients.map(({ email }) =>
+      this.mailerService.sendFloodNearYouEmail(email, {
+        location,
+        severity,
+      }),
+    );
+
+    const genericTasks = genericRecipients.map(({ email }) =>
+      this.mailerService.sendGenericFloodAlertEmail(email, {
+        location,
+        severity,
+      }),
+    );
+
+    await Promise.all(nearTasks.concat(genericTasks));
+
+    for (const { email } of adminRecipients) {
+      await this.mailerService.sendAdminFloodAlertEmail(email, {
+        location,
+        severity,
+      });
+    }
+  }
+
+  private isHomeAddressMatchingLocation(homeAddress: string, location: string) {
+    const trimmedHome = homeAddress.trim().toLowerCase();
+    if (!trimmedHome) return false;
+
+    const parts = location
+      .toLowerCase()
+      .split(',')
+      .map((part) => part.trim())
+      .filter((part) => part.length >= 3);
+
+    return parts.some((part) => trimmedHome.includes(part));
+  }
+
   async getRecentReports() {
     const recentReports = await this.db
       .select({
@@ -573,17 +819,16 @@ export class ReportsService {
       .from(reports)
       .where(
         and(
-          eq(reports.status, 'unverified'),
+          inArray(reports.status, ['unverified', 'verified']),
           sql`${this.db.$count(
             reportConfirmations,
             and(
               eq(reportConfirmations.action, 'confirm'),
               eq(reportConfirmations.reportId, reports.id),
             ),
-          )} >= 10`, // Threshold of 10 confirmations
+          )} >= 10`,
         ),
       );
-
     return reportsNeedingAttention;
   }
 }

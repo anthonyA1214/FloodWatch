@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
 export const severityEnum = z.enum(['low', 'moderate', 'high', 'critical']);
+export const statusEnum = z.enum(['verified', 'unverified', 'resolved']);
 
 export const reportFloodAlertSchema = z.object({
   latitude: z.coerce.number(),
@@ -53,7 +54,7 @@ export const reportMapPinSchema = z.object({
   longitude: z.number(),
   range: z.number(),
   severity: severityEnum,
-  status: z.enum(['verified', 'unverified']),
+  status: statusEnum,
 });
 
 export const reportSchema = z.object({
@@ -65,7 +66,7 @@ export const reportSchema = z.object({
     profilePicture: z.string().nullable(),
   }),
   reportedAt: z.date(),
-  status: z.enum(['verified', 'unverified']),
+  status: statusEnum,
 });
 
 export const reportDetailSchema = reportSchema.extend({
@@ -101,7 +102,7 @@ export const reportListItemSchema = z.object({
 export const reportQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
-  status: z.enum(['unverified', 'verified']).optional(),
+  status: z.enum(['unverified', 'verified', 'resolved']).optional(),
   q: z.string().optional(),
 });
 

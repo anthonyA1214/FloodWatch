@@ -31,7 +31,7 @@ import { useReportDialog } from '@/contexts/report-dialog-context';
 import { format } from 'date-fns';
 import { useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
-import { verifyReport } from '@/lib/actions/report-actions';
+import { verifyReport, resolveReport } from '@/lib/actions/report-actions';
 import { useSWRConfig } from 'swr';
 import { SWR_KEYS } from '@/lib/constants/swr-keys';
 import { Badge } from '@/components/ui/badge';
@@ -52,6 +52,20 @@ export default function ViewReportDialog() {
     setIsPending(true);
     try {
       await verifyReport(reportDetail.id);
+      mutate(SWR_KEYS.reportMapPins);
+      mutateReportDetail();
+      mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reports);
+      closeDialog();
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  const handleResolve = async () => {
+    if (!reportDetail) return;
+    setIsPending(true);
+    try {
+      await resolveReport(reportDetail.id);
       mutate(SWR_KEYS.reportMapPins);
       mutateReportDetail();
       mutate((key) => Array.isArray(key) && key[0] === SWR_KEYS.reports);
@@ -238,51 +252,70 @@ export default function ViewReportDialog() {
                           </div>
 
                           {/*confirms, denies and credibility*/}
-                          {!reportDetail?.isAdmin && (
+                          {reportDetail?.status !== 'resolved' && (
                             <>
                               <Separator />
 
-                              <div className='grid grid-cols-3 gap-4 px-4'>
-                                {/*confirms*/}
-                                <div className='flex flex-col gap-2 text-center'>
+                              <div className='flex flex-col gap-2 px-4'>
+                                {reportDetail?.status === 'verified' && (
                                   <span className='font-poppins font-medium text-gray-600 text-sm'>
-                                    CONFIRMS
+                                    IS THIS FLOOD STILL HAPPENING?
                                   </span>
-                                  <span className='font-poppins font-medium  text-[#16a34a]'>
-                                    {confirms !== undefined ? confirms : 'N/A'}
-                                  </span>
-                                </div>
+                                )}
 
-                                {/*denies*/}
-                                <div className='flex flex-col gap-2 text-center'>
-                                  <span className='font-poppins font-medium text-gray-600 text-sm'>
-                                    DENIES
-                                  </span>
-                                  <span className='font-poppins font-medium text-[#dc2626]'>
-                                    {denies !== undefined ? denies : 'N/A'}
-                                  </span>
-                                </div>
+                                <div
+                                  className={cn(
+                                    'grid gap-4',
+                                    reportDetail?.status === 'verified'
+                                      ? 'grid-cols-2'
+                                      : 'grid-cols-3',
+                                  )}
+                                >
+                                  {/*confirms*/}
+                                  <div className='flex flex-col gap-2 text-center'>
+                                    <span className='font-poppins font-medium text-gray-600 text-sm'>
+                                      CONFIRMS
+                                    </span>
+                                    <span className='font-poppins font-medium  text-[#16a34a]'>
+                                      {confirms !== undefined
+                                        ? confirms
+                                        : 'N/A'}
+                                    </span>
+                                  </div>
 
-                                {/*credibility*/}
-                                <div className='flex flex-col gap-2 text-center'>
-                                  <span className='font-poppins font-medium text-gray-600 text-sm'>
-                                    CREDIBILITY
-                                  </span>
-                                  <span
-                                    className='font-poppins font-medium'
-                                    style={{
-                                      color:
-                                        credibility >= 70
-                                          ? '#16a34a'
-                                          : credibility >= 40
-                                            ? '#d97706'
-                                            : '#dc2626',
-                                    }}
-                                  >
-                                    {credibility !== undefined
-                                      ? `${credibility}%`
-                                      : 'N/A'}
-                                  </span>
+                                  {/*denies*/}
+                                  <div className='flex flex-col gap-2 text-center'>
+                                    <span className='font-poppins font-medium text-gray-600 text-sm'>
+                                      DENIES
+                                    </span>
+                                    <span className='font-poppins font-medium text-[#dc2626]'>
+                                      {denies !== undefined ? denies : 'N/A'}
+                                    </span>
+                                  </div>
+
+                                  {/*credibility*/}
+                                  {reportDetail?.status === 'unverified' && (
+                                    <div className='flex flex-col gap-2 text-center'>
+                                      <span className='font-poppins font-medium text-gray-600 text-sm'>
+                                        CREDIBILITY
+                                      </span>
+                                      <span
+                                        className='font-poppins font-medium'
+                                        style={{
+                                          color:
+                                            credibility >= 70
+                                              ? '#16a34a'
+                                              : credibility >= 40
+                                                ? '#d97706'
+                                                : '#dc2626',
+                                        }}
+                                      >
+                                        {credibility !== undefined
+                                          ? `${credibility}%`
+                                          : 'N/A'}
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </>
@@ -342,7 +375,7 @@ export default function ViewReportDialog() {
                   )}
                 </div>
               </div>
-              {reportDetail?.status !== 'verified' ? (
+              {reportDetail?.status === 'unverified' ? (
                 <DialogFooter className='flex items-center bg-[#F9F9F9] rounded-t-2xl p-4 shrink-0'>
                   <div className='flex w-full items-center justify-between'>
                     <span className='text-start opacity-50 text-sm'>
@@ -376,39 +409,65 @@ export default function ViewReportDialog() {
                   </div>
                 </DialogFooter>
               ) : (
-                !reportDetail?.isAdmin && (
-                  <DialogFooter className='flex items-center bg-[#F9F9F9] rounded-t-2xl p-4 shrink-0'>
-                    <div className='flex flex-col gap-2 items-end'>
-                      <span className='font-poppins font-semibold text-gray-600 text-sm'>
-                        VERIFIED BY
-                      </span>
-                      <div className='flex items-center gap-2 w-auto text-end'>
-                        <div className='flex flex-col'>
-                          <span className='text-sm font-medium'>
-                            {reportDetail?.verifier?.name}
-                          </span>
-                          {reportDetail?.verifiedAt && (
-                            <span className='text-xs text-gray-600'>
-                              {format(reportDetail?.verifiedAt, 'PPP p')}
-                            </span>
-                          )}
-                        </div>
-
-                        <UIAvatar className='size-8'>
-                          <AvatarImage
-                            src={
-                              reportDetail?.verifier?.profilePicture ||
-                              undefined
-                            }
-                          />
-                          <AvatarFallback>
-                            <Avatar
-                              name={`${reportDetail?.verifier?.name} ${reportDetail?.verifier?.id}`}
-                              variant='beam'
-                              className='size-8'
+                reportDetail?.status === 'verified' && (
+                  <DialogFooter className='flex bg-[#F9F9F9] rounded-t-2xl p-4 shrink-0'>
+                    <div className='flex w-full items-center justify-between'>
+                      <div className='flex flex-col gap-2'>
+                        <span className='font-poppins font-semibold text-gray-600 text-sm'>
+                          VERIFIED BY
+                        </span>
+                        <div className='flex items-center gap-2 w-auto '>
+                          <UIAvatar className='size-8'>
+                            <AvatarImage
+                              src={
+                                reportDetail?.verifier?.profilePicture ||
+                                undefined
+                              }
                             />
-                          </AvatarFallback>
-                        </UIAvatar>
+                            <AvatarFallback>
+                              <Avatar
+                                name={`${reportDetail?.verifier?.name} ${reportDetail?.verifier?.id}`}
+                                variant='beam'
+                                className='size-8'
+                              />
+                            </AvatarFallback>
+                          </UIAvatar>
+                          <div className='flex flex-col'>
+                            <span className='text-sm font-medium'>
+                              {reportDetail?.verifier?.name}
+                            </span>
+                            {reportDetail?.verifiedAt && (
+                              <span className='text-xs text-gray-600'>
+                                {format(reportDetail?.verifiedAt, 'PPP p')}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className='flex gap-2 self-end'>
+                        <Button
+                          variant='ghost'
+                          onClick={closeDialog}
+                          className='font-poppins'
+                        >
+                          <span>CANCEL</span>
+                        </Button>
+
+                        <Button
+                          variant='outline'
+                          disabled={isPending}
+                          onClick={handleResolve}
+                          className='font-poppins flex items-center gap-2 border-[#0066CC] bg-white text-[#0066CC] hover:bg-[#0066CC10] hover:text-[#0066CC]'
+                        >
+                          {isPending ? (
+                            <Spinner />
+                          ) : (
+                            <IconCheck className='w-[1.5em]! h-[1.5em]!' />
+                          )}
+                          <span>
+                            {isPending ? 'MARKING...' : 'MARK AS RESOLVED'}
+                          </span>
+                        </Button>
                       </div>
                     </div>
                   </DialogFooter>

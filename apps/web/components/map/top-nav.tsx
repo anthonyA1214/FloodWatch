@@ -20,11 +20,13 @@ import ReportFloodAlertDialog from './report-flood-alert-dialog';
 import { useMapOverlay } from '@/contexts/map-overlay-context';
 import { cn } from '@/lib/utils';
 import { useMapFilter } from '@/contexts/map-filter-context';
+import { useNotificationsUnreadCount } from '@/hooks/use-notifications-unread-count';
 
 export default function TopNav() {
   const { toggle, openLocations, activeOverlay } = useMapOverlay();
   const { setQ, setInputValue } = useMapFilter();
   const { me, isLoading } = useMe();
+  const { unreadCount } = useNotificationsUnreadCount();
 
   return (
     <header className='w-full bg-[#0066CC] relative z-50'>
@@ -52,9 +54,10 @@ export default function TopNav() {
               activeOverlay?.type === 'affected-list' &&
                 'bg-white/30 border-white/30',
             )}
+            data-tour='topnav-affected-locations-mobile'
             onClick={() => openLocations('affected-list')}
           >
-            <IconMapPinExclamation className='size-[1.5em]! shrink-0 shrink-0' />
+            <IconMapPinExclamation className='size-[1.5em]! shrink-0' />
             <span className='font-medium truncate'>AFFECTED LOCATIONS</span>
           </button>
 
@@ -69,9 +72,10 @@ export default function TopNav() {
               activeOverlay?.type === 'safety-list' &&
                 'bg-white/30 border-white/30',
             )}
+            data-tour='topnav-safety-locations-mobile'
             onClick={() => openLocations('safety-list')}
           >
-            <IconShieldPin className='size-[1.5em]! shrink-0 shrink-0' />
+            <IconShieldPin className='size-[1.5em]! shrink-0' />
             <span className='font-medium truncate'>SAFETY LOCATIONS</span>
           </button>
         </div>
@@ -90,6 +94,7 @@ export default function TopNav() {
                 activeOverlay?.type === 'affected-list' &&
                   'bg-white/30 border-white/30',
               )}
+              data-tour='topnav-affected-locations-desktop'
               onClick={() => {
                 setInputValue('');
                 setQ('');
@@ -111,6 +116,7 @@ export default function TopNav() {
                 activeOverlay?.type === 'safety-list' &&
                   'bg-white/30 border-white/30',
               )}
+              data-tour='topnav-safety-locations-desktop'
               onClick={() => {
                 setInputValue('');
                 setQ('');
@@ -124,23 +130,38 @@ export default function TopNav() {
 
           {/* user actions */}
           {isLoading ? (
-            <div className='flex items-center gap-2 ml-auto'>
+            <div className='flex items-center gap-3 ml-auto'>
               <Skeleton className='w-24 h-9 rounded-md bg-white/20' />
               <Skeleton className='w-6 h-6 rounded-md bg-white/20' />
               <Skeleton className='size-8 rounded-full bg-white/20' />
             </div>
           ) : me ? (
-            <>
-              <ReportFloodAlertDialog />
+            <div className='flex items-center gap-3 ml-auto'>
+              <div data-tour='report-flood-alert'>
+                <ReportFloodAlertDialog />
+              </div>
 
               <button
-                className='text-base text-white hover:text-[#F5F5F5] active:text-[#EAEAEA] transition-colors shrink-0'
+                className={cn(
+                  'relative text-base text-white/70 hover:text-white transition-colors shrink-0 p-1.5 rounded-full bg-white/10 hover:bg-white/20',
+                  activeOverlay?.type === 'notification' &&
+                    'text-white bg-white/20',
+                )}
                 onClick={() => toggle('notification')}
               >
                 <IconBell className='size-[1.5em]! shrink-0' />
+                {unreadCount > 0 && (
+                  <span className='absolute top-0 right-0 size-2 rounded-full bg-[#FB2C36]' />
+                )}
               </button>
 
-              <button onClick={() => toggle('profile')}>
+              <button
+                onClick={() => toggle('profile')}
+                className={cn(
+                  activeOverlay?.type === 'profile' &&
+                    'ring-2 ring-white ring-offset-2 ring-offset-[#0066CC] rounded-full',
+                )}
+              >
                 <UIAvatar className='size-8 border'>
                   <AvatarImage src={me?.profilePicture} />
                   <AvatarFallback>
@@ -152,7 +173,7 @@ export default function TopNav() {
                   </AvatarFallback>
                 </UIAvatar>
               </button>
-            </>
+            </div>
           ) : (
             <div className='ml-auto'>
               <AuthButtons />

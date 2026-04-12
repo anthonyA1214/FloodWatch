@@ -55,10 +55,29 @@ export class NotificationsService {
       );
   }
 
+  async deleteOne(notificationId: number, userId: number) {
+    await this.db
+      .delete(notifications)
+      .where(
+        and(
+          eq(notifications.id, notificationId),
+          eq(notifications.recipientId, userId),
+        ),
+      );
+  }
+
   async create(dto: typeof notifications.$inferInsert) {
     const [created] = await this.db
       .insert(notifications)
       .values(dto)
+      .returning();
+    return created;
+  }
+
+  async createMany(dtos: (typeof notifications.$inferInsert)[]) {
+    const created = await this.db
+      .insert(notifications)
+      .values(dtos)
       .returning();
     return created;
   }

@@ -53,20 +53,18 @@ export default function SafetyLocationsListDrawer() {
     q: q || undefined,
   };
 
+  const [snap, setSnap] = useState<number | string | null>(snapPoints[1]);
+  const [open, setOpen] = useState(true);
   const { safetyList, meta, isLoading } = useSafetyLocationList(params);
   const { close } = useMapOverlay();
   const { activePopup, openSafetyPopup } = useMapPopup();
   const { safetyMapPins } = useSafetyLocationMapPins();
 
-  const handleCardClick = (safetyId: number) => {
-    const pin = safetyMapPins?.find((p) => p.id === safetyId);
-    if (pin) {
-      openSafetyPopup(pin);
-    }
+  const collapseAndClose = () => {
+    setSnap(snapPoints[0]);
+    // Allow the snap animation to play before closing overlay
+    window.setTimeout(() => handleOpenChange(false), 220);
   };
-
-  const [snap, setSnap] = useState<number | string | null>(snapPoints[1]);
-  const [open, setOpen] = useState(true);
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
@@ -74,6 +72,14 @@ export default function SafetyLocationsListDrawer() {
       setQ('');
       setInputValue('');
       close?.();
+    }
+  };
+
+  const handleCardClick = (safetyId: number) => {
+    const pin = safetyMapPins?.find((p) => p.id === safetyId);
+    if (pin) {
+      openSafetyPopup(pin);
+      collapseAndClose();
     }
   };
 
@@ -86,7 +92,7 @@ export default function SafetyLocationsListDrawer() {
       activeSnapPoint={snap}
       setActiveSnapPoint={(newSnap) => {
         if (newSnap === snapPoints[0]) {
-          handleOpenChange(false);
+          collapseAndClose();
         } else {
           setSnap(newSnap);
         }
@@ -98,7 +104,7 @@ export default function SafetyLocationsListDrawer() {
 
       <Drawer.Content
         data-testid='content'
-        className='z-1 absolute flex flex-col bg-white border border-gray-200 border-b-none rounded-t-[10px] bottom-0 left-0 right-0 h-full max-h-full -mx-px'
+        className='z-1001 absolute flex flex-col bg-white border border-gray-200 border-b-none rounded-t-[10px] bottom-0 left-0 right-0 h-full max-h-full -mx-px'
       >
         <Drawer.Handle className='w-16! my-3! rounded-full! shrink-0!' />
 

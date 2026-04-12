@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Accordion,
   AccordionContent,
@@ -5,10 +7,26 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { IconPhoneCall } from '@tabler/icons-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { toast } from 'sonner';
 
 export default function HotlinesPill() {
+  const isMobile = useIsMobile();
+
+  const handleCopy = async (label: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} number copied`);
+    } catch {
+      toast.error('Unable to copy number');
+    }
+  };
+
   return (
-    <div className='pointer-events-auto bg-white/80 overflow-hidden rounded-2xl shadow-lg border w-[230px] md:w-[280px] max-w-xs'>
+    <div
+      className='pointer-events-auto bg-white/80 overflow-hidden rounded-2xl shadow-lg border w-[230px] md:w-[280px] max-w-xs'
+      data-tour='map-hotlines'
+    >
       <Accordion type='single' collapsible>
         <AccordionItem value='hotlines'>
           <AccordionTrigger className='flex items-center px-3 py-2.5 md:px-4 md:py-3 hover:no-underline! shadow-2xs rounded-2xl'>
@@ -33,28 +51,59 @@ export default function HotlinesPill() {
               Caloocan City Disaster Risk Management Office
             </p>
             <div className='flex flex-col gap-2'>
-              <a
-                href='tel:+63288825664'
-                className='flex items-center justify-between rounded-2xl border border-red-200 bg-red-50 px-4 py-3 cursor-pointer'
-              >
-                <span className='text-[11px] md:text-xs font-semibold tracking-[0.16em] text-red-400 uppercase'>
-                  Phone
-                </span>
-                <span className='text-[13px] md:text-sm font-bold text-red-600 whitespace-nowrap text-right'>
-                  (02) 888-25664
-                </span>
-              </a>
-              <a
-                href='tel:+639088125664'
-                className='flex items-center justify-between rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 cursor-pointer'
-              >
-                <span className='text-[11px] md:text-xs font-semibold tracking-[0.16em] text-blue-500 uppercase'>
-                  Mobile
-                </span>
-                <span className='text-[13px] md:text-sm font-bold text-blue-600 whitespace-nowrap text-right'>
-                  090881 - 25664
-                </span>
-              </a>
+              {isMobile ? (
+                <>
+                  <a
+                    href='tel:+63288825664'
+                    className='flex items-center justify-between rounded-2xl border border-red-200 bg-red-50 px-4 py-3 cursor-pointer'
+                  >
+                    <span className='text-[11px] md:text-xs font-semibold tracking-[0.16em] text-red-400 uppercase'>
+                      Phone
+                    </span>
+                    <span className='text-[13px] md:text-sm font-bold text-red-600 whitespace-nowrap text-right'>
+                      (02) 888-25664
+                    </span>
+                  </a>
+                  <a
+                    href='tel:+639088125664'
+                    className='flex items-center justify-between rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 cursor-pointer'
+                  >
+                    <span className='text-[11px] md:text-xs font-semibold tracking-[0.16em] text-blue-500 uppercase'>
+                      Mobile
+                    </span>
+                    <span className='text-[13px] md:text-sm font-bold text-blue-600 whitespace-nowrap text-right'>
+                      090881 - 25664
+                    </span>
+                  </a>
+                </>
+              ) : (
+                <>
+                  <button
+                    type='button'
+                    onClick={() => handleCopy('Phone', '+63288825664')}
+                    className='flex items-center justify-between rounded-2xl border border-red-200 bg-red-50 px-4 py-3 cursor-pointer select-text hover:bg-red-100'
+                  >
+                    <span className='text-[11px] md:text-xs font-semibold tracking-[0.16em] text-red-400 uppercase'>
+                      Phone
+                    </span>
+                    <span className='text-[13px] md:text-sm font-bold text-red-600 whitespace-nowrap text-right'>
+                      (02) 888-25664
+                    </span>
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => handleCopy('Mobile', '+639088125664')}
+                    className='flex items-center justify-between rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 cursor-pointer select-text hover:bg-blue-100'
+                  >
+                    <span className='text-[11px] md:text-xs font-semibold tracking-[0.16em] text-blue-500 uppercase'>
+                      Mobile
+                    </span>
+                    <span className='text-[13px] md:text-sm font-bold text-blue-600 whitespace-nowrap text-right'>
+                      090881 - 25664
+                    </span>
+                  </button>
+                </>
+              )}
             </div>
           </AccordionContent>
         </AccordionItem>

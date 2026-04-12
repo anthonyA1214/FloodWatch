@@ -23,16 +23,7 @@ import { Badge } from '@/components/ui/badge';
 export const columns: ColumnDef<ReportInput>[] = [
   {
     accessorKey: 'name',
-    header: ({ column }) => {
-      return (
-        <button
-          className='inline-flex gap-2 items-center'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          USER <IconArrowsUpDown className='w-[1em]! h-[1em]!' />
-        </button>
-      );
-    },
+    header: 'REPORTER',
     cell: ({ row }) => {
       const user = row.original;
       return (

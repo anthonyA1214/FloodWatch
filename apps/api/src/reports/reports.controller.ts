@@ -189,11 +189,25 @@ export class ReportsController {
   }
 
   @Roles('admin')
+  @Patch(':id/resolve')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, UserStatusGuard)
+  async resolveReport(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthRequest,
+  ) {
+    return await this.reportsService.resolveReport(id, req.user.id);
+  }
+
+  @Roles('admin')
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard, UserStatusGuard)
-  async deleteReport(@Param('id', ParseIntPipe) id: number) {
-    return await this.reportsService.deleteReport(id);
+  async deleteReport(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: AuthRequest,
+  ) {
+    return await this.reportsService.deleteReport(id, req.user.id);
   }
 
   @Public()

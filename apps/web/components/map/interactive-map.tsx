@@ -311,7 +311,14 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
                 openReportPopup(report);
               }}
             >
-              <FloodMarker severity={report.severity} status={report.status} />
+              <FloodMarker
+                severity={report.severity}
+                status={report.status}
+                isFocused={
+                  activePopup?.type === 'report' &&
+                  activePopup.report.id === report.id
+                }
+              />
             </Marker>
             <RadiusCircle
               id={`${report.id}`}
@@ -335,7 +342,13 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
               openSafetyPopup(safety);
             }}
           >
-            <SafetyMarker type={safety.type} />
+            <SafetyMarker
+              type={safety.type}
+              isFocused={
+                activePopup?.type === 'safety' &&
+                activePopup.safety.id === safety.id
+              }
+            />
           </Marker>
         ))}
 
@@ -360,6 +373,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
             maxWidth='none'
             onClose={closePopup}
             closeOnClick={false}
+            className='z-1'
           >
             <AffectedLocationPopup
               onClose={closePopup}
@@ -389,6 +403,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
             maxWidth='none'
             onClose={closePopup}
             closeOnClick={false}
+            className='z-1'
           >
             <SafetyLocationPopup
               onClose={closePopup}

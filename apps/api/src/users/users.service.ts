@@ -11,9 +11,11 @@ import { users } from 'src/drizzle/schemas/users.schema';
 import { and, count, desc, eq, like, or, sql } from 'drizzle-orm';
 import { authAccounts } from 'src/drizzle/schemas/auth-accounts.schema';
 import * as bcrypt from 'bcrypt';
+import { type UploadedImageFile } from 'src/common/types/uploaded-image-file.type';
 import { profileInfo } from 'src/drizzle/schemas';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ImagesService } from 'src/images/images.service';
+import { MailerService } from '../mailer/mailer.service';
 import {
   CreateAdminInput,
   UpdateProfileInput,
@@ -26,6 +28,7 @@ export class UsersService {
     @Inject(DRIZZLE) private db: DrizzleDB,
     private cloudinaryService: CloudinaryService,
     private imagesService: ImagesService,
+    private mailerService: MailerService,
   ) {}
 
   async createUser(email: string, role: 'user' | 'admin' = 'user') {
@@ -251,7 +254,7 @@ export class UsersService {
     return updatedProfile;
   }
 
-  async uploadAvatar(id: number, image: Express.Multer.File) {
+  async uploadAvatar(id: number, image: UploadedImageFile) {
     try {
       const [profile] = await this.db
         .select()
@@ -273,7 +276,7 @@ export class UsersService {
       const { buffer, mimetype } =
         await this.imagesService.normalizeAvatarImage(image.buffer);
 
-      const normalizedFile: Express.Multer.File = {
+      const normalizedFile: UploadedImageFile = {
         ...image,
         buffer,
         mimetype,
@@ -452,6 +455,18 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
 
     await this.updateUserStatus(id, 'blocked');
+
+    // Send account blocked email if user has an email
+    if (user.email) {
+      try {
+        await this.mailerService.sendAccountBlockedEmail(user.email);
+      } catch (e) {
+        // Log error but do not block operation
+
+        console.error('Failed to send account blocked email:', e);
+      }
+    }
+
     return { message: 'User blocked successfully' };
   }
 

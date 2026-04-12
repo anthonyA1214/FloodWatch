@@ -119,7 +119,7 @@ export default function AffectedLocationDrawer({
 
       <Drawer.Content
         data-testid='content'
-        className='z-1 absolute flex flex-col bg-white border border-gray-200 border-b-none rounded-t-[10px] bottom-0 left-0 right-0 h-full max-h-full -mx-px'
+        className='z-1001 absolute flex flex-col bg-white border border-gray-200 border-b-none rounded-t-[10px] bottom-0 left-0 right-0 h-full max-h-full -mx-px'
       >
         <Drawer.Handle className='w-16! my-3! rounded-full! shrink-0!' />
 
@@ -324,18 +324,30 @@ export default function AffectedLocationDrawer({
               )}
 
               {/* credibility and confirm and deny */}
-              {!reportDetail?.isAdmin && (
+              {['unverified', 'verified'].includes(reportDetail?.status) && (
                 <div className='flex flex-col border rounded-lg text-xs lg:text-sm'>
                   <div className='flex justify-between items-center p-3 lg:p-4'>
                     <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
                       <IconShieldCheck className='w-[1.5em]! h-[1.5em]!' />
                       <span className='font-poppins font-medium'>
-                        CREDIBILITY
+                        {reportDetail?.status === 'verified'
+                          ? 'IS THIS FLOOD STILL HAPPENING?'
+                          : 'CREDIBILITY'}
                       </span>
                     </div>
 
-                    <span className='font-poppins font-bold'>
-                      {credibility}%
+                    <span
+                      className='font-poppins font-medium'
+                      style={{
+                        color:
+                          credibility >= 70
+                            ? '#16a34a'
+                            : credibility >= 40
+                              ? '#d97706'
+                              : '#dc2626',
+                      }}
+                    >
+                      {credibility !== undefined ? `${credibility}%` : 'N/A'}
                     </span>
                   </div>
 

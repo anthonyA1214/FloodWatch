@@ -20,13 +20,16 @@ export const severityEnum = pgEnum('severity', [
 export const reportsStatusEnum = pgEnum('report_status', [
   'unverified',
   'verified',
+  'resolved',
 ]);
 
 export const reports = pgTable('reports', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id, {
-    onDelete: 'cascade',
-  }),
+  userId: integer('user_id')
+    .references(() => users.id, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
   verifierId: integer('verifier_id').references(() => users.id, {
     onDelete: 'set null',
   }),
