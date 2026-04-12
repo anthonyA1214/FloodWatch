@@ -314,11 +314,6 @@ export class ReportsService {
       location: displayName,
     });
 
-    await this.sendFloodAlertEmails({
-      location: displayName,
-      severity,
-    });
-
     return { message: 'Report created successfully' };
   }
 
@@ -752,7 +747,6 @@ export class ReportsService {
         severity,
       }),
     );
-
     for (const { email } of adminRecipients) {
       await this.mailerService.sendAdminFloodAlertEmail(email, {
         location,

@@ -98,7 +98,7 @@ export default function InteractiveMapPage() {
           {/* static hotlines pill (only when no overlay is active) */}
           <div
             className={cn(
-              'absolute right-4 ',
+              'absolute right-4 z-1',
               isError || !location
                 ? 'bottom-4 md:bottom-4'
                 : 'bottom-20 md:bottom-4',

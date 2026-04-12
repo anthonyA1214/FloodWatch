@@ -12,8 +12,6 @@ export function useNotifications() {
     refreshInterval: 30000,
   });
 
-  console.log(data);
-
   return {
     notifications: data,
     isLoading,
