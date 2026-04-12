@@ -252,51 +252,70 @@ export default function ViewReportDialog() {
                           </div>
 
                           {/*confirms, denies and credibility*/}
-                          {!reportDetail?.isAdmin && (
+                          {reportDetail?.status !== 'resolved' && (
                             <>
                               <Separator />
 
-                              <div className='grid grid-cols-3 gap-4 px-4'>
-                                {/*confirms*/}
-                                <div className='flex flex-col gap-2 text-center'>
+                              <div className='flex flex-col gap-2 px-4'>
+                                {reportDetail?.status === 'verified' && (
                                   <span className='font-poppins font-medium text-gray-600 text-sm'>
-                                    CONFIRMS
+                                    IS THIS FLOOD STILL HAPPENING?
                                   </span>
-                                  <span className='font-poppins font-medium  text-[#16a34a]'>
-                                    {confirms !== undefined ? confirms : 'N/A'}
-                                  </span>
-                                </div>
+                                )}
 
-                                {/*denies*/}
-                                <div className='flex flex-col gap-2 text-center'>
-                                  <span className='font-poppins font-medium text-gray-600 text-sm'>
-                                    DENIES
-                                  </span>
-                                  <span className='font-poppins font-medium text-[#dc2626]'>
-                                    {denies !== undefined ? denies : 'N/A'}
-                                  </span>
-                                </div>
+                                <div
+                                  className={cn(
+                                    'grid gap-4',
+                                    reportDetail?.status === 'verified'
+                                      ? 'grid-cols-2'
+                                      : 'grid-cols-3',
+                                  )}
+                                >
+                                  {/*confirms*/}
+                                  <div className='flex flex-col gap-2 text-center'>
+                                    <span className='font-poppins font-medium text-gray-600 text-sm'>
+                                      CONFIRMS
+                                    </span>
+                                    <span className='font-poppins font-medium  text-[#16a34a]'>
+                                      {confirms !== undefined
+                                        ? confirms
+                                        : 'N/A'}
+                                    </span>
+                                  </div>
 
-                                {/*credibility*/}
-                                <div className='flex flex-col gap-2 text-center'>
-                                  <span className='font-poppins font-medium text-gray-600 text-sm'>
-                                    CREDIBILITY
-                                  </span>
-                                  <span
-                                    className='font-poppins font-medium'
-                                    style={{
-                                      color:
-                                        credibility >= 70
-                                          ? '#16a34a'
-                                          : credibility >= 40
-                                            ? '#d97706'
-                                            : '#dc2626',
-                                    }}
-                                  >
-                                    {credibility !== undefined
-                                      ? `${credibility}%`
-                                      : 'N/A'}
-                                  </span>
+                                  {/*denies*/}
+                                  <div className='flex flex-col gap-2 text-center'>
+                                    <span className='font-poppins font-medium text-gray-600 text-sm'>
+                                      DENIES
+                                    </span>
+                                    <span className='font-poppins font-medium text-[#dc2626]'>
+                                      {denies !== undefined ? denies : 'N/A'}
+                                    </span>
+                                  </div>
+
+                                  {/*credibility*/}
+                                  {reportDetail?.status === 'unverified' && (
+                                    <div className='flex flex-col gap-2 text-center'>
+                                      <span className='font-poppins font-medium text-gray-600 text-sm'>
+                                        CREDIBILITY
+                                      </span>
+                                      <span
+                                        className='font-poppins font-medium'
+                                        style={{
+                                          color:
+                                            credibility >= 70
+                                              ? '#16a34a'
+                                              : credibility >= 40
+                                                ? '#d97706'
+                                                : '#dc2626',
+                                        }}
+                                      >
+                                        {credibility !== undefined
+                                          ? `${credibility}%`
+                                          : 'N/A'}
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </>
