@@ -5,11 +5,10 @@ export default function MainLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    // dito ilalagay ung topnav or footer.
-    <>
+    <div className='overflow-x-hidden w-full'>
       <TopNav />
-      <main>{children}</main>
+      <main className='overflow-x-hidden'>{children}</main>
       <Footer />
-    </>
+    </div>
   );
 }

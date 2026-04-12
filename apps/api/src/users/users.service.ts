@@ -11,6 +11,7 @@ import { users } from 'src/drizzle/schemas/users.schema';
 import { and, count, desc, eq, like, or, sql } from 'drizzle-orm';
 import { authAccounts } from 'src/drizzle/schemas/auth-accounts.schema';
 import * as bcrypt from 'bcrypt';
+import { type UploadedImageFile } from 'src/common/types/uploaded-image-file.type';
 import { profileInfo } from 'src/drizzle/schemas';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ImagesService } from 'src/images/images.service';
@@ -253,7 +254,7 @@ export class UsersService {
     return updatedProfile;
   }
 
-  async uploadAvatar(id: number, image: Express.Multer.File) {
+  async uploadAvatar(id: number, image: UploadedImageFile) {
     try {
       const [profile] = await this.db
         .select()
@@ -275,7 +276,7 @@ export class UsersService {
       const { buffer, mimetype } =
         await this.imagesService.normalizeAvatarImage(image.buffer);
 
-      const normalizedFile: Express.Multer.File = {
+      const normalizedFile: UploadedImageFile = {
         ...image,
         buffer,
         mimetype,

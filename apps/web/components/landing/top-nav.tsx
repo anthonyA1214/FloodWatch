@@ -1,8 +1,22 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import TopNavShadow from '@/components/shared/top-nav-shadow';
 import CollapsibleMenu from '@/components/landing/collapsible-menu';
-import AuthButtons from '@/components/shared/auth-buttons';
+
+// Check if user is logged in by looking for JWT access token in cookies
+async function getIsLoggedIn(): Promise<boolean> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('access_token');
+
+    // User is logged in if access_token cookie exists
+    return !!accessToken;
+  } catch (error) {
+    console.error('Auth check error:', error);
+    return false;
+  }
+}
 
 const navItems = [
   { label: 'FEATURES', url: '#features' },
@@ -11,11 +25,13 @@ const navItems = [
   { label: 'ABOUT US', url: '#about-us' },
 ];
 
-export default function TopNav() {
+export default async function TopNav() {
+  const isLoggedIn = await getIsLoggedIn();
+
   return (
     <>
       <header
-        className='flex w-full bg-[#0066CC]/95 fixed h-16 top-0 z-10 transition-shadow duration-200'
+        className='flex w-full bg-[#0066CC]/95 backdrop-blur-md fixed h-16 top-0 z-50 transition-shadow duration-200'
         id='top-nav'
       >
         <nav className='flex justify-between py-4 max-w-7xl w-full mx-auto px-4'>
@@ -32,23 +48,40 @@ export default function TopNav() {
           </div>
 
           <div className='flex items-center gap-10'>
+            {/* Desktop nav links */}
             <div className='hidden lg:flex items-center gap-8'>
               {navItems.map((item) => (
                 <Link
                   key={item.label}
                   href={item.url}
-                  className='font-poppins text-lg text-white hover:text-[#F5F5F5] active:text-[#EAEAEA]'
+                  className='font-poppins text-sm font-semibold text-white hover:text-white/80 transition-colors'
                 >
                   {item.label}
                 </Link>
               ))}
             </div>
 
-            <AuthButtons className='hidden lg:flex' />
+            {/* Desktop auth buttons — hidden when logged in */}
+            {!isLoggedIn && (
+              <div className='hidden lg:flex items-center gap-3'>
+                <Link
+                  href='/auth/login'
+                  className='text-sm font-semibold text-white border border-white/40 hover:border-white hover:bg-white/10 rounded-full px-5 py-1.5 transition-all duration-200'
+                >
+                  Log In
+                </Link>
+                <Link
+                  href='/auth/sign-up'
+                  className='text-sm font-semibold text-[#0066CC] bg-white hover:bg-white/90 rounded-full px-5 py-1.5 transition-all duration-200 shadow-sm'
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
 
             {/* Mobile Menu */}
             <div className='lg:hidden flex items-center'>
-              <CollapsibleMenu />
+              <CollapsibleMenu isLoggedIn={isLoggedIn} />
             </div>
           </div>
         </nav>

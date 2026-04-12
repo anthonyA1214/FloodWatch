@@ -26,12 +26,7 @@ import {
 import { Queue } from 'bullmq';
 import { notificationMessageMap } from 'src/notifications/notifications-messages';
 import { MailerService } from 'src/mailer/mailer.service';
-
-interface UploadedImageFile {
-  buffer: Buffer;
-  mimetype: string;
-  originalname: string;
-}
+import { type UploadedImageFile } from 'src/common/types/uploaded-image-file.type';
 
 @Injectable()
 export class ReportsService {
