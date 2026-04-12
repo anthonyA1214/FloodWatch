@@ -1,10 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { Collapsible, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useEffect, useState } from 'react';
-import { Cross as Hamburger } from 'hamburger-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { X, Menu } from 'lucide-react';
 
 const navItems = [
   { label: 'Features', url: '#features' },
@@ -13,85 +12,218 @@ const navItems = [
   { label: 'About Us', url: '#about-us' },
 ];
 
-export default function CollapsibleMenu() {
-  const [open, setOpen] = useState(false);
+interface CollapsibleMenuProps {
+  isLoggedIn?: boolean;
+}
+
+export default function CollapsibleMenu({
+  isLoggedIn = false,
+}: CollapsibleMenuProps) {
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : '';
+    document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
-  }, [open]);
+  }, [isOpen]);
+
+  const closeMenu = () => setIsOpen(false);
 
   return (
-    <Collapsible
-      open={open}
-      onOpenChange={setOpen}
-      className='flex items-center justify-center'
-    >
-      <CollapsibleTrigger className='text-white'>
-        <Hamburger
-          direction='left'
-          toggled={open}
-          toggle={setOpen}
-          size={20}
-          distance='sm'
-        />
-      </CollapsibleTrigger>
+    <>
+      {/* Hamburger — extra right padding so it's never flush with screen edge */}
+      <button
+        onClick={() => setIsOpen(true)}
+        aria-label='Open menu'
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          padding: '4px 0px 4px 4px',
+          display: 'flex',
+          alignItems: 'center',
+          color: '#fff',
+        }}
+      >
+        <Menu size={22} strokeWidth={2} />
+      </button>
 
-      {/* Backdrop */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            key='backdrop'
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className='fixed inset-0 top-16 bg-black/30 z-40'
-            onClick={() => setOpen(false)}
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={closeMenu}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              backgroundColor: 'rgba(0,0,0,0.45)',
+              zIndex: 9998,
+            }}
           />
-        )}
-      </AnimatePresence>
 
-      {/* Mobile Menu — replaces CollapsibleContent */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            key='menu'
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className='fixed right-0 top-16 bottom-0 w-3/4 max-w-xs bg-white shadow-md z-50'
+          {/* Panel */}
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              width: '68%',
+              maxWidth: '340px',
+              height: '100vh',
+              backgroundColor: '#ffffff',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '-6px 0 32px rgba(0,0,0,0.2)',
+              zIndex: 9999,
+              // Respect device safe areas (notch / dynamic island)
+              paddingRight: 'env(safe-area-inset-right, 0px)',
+            }}
           >
-            <div className='flex flex-col p-6 gap-4 text-lg overflow-y-scroll h-full'>
+            {/* Blue header — left padding for logo, right padding so X isn't clipped */}
+            <div
+              style={{
+                backgroundColor: '#0066CC',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingLeft: '16px',
+                paddingRight: '12px',
+                height: '64px',
+                flexShrink: 0,
+              }}
+            >
+              <Link
+                href='/'
+                onClick={closeMenu}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  textDecoration: 'none',
+                  minWidth: 0,
+                }}
+              >
+                <Image
+                  src='/logo-white.svg'
+                  alt='FloodWatch Logo'
+                  width={26}
+                  height={26}
+                  style={{ flexShrink: 0 }}
+                />
+                <span
+                  style={{
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: '17px',
+                    letterSpacing: '-0.2px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  FloodWatch
+                </span>
+              </Link>
+
+              {/* X button — explicit size so it's always fully visible */}
+              <button
+                onClick={closeMenu}
+                aria-label='Close menu'
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '36px',
+                  height: '36px',
+                  flexShrink: 0,
+                  marginLeft: '8px',
+                }}
+              >
+                <X size={22} strokeWidth={2} />
+              </button>
+            </div>
+
+            {/* Nav links */}
+            <nav style={{ flex: 1, overflowY: 'auto' }}>
               {navItems.map((item) => (
                 <Link
                   key={item.label}
                   href={item.url}
-                  onClick={() => setOpen(false)}
+                  onClick={closeMenu}
+                  style={{
+                    display: 'block',
+                    padding: '18px 20px',
+                    color: '#111111',
+                    textDecoration: 'none',
+                    fontSize: '16px',
+                    fontWeight: 400,
+                    borderBottom: '1px solid #eeeeee',
+                  }}
                 >
                   {item.label}
                 </Link>
               ))}
+            </nav>
 
-              <div className='w-full flex flex-col items-center gap-4 mt-auto'>
-                <Link href='/auth/login' className='w-full'>
-                  <button className='w-full py-3 bg-[#FFFFFF] hover:bg-[#F5F5F5] active:bg-[#EAEAEA] rounded-lg border transition-colors'>
-                    Login
-                  </button>
+            {/* Auth buttons pinned to bottom */}
+            {!isLoggedIn && (
+              <div
+                style={{
+                  padding: '16px 20px 32px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  flexShrink: 0,
+                }}
+              >
+                <Link
+                  href='/auth/login'
+                  onClick={closeMenu}
+                  style={{
+                    display: 'block',
+                    textAlign: 'center',
+                    padding: '13px',
+                    borderRadius: '8px',
+                    border: '1.5px solid #cccccc',
+                    backgroundColor: '#ffffff',
+                    color: '#111111',
+                    fontWeight: 500,
+                    fontSize: '15px',
+                    textDecoration: 'none',
+                  }}
+                >
+                  Login
                 </Link>
-                <Link href='/auth/sign-up' className='w-full'>
-                  <button className='w-full py-3 rounded-lg bg-[#81B2E2] text-white font-semibold hover:bg-[#6CA2DA] active:bg-[#578FCF] transition-colors shadow-sm'>
-                    Sign Up
-                  </button>
+                <Link
+                  href='/auth/sign-up'
+                  onClick={closeMenu}
+                  style={{
+                    display: 'block',
+                    textAlign: 'center',
+                    padding: '13px',
+                    borderRadius: '8px',
+                    backgroundColor: '#5B9BD5',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: '15px',
+                    textDecoration: 'none',
+                  }}
+                >
+                  Sign Up
                 </Link>
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </Collapsible>
+            )}
+          </div>
+        </>
+      )}
+    </>
   );
 }

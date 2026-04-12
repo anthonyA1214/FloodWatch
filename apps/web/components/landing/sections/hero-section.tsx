@@ -1,69 +1,216 @@
-import Image from 'next/image';
+'use client';
+
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+
+// 1. Define interfaces para sa animation objects
+interface BGBubble {
+  x: number;
+  y: number;
+  size: number;
+  speed: number;
+  drift: number;
+  opacity: number;
+  wobble: number;
+  wobbleSpeed: number;
+  wobbleAmp: number;
+}
+
+interface WaterEffect {
+  x: number;
+  y: number;
+  size: number;
+  maxSize: number;
+  opacity: number;
+  isBubble: boolean;
+  speedY: number;
+  speedX: number;
+}
 
 export default function HeroSection() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // 2. Gamitin ang interfaces dito sa halip na any[]
+    const waterEffects: WaterEffect[] = [];
+    let bgBubbles: BGBubble[] = [];
+    let animationFrameId: number;
+    let lastSpawnTime = 0;
+
+    const resizeCanvas = () => {
+      const section = canvas.closest('section');
+      canvas.width = section?.clientWidth || window.innerWidth;
+      canvas.height = section?.clientHeight || window.innerHeight;
+
+      bgBubbles = [];
+      for (let i = 0; i < 120; i++) {
+        bgBubbles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size:
+            Math.random() < 0.7
+              ? Math.random() * 2 + 0.5
+              : Math.random() * 4 + 2,
+          speed: Math.random() * 0.7 + 0.15,
+          drift: (Math.random() - 0.5) * 0.35,
+          opacity: Math.random() * 0.3 + 0.04,
+          wobble: Math.random() * Math.PI * 2,
+          wobbleSpeed: Math.random() * 0.025 + 0.008,
+          wobbleAmp: Math.random() * 0.6 + 0.2,
+        });
+      }
+    };
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const now = Date.now();
+      if (now - lastSpawnTime < 30) return;
+      lastSpawnTime = now;
+
+      for (let i = 0; i < 5; i++) {
+        waterEffects.push({
+          x: mouseX + (Math.random() - 0.5) * 20,
+          y: mouseY + (Math.random() - 0.5) * 20,
+          size: Math.random() * 2 + 1,
+          maxSize: Math.random() * 40 + 15,
+          opacity: 0.75,
+          isBubble: Math.random() > 0.45,
+          speedY: Math.random() * -1.0 - 0.2,
+          speedX: (Math.random() - 0.5) * 0.8,
+        });
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < bgBubbles.length; i++) {
+        const b = bgBubbles[i];
+        b.wobble += b.wobbleSpeed;
+        b.y -= b.speed;
+        b.x += b.drift + Math.sin(b.wobble) * b.wobbleAmp;
+        if (b.y < -10) {
+          b.y = canvas.height + 10;
+          b.x = Math.random() * canvas.width;
+        }
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${b.opacity})`;
+        ctx.fill();
+      }
+
+      for (let i = 0; i < waterEffects.length; i++) {
+        const e = waterEffects[i];
+        e.opacity -= 0.01;
+        if (e.isBubble) {
+          e.y += e.speedY;
+          e.x += e.speedX;
+          e.speedY *= 0.98;
+        } else {
+          if (e.size < e.maxSize) e.size += 0.6;
+        }
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+        if (e.isBubble) {
+          ctx.fillStyle = `rgba(255,255,255,${e.opacity})`;
+          ctx.fill();
+        } else {
+          ctx.strokeStyle = `rgba(180,220,255,${e.opacity})`;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+        if (e.opacity <= 0) {
+          waterEffects.splice(i, 1);
+          i--;
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
   return (
-    <section className='relative flex items-center justify-center bg-[#0066CC] w-full min-h-screen px-4 py-20'>
-      <div className='flex flex-col-reverse md:flex-row gap-10 items-center max-w-7xl justify-center w-full'>
-        {/* TEXT */}
-        <div className='flex flex-col gap-6 max-w-2xl text-left order-2 md:order-1'>
-          <div className='flex flex-col gap-6'>
-            <h1 className='text-4xl sm:text-5xl md:text-6xl font-extrabold'>
-              <p className='text-white'>
-                <span className='text-[#2F327D]'>Our flood</span> tracking
-                website ensures safety
-              </p>
-            </h1>
+    <section
+      className='relative z-0 flex flex-col items-center justify-center min-h-[90vh] pb-20 overflow-hidden -mt-16 pt-16'
+      style={{
+        background:
+          'linear-gradient(to bottom, #0066CC 0%, #0066CC 12%, #3385d6 30%, #66a3ff 55%, #b3d1ff 80%, #ffffff 100%)',
+      }}
+    >
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        @keyframes neonPulse {
+          0%   { box-shadow: 0 0 8px rgba(47,50,125,0.4), 0 0 15px rgba(47,50,125,0.2); transform: scale(1); }
+          50%  { box-shadow: 0 0 25px rgba(47,50,125,0.8), 0 0 50px rgba(153,200,255,0.5); transform: scale(1.02); }
+          100% { box-shadow: 0 0 8px rgba(47,50,125,0.4), 0 0 15px rgba(47,50,125,0.2); transform: scale(1); }
+        }
+        .animate-neon { animation: neonPulse 3s infinite ease-in-out; }
+      `,
+        }}
+      />
 
-            <p className='text-white text-lg sm:text-xl md:text-2xl'>
-              Our website helps communities stay safe during floods with an
-              interactive map showing real-time updates of affected areas. Users
-              can also post reports and share updates.
-            </p>
-          </div>
+      <canvas
+        ref={canvasRef}
+        className='absolute inset-0 z-0 pointer-events-none w-full h-full'
+      />
 
-          {/* Button below text */}
-          <div className='w-full'>
-            <Link href='/map'>
-              <button
-                className='bg-[#5c9ce6] hover:bg-[#4d8cd1]
-                w-full md:w-auto
-              text-white font-semibold
-                text-lg mm:text-xl
-                py-4 mm:py-5
-                px-12 mm:px-16
-                rounded-full
-                shadow-lg hover:shadow-xl
-                transition-all duration-300
-                hover:-translate-y-0.5'
-              >
-                Get Started
-              </button>
-            </Link>
-          </div>
-        </div>
+      <div className='relative z-10 flex flex-col items-center w-full max-w-4xl px-5 sm:px-8 text-center gap-5 md:gap-8 mt-16'>
+        <h1 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.2]'>
+          Track floods in real-time. <br className='hidden sm:block' />
+          <span className='text-[#2F327D] drop-shadow-sm'>
+            Ensure your safety.
+          </span>
+        </h1>
 
-        {/* IMAGE */}
-        <div className='w-full flex justify-center order-1 md:order-2'>
-          <Image
-            src='/hero-image.svg'
-            alt='hero image'
-            width={1440}
-            height={1024}
-            className='w-full object-cover'
-            priority
-          />
+        <p className='text-sm sm:text-base md:text-lg lg:text-xl text-white/95 max-w-2xl leading-relaxed font-normal drop-shadow-sm'>
+          Stay ahead of the rising waters. Our interactive map delivers instant
+          updates of affected areas, empowering communities to make smart
+          decisions when seconds count.
+        </p>
+
+        <div className='mt-4 md:mt-8'>
+          <Link href='/map'>
+            <Button className='animate-neon bg-[#2F327D] hover:bg-[#1a1c4b] text-white font-bold text-base sm:text-lg py-4 sm:py-5 px-8 sm:px-10 rounded-full transition-all duration-300 hover:-translate-y-1'>
+              Get Started Now
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Bottom Curve */}
-      <div className='absolute bottom-0 left-0 w-full'>
+      <div className='absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10 pointer-events-none'>
         <svg
-          viewBox='0 0 1200 120'
+          className='relative block w-full h-[60px] sm:h-[100px] md:h-[140px]'
           preserveAspectRatio='none'
-          className='relative block w-full h-[40px] md:h-[150px] fill-[#EAEAEA]'
+          viewBox='0 0 1200 120'
+          xmlns='http://www.w3.org/2000/svg'
         >
-          <path d='M0,120V0C150,80,450,120,600,120C750,120,1050,80,1200,0V120H0Z'></path>
+          <path
+            d='M0,60 C350,140 850,-20 1200,60 V120 H0 Z'
+            className='fill-white'
+          />
         </svg>
       </div>
     </section>
