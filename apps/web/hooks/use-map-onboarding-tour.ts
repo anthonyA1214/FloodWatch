@@ -160,7 +160,7 @@ export function useMapOnboardingTour() {
           popover: {
             title: 'Reporting floods',
             description:
-              "Once you log in, you’ll see a Report button here. Use it to submit flood reports and help others stay safe.<br /><br /><img src='/Report.png' alt='Report example' style='width: 100%; max-width: 260px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);' />",
+              "Once you log in, you’ll see a Report button here. Use it to submit flood reports and help others stay safe.<br /><br /><img src='tutorial/Report.png' alt='Report example' style='width: 100%; max-width: 260px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);' />",
             side: 'center' as const,
             align: 'center' as const,
           },
