@@ -160,7 +160,7 @@ export function useMapOnboardingTour() {
           popover: {
             title: 'Reporting floods',
             description:
-              "Once you log in, you’ll see a Report button here. Use it to submit flood reports and help others stay safe.<br /><br /><img src='/hero-image.svg' alt='Report example' style='width: 100%; max-width: 260px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);' />",
+              "Once you log in, you’ll see a Report button here. Use it to submit flood reports and help others stay safe.<br /><br /><img src='/Report.png' alt='Report example' style='width: 100%; max-width: 260px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);' />",
             side: 'center' as const,
             align: 'center' as const,
           },
@@ -203,7 +203,7 @@ export function useMapOnboardingTour() {
         popover: {
           title: 'Community Updates',
           description:
-            "Stay informed about the latest flood updates and community news. <br /><br /><img src='/tutorial/Community%20Updates.png' alt='Community Updates' style='width: 100%; max-width: 260px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);' />",
+            "Stay informed about the latest flood updates and community news. <br /><br /><img src='/tutorial/community.png' alt='Community Updates' style='width: 100%; max-width: 260px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);' />",
           side: 'center' as const,
           align: 'center' as const,
         },
@@ -213,7 +213,7 @@ export function useMapOnboardingTour() {
         popover: {
           title: 'Help your Community',
           description:
-            "Help your community verify the flood report by confirming or disputing it. It makes a difference! <br /><br /><img src='/tutorial/Verified%20vs%20Unverified.png' alt='Verified vs Unverified' style='width: 100%; max-width: 260px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);' />",
+            "Help your community verify the flood report by confirming or disputing it. It makes a difference! <br /><br /><img src='/tutorial/credibility.png' alt='Verified vs Unverified' style='width: 100%; max-width: 260px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);' />",
           side: 'center' as const,
           align: 'center' as const,
         },
@@ -223,7 +223,7 @@ export function useMapOnboardingTour() {
         popover: {
           title: 'See Directions',
           description:
-            "Get directions to the nearest evacuation center or emergency shelter. <br /><br /><img src='/tutorial/Directions.png' alt='Directions' style='width: 100%; max-width: 260px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);' />",
+            "Get directions to the nearest evacuation center or emergency shelter. <br /><br /><image src='/tutorial/Directions.png' autoplay muted loop playsinline style='width: 100%; max-width: 260px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); display: block; margin: 0 auto 8px auto;'></image>",
           side: 'center' as const,
           align: 'center' as const,
         },
@@ -233,7 +233,7 @@ export function useMapOnboardingTour() {
         popover: {
           title: 'THANKYOU, PLEASE STAY SAFE!',
           description:
-            "Thank you for using our app! Please stay safe and informed. <br /><br /><img src='/tutorial/Directions.png' alt='Directions' style='width: 100%; max-width: 260px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);' />",
+            "Thank you for using our app! Please stay safe and informed. <br /><br /><img src='/tutorial/thankyou.png' alt='Directions' style='width: 100%; max-width: 260px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);' />",
           side: 'center' as const,
           align: 'center' as const,
         },
