@@ -31,18 +31,18 @@ export default function ReportStatCards({
         onClick={() => onStatusChange('total')}
       />
       <ReportStatCard
-        label='Verified Reports'
-        count={verifiedCount}
-        status='verified'
-        isActive={activeStatus === 'verified'}
-        onClick={() => onStatusChange('verified')}
-      />
-      <ReportStatCard
         label='Unverified Reports'
         count={unverifiedCount}
         status='unverified'
         isActive={activeStatus === 'unverified'}
         onClick={() => onStatusChange('unverified')}
+      />
+      <ReportStatCard
+        label='Verified Reports'
+        count={verifiedCount}
+        status='verified'
+        isActive={activeStatus === 'verified'}
+        onClick={() => onStatusChange('verified')}
       />
       <ReportStatCard
         label='Resolved Reports'

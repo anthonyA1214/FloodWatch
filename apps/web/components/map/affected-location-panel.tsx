@@ -277,13 +277,15 @@ export default function AffectedLocationPanel({
             )}
 
             {/* credibility and confirm and deny */}
-            {!reportDetail?.isAdmin && (
+            {['unverified', 'verified'].includes(reportDetail?.status) && (
               <div className='flex flex-col border rounded-lg text-xs lg:text-sm'>
                 <div className='flex justify-between items-center p-3 lg:p-4'>
                   <div className='flex items-center gap-1.5 lg:gap-2 opacity-50'>
                     <IconShieldCheck className='w-[1.5em]! h-[1.5em]!' />
                     <span className='font-poppins font-medium'>
-                      CREDIBILITY
+                      {reportDetail?.status === 'verified'
+                        ? 'IS THIS FLOOD STILL HAPPENING?'
+                        : 'CREDIBILITY'}
                     </span>
                   </div>
 

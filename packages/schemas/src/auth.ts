@@ -9,9 +9,25 @@ export const logInSchema = z.object({
       error: 'Password is required',
       abort: true,
     })
-    .refine((val) => val.length >= 6, {
-      error: 'Password must be at least 6 characters long',
+    .refine((val) => val.length >= 8, {
+      error: 'Password must be at least 8 characters long',
       abort: true,
+    })
+    .refine((val) => /[A-Z]/.test(val), {
+      error: 'Password must contain at least one uppercase letter',
+      abort: false,
+    })
+    .refine((val) => /[a-z]/.test(val), {
+      error: 'Password must contain at least one lowercase letter',
+      abort: false,
+    })
+    .refine((val) => /\d/.test(val), {
+      error: 'Password must contain at least one number',
+      abort: false,
+    })
+    .refine((val) => /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(val), {
+      error: 'Password must contain at least one special character',
+      abort: false,
     }),
 });
 
@@ -48,9 +64,25 @@ export const signUpSchema = z
         error: 'Password is required',
         abort: true,
       })
-      .refine((val) => val.length >= 6, {
-        error: 'Password must be at least 6 characters long',
+      .refine((val) => val.length >= 8, {
+        error: 'Password must be at least 8 characters long',
         abort: true,
+      })
+      .refine((val) => /[A-Z]/.test(val), {
+        error: 'Password must contain at least one uppercase letter',
+        abort: false,
+      })
+      .refine((val) => /[a-z]/.test(val), {
+        error: 'Password must contain at least one lowercase letter',
+        abort: false,
+      })
+      .refine((val) => /\d/.test(val), {
+        error: 'Password must contain at least one number',
+        abort: false,
+      })
+      .refine((val) => /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(val), {
+        error: 'Password must contain at least one special character',
+        abort: false,
       }),
     confirm_password: z.string('Please confirm your password'),
   })
@@ -86,9 +118,25 @@ export const resetPasswordSchema = z
         error: 'New password is required',
         abort: true,
       })
-      .refine((val) => val.length >= 6, {
-        error: 'New password must be at least 6 characters long',
+      .refine((val) => val.length >= 8, {
+        error: 'New password must be at least 8 characters long',
         abort: true,
+      })
+      .refine((val) => /[A-Z]/.test(val), {
+        error: 'New password must contain at least one uppercase letter',
+        abort: false,
+      })
+      .refine((val) => /[a-z]/.test(val), {
+        error: 'New password must contain at least one lowercase letter',
+        abort: false,
+      })
+      .refine((val) => /\d/.test(val), {
+        error: 'New password must contain at least one number',
+        abort: false,
+      })
+      .refine((val) => /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(val), {
+        error: 'New password must contain at least one special character',
+        abort: false,
       }),
     confirm_new_password: z.string('Please confirm your new password'),
   })
