@@ -83,4 +83,13 @@ export class MailerService {
       },
     });
   }
+
+  async sendAccountBlockedEmail(to: string) {
+    await this.nestMailerService.sendMail({
+      to,
+      subject: 'Your FloodWatch account has been blocked',
+      template: 'account-blocked',
+      context: {},
+    });
+  }
 }
