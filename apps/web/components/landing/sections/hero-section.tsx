@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
 // 1. Define interfaces para sa animation objects
@@ -30,6 +30,7 @@ interface WaterEffect {
 
 export default function HeroSection() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -151,6 +152,13 @@ export default function HeroSection() {
     };
   }, []);
 
+  const handleGetStarted = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('start_map_tour', 'true');
+    }
+    router.push('/map');
+  };
+
   return (
     <section
       className='relative z-0 flex flex-col items-center justify-center min-h-[90vh] pb-20 overflow-hidden -mt-16 pt-16'
@@ -192,11 +200,12 @@ export default function HeroSection() {
         </p>
 
         <div className='mt-4 md:mt-8'>
-          <Link href='/map'>
-            <Button className='animate-neon bg-[#2F327D] hover:bg-[#1a1c4b] text-white font-bold text-base sm:text-lg py-4 sm:py-5 px-8 sm:px-10 rounded-full transition-all duration-300 hover:-translate-y-1'>
-              Get Started Now
-            </Button>
-          </Link>
+          <Button
+            className='animate-neon bg-[#2F327D] hover:bg-[#1a1c4b] text-white font-bold text-base sm:text-lg py-4 sm:py-5 px-8 sm:px-10 rounded-full transition-all duration-300 hover:-translate-y-1'
+            onClick={handleGetStarted}
+          >
+            Get Started Now
+          </Button>
         </div>
       </div>
 

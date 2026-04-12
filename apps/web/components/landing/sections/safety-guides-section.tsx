@@ -30,7 +30,8 @@ const safetyData = [
     // Changed to just text color suitable for the dark overlay
     accent: 'text-[#66B2FF]',
     image: '/images/beforeflood.png',
-    protocolLink: 'https://www.ready.gov/floods',
+    protocolLink:
+      'https://8list.ph/flood-safety-guide-what-to-do-during-flood/#before',
     cards: [
       {
         icon: IconClipboardText,
@@ -59,7 +60,8 @@ const safetyData = [
     // Changed to just text color suitable for the dark overlay
     accent: 'text-amber-400',
     image: '/images/duringflood.png',
-    protocolLink: 'https://www.ready.gov/floods',
+    protocolLink:
+      'https://8list.ph/flood-safety-guide-what-to-do-during-flood/#during',
     cards: [
       {
         icon: IconRun,
@@ -88,7 +90,8 @@ const safetyData = [
     // Changed to just text color suitable for the dark overlay
     accent: 'text-emerald-400',
     image: '/images/afterflood.png',
-    protocolLink: 'https://www.ready.gov/floods',
+    protocolLink:
+      'https://8list.ph/flood-safety-guide-what-to-do-during-flood/#after',
     cards: [
       {
         icon: IconClock,

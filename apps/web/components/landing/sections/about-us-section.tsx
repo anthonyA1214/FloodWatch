@@ -110,10 +110,10 @@ export default function AboutUsSection() {
               <div className='absolute inset-0 bg-linear-to-t from-slate-900/80 via-transparent to-transparent opacity-90' />
               <div className='absolute bottom-5 sm:bottom-8 left-5 sm:left-8 right-5 sm:right-8'>
                 <p className='text-white font-bold text-lg sm:text-2xl drop-shadow-md mb-1'>
-                  Nick Justine Dagum
+                  Flood Watch Team
                 </p>
-                <p className='text-white/90 text-xs sm:text-sm font-medium tracking-wide drop-shadow-sm uppercase'>
-                  Project Lead & The BSCS Dream Team
+                <p className='text-white/90 text-sm sm:text-xs font-light tracking-wide drop-shadow-sm uppercase'>
+                  University of Caloocan City | Software Engineering Project
                 </p>
               </div>
             </div>
