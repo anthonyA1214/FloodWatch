@@ -20,7 +20,10 @@ export default function MapLegendPopover() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className='relative flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 pointer-events-auto'>
+        <div
+          className='relative flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 pointer-events-auto'
+          data-tour='map-legend'
+        >
           <button
             className={cn(
               'aspect-square rounded-md p-1',

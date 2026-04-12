@@ -23,7 +23,10 @@ export default function HotlinesPill() {
   };
 
   return (
-    <div className='pointer-events-auto bg-white/80 overflow-hidden rounded-2xl shadow-lg border w-[230px] md:w-[280px] max-w-xs'>
+    <div
+      className='pointer-events-auto bg-white/80 overflow-hidden rounded-2xl shadow-lg border w-[230px] md:w-[280px] max-w-xs'
+      data-tour='map-hotlines'
+    >
       <Accordion type='single' collapsible>
         <AccordionItem value='hotlines'>
           <AccordionTrigger className='flex items-center px-3 py-2.5 md:px-4 md:py-3 hover:no-underline! shadow-2xs rounded-2xl'>

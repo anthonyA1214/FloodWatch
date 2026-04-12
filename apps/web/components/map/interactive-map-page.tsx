@@ -59,7 +59,7 @@ export default function InteractiveMapPage() {
     useMapFilter();
 
   return (
-    <div className='relative w-full h-full'>
+    <div className='relative w-full h-full' data-tour='map-main'>
       <InteractiveMap ref={interactiveMapRef} />
 
       {/* Top bar: search + controls in one row */}
@@ -111,7 +111,10 @@ export default function InteractiveMapPage() {
         {/* Map controls — fixed to right */}
         <div className='pointer-events-none flex flex-col gap-2 h-fit pt-4 pe-4'>
           {/* zoom buttons */}
-          <div className='flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 pointer-events-auto'>
+          <div
+            className='flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 pointer-events-auto'
+            data-tour='map-zoom-controls'
+          >
             <button
               onClick={() => interactiveMapRef.current?.zoomIn()}
               className='aspect-square hover:bg-gray-200 rounded-md p-1'
@@ -129,7 +132,10 @@ export default function InteractiveMapPage() {
           </div>
 
           {/* geolocate */}
-          <div className='flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 pointer-events-auto'>
+          <div
+            className='flex flex-col bg-white/80 rounded-md shadow-lg p-0.5 pointer-events-auto'
+            data-tour='map-geolocate'
+          >
             <button
               onClick={async () => {
                 if (!interactiveMapRef.current || isGeolocating) return;
