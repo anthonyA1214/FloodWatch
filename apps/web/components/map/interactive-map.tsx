@@ -373,7 +373,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
             maxWidth='none'
             onClose={closePopup}
             closeOnClick={false}
-            className='z-1'
+            className='z-2'
           >
             <AffectedLocationPopup
               onClose={closePopup}
@@ -403,7 +403,7 @@ const InteractiveMap = forwardRef<InteractiveMapHandle, object>(
             maxWidth='none'
             onClose={closePopup}
             closeOnClick={false}
-            className='z-1'
+            className='z-2'
           >
             <SafetyLocationPopup
               onClose={closePopup}
