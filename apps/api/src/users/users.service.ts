@@ -14,6 +14,7 @@ import * as bcrypt from 'bcrypt';
 import { profileInfo } from 'src/drizzle/schemas';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ImagesService } from 'src/images/images.service';
+import { MailerService } from '../mailer/mailer.service';
 import {
   CreateAdminInput,
   UpdateProfileInput,
@@ -26,6 +27,7 @@ export class UsersService {
     @Inject(DRIZZLE) private db: DrizzleDB,
     private cloudinaryService: CloudinaryService,
     private imagesService: ImagesService,
+    private mailerService: MailerService,
   ) {}
 
   async createUser(email: string, role: 'user' | 'admin' = 'user') {
@@ -452,6 +454,18 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
 
     await this.updateUserStatus(id, 'blocked');
+
+    // Send account blocked email if user has an email
+    if (user.email) {
+      try {
+        await this.mailerService.sendAccountBlockedEmail(user.email);
+      } catch (e) {
+        // Log error but do not block operation
+
+        console.error('Failed to send account blocked email:', e);
+      }
+    }
+
     return { message: 'User blocked successfully' };
   }
 
