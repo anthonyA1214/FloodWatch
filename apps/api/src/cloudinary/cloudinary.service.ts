@@ -5,11 +5,12 @@ import {
   UploadApiResponse,
 } from 'cloudinary';
 import * as streamifier from 'streamifier';
+import { type UploadedImageFile } from 'src/common/types/uploaded-image-file.type';
 
 @Injectable()
 export class CloudinaryService {
   async uploadImage(
-    file: Express.Multer.File,
+    file: UploadedImageFile,
     folder: string,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     return new Promise<UploadApiResponse | UploadApiErrorResponse>(
