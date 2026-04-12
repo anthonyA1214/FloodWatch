@@ -1,4 +1,3 @@
-import { el } from '@faker-js/faker';
 import { InjectQueue } from '@nestjs/bullmq';
 import {
   BadRequestException,
@@ -22,6 +21,7 @@ import { and, desc, eq, lt, or, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { User } from 'src/auth/types/auth-request.type';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { type UploadedImageFile } from 'src/common/types/uploaded-image-file.type';
 import { DRIZZLE } from 'src/drizzle/drizzle-connection';
 import {
   commentReportReviews,
@@ -110,7 +110,7 @@ export class CommentsService {
     reportId: number,
     createCommentDto: CreateCommentInput,
     userId: number,
-    image: Express.Multer.File,
+    image: UploadedImageFile,
   ) {
     const { content } = createCommentDto;
 
@@ -134,7 +134,7 @@ export class CommentsService {
         image.buffer,
       );
 
-      const normalizedFile: Express.Multer.File = {
+      const normalizedFile: UploadedImageFile = {
         ...image,
         buffer,
         mimetype,
@@ -171,7 +171,7 @@ export class CommentsService {
     commentId: number,
     updateCommentDto: UpdateCommentDto,
     userId: number,
-    image: Express.Multer.File,
+    image: UploadedImageFile,
   ) {
     const [comment] = await this.db
       .select({
@@ -213,7 +213,7 @@ export class CommentsService {
         image.buffer,
       );
 
-      const normalizedFile: Express.Multer.File = {
+      const normalizedFile: UploadedImageFile = {
         ...image,
         buffer,
         mimetype,

@@ -3,7 +3,6 @@ import { MailerService } from './mailer.service';
 import { MailerModule as NestMailerModule } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import BrevoTransport from 'nodemailer-brevo-transport';
 @Module({
   imports: [
     NestMailerModule.forRootAsync({
