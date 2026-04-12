@@ -9,18 +9,18 @@ import BrevoTransport from 'nodemailer-brevo-transport';
     NestMailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        transport: new BrevoTransport({
-          apiKey: configService.getOrThrow('BREVO_API_KEY'),
-        }),
+        // transport: new BrevoTransport({
+        //   apiKey: configService.getOrThrow('BREVO_API_KEY'),
+        // }),
         // Using SMTP transport as an alternative to BrevoTransport
-        // transport: {
-        //   host: configService.getOrThrow('EMAIL_HOST'),
-        //   port: Number(configService.getOrThrow('EMAIL_PORT')),
-        //   auth: {
-        //     user: configService.getOrThrow('EMAIL_USERNAME'),
-        //     pass: configService.getOrThrow('EMAIL_PASSWORD'),
-        //   },
-        // },
+        transport: {
+          host: configService.getOrThrow('EMAIL_HOST'),
+          port: Number(configService.getOrThrow('EMAIL_PORT')),
+          auth: {
+            user: configService.getOrThrow('EMAIL_USERNAME'),
+            pass: configService.getOrThrow('EMAIL_PASSWORD'),
+          },
+        },
         defaults: {
           from: '"FloodWatch" <anthonyamiluddin1@gmail.com>', // sender address - verified only
         },
