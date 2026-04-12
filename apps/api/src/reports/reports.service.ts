@@ -8,7 +8,7 @@ import {
 import { inArray } from 'drizzle-orm';
 import { ilike } from 'drizzle-orm';
 import { aliasedTable, asc } from 'drizzle-orm';
-import { and, count, desc, eq, like, or, sql } from 'drizzle-orm';
+import { and, count, desc, eq, like, or, sql, ne } from 'drizzle-orm';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { DRIZZLE } from 'src/drizzle/drizzle-connection';
 import { profileInfo, users } from 'src/drizzle/schemas';
@@ -55,7 +55,8 @@ export class ReportsService {
         status: reports.status,
       })
       .from(reports)
-      .orderBy(asc(reports.createdAt));
+      .orderBy(asc(reports.createdAt))
+      .where(ne(reports.status, 'resolved')); // dont show resolved reports on the map
   }
 
   async getReportDetail(reportId: number) {
@@ -124,11 +125,13 @@ export class ReportsService {
       severities && severities.length > 0
         ? inArray(reports.severity, severities)
         : undefined;
+    const notResolvedCondition = ne(reports.status, 'resolved');
 
-    const whereClause =
-      severityCondition && searchCondition
-        ? and(severityCondition, searchCondition)
-        : (severityCondition ?? searchCondition);
+    const whereClause = and(
+      notResolvedCondition,
+      severityCondition,
+      searchCondition,
+    );
 
     const [data, counts] = await Promise.all([
       this.db
@@ -437,6 +440,11 @@ export class ReportsService {
       })
       .where(eq(reports.id, reportId));
 
+    // after verifying a reset, reset the confirmations for that report
+    await this.db
+      .delete(reportConfirmations)
+      .where(eq(reportConfirmations.reportId, reportId));
+
     await Promise.all([
       this.notificationsQueue.add(NOTIFICATION_JOBS.SEND, {
         recipientId: report.userId,
@@ -494,6 +502,11 @@ export class ReportsService {
         updatedAt: new Date(),
       })
       .where(eq(reports.id, reportId));
+
+    // after resolving a reset, reset the confirmations for that report
+    await this.db
+      .delete(reportConfirmations)
+      .where(eq(reportConfirmations.reportId, reportId));
 
     const recipients = await this.db.select({ id: users.id }).from(users);
 
@@ -811,17 +824,16 @@ export class ReportsService {
       .from(reports)
       .where(
         and(
-          eq(reports.status, 'unverified'),
+          inArray(reports.status, ['unverified', 'verified']),
           sql`${this.db.$count(
             reportConfirmations,
             and(
               eq(reportConfirmations.action, 'confirm'),
               eq(reportConfirmations.reportId, reports.id),
             ),
-          )} >= 10`, // Threshold of 10 confirmations
+          )} >= 10`,
         ),
       );
-
     return reportsNeedingAttention;
   }
 }

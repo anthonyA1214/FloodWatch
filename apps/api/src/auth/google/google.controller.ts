@@ -38,6 +38,18 @@ export class GoogleController {
     @Request() req: GoogleRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
+    const frontendURL = this.configService.getOrThrow<string>('FRONTEND_URL');
+    const existingToken = req.cookies?.['access_token'] as string | undefined;
+
+    if (existingToken) {
+      const payload = JSON.parse(
+        Buffer.from(existingToken.split('.')[1], 'base64url').toString(),
+      ) as { role: string };
+      return res.redirect(
+        `${frontendURL}${payload?.role === 'admin' ? '/admin' : '/map'}`,
+      );
+    }
+
     const { access_token, refresh_token, deviceId, user } =
       await this.googleService.handleGoogleLogin(req.user);
 
@@ -49,8 +61,6 @@ export class GoogleController {
     const isProduction =
       this.configService.getOrThrow('NODE_ENV') === 'production';
     setAuthCookies(res, access_token, refresh_token, deviceId, isProduction);
-
-    const frontendURL = this.configService.getOrThrow<string>('FRONTEND_URL');
 
     if (user.role === 'admin') res.redirect(`${frontendURL}/admin`);
     else res.redirect(`${frontendURL}/map`);
