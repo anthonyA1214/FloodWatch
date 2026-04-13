@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { SearchQueryInput } from '@repo/schemas';
-import { and, inArray } from 'drizzle-orm';
+import { and, inArray, ne } from 'drizzle-orm';
 import { reports, safety } from './drizzle/schemas';
 import { DRIZZLE } from './drizzle/drizzle-connection';
 import { type DrizzleDB } from './drizzle/types/drizzle';
@@ -39,6 +39,7 @@ export class AppService {
               and(
                 ilike(reports.location, pattern),
                 inArray(reports.severity, severities),
+                ne(reports.status, 'resolved'),
               ),
             )
             .limit(3)

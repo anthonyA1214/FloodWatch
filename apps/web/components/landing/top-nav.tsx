@@ -1,22 +1,10 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import TopNavShadow from '@/components/shared/top-nav-shadow';
 import CollapsibleMenu from '@/components/landing/collapsible-menu';
-
-// Check if user is logged in by looking for JWT access token in cookies
-async function getIsLoggedIn(): Promise<boolean> {
-  try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('access_token');
-
-    // User is logged in if access_token cookie exists
-    return !!accessToken;
-  } catch (error) {
-    console.error('Auth check error:', error);
-    return false;
-  }
-}
+import { useMe } from '@/hooks/use-me';
 
 const navItems = [
   { label: 'FEATURES', url: '#features' },
@@ -25,8 +13,10 @@ const navItems = [
   { label: 'ABOUT US', url: '#about-us' },
 ];
 
-export default async function TopNav() {
-  const isLoggedIn = await getIsLoggedIn();
+export default function TopNav() {
+  const { me } = useMe();
+
+  const isLoggedIn = !!me;
 
   return (
     <>
